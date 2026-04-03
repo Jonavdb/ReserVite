@@ -44,6 +44,10 @@ alter table restaurants
 -- Je remplace au cas où les espaces sont présents en les enlevant et ma regex vérifie que ça commence par 0 ou +32 ou 0032
 -- et qu'ensuite on a entre 8 et 9 chiffres dépendant de si c'est un fix ou un mobile
 
+alter table restaurants
+    add constraint ck_restaurant_name
+        check(length(name) => 5);
+
 alter table users
     add constraint ck_users_phone
         check(
