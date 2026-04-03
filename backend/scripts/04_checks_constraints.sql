@@ -48,6 +48,10 @@ alter table restaurants
     add constraint ck_restaurant_name
         check(length(name) => 5);
 
+alter table restaurants
+    add constraint ck_restaurant_address
+        check(length(address) >= 5);
+
 alter table users
     add constraint ck_users_phone
         check(
