@@ -55,7 +55,7 @@ alter table restaurants
 
 alter table restaurants
     add constraint ck_restaurant_name
-        check(length(name) => 5);
+        check(length(name) >= 5);
 
 alter table restaurants
     add constraint ck_restaurant_address
