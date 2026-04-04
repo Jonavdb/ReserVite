@@ -1,3 +1,5 @@
+-- Contraintes USERS --
+
 alter table users
     add constraint ck_users_name_length
         check (length(trim(full_name)) >= 3);
@@ -11,6 +13,11 @@ alter table users
             and password ~ '[a-z]'
             and password ~ '[,;.:?!&/$%@#]')
             or password ~ '^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$');
+
+alter table users
+    add constraint ck_users_phone
+        check(
+            replace(phone, ' ', '') ~ '^(0|\+32|0032)[0-9]{8,9}$');
 
 create or replace function can_not_change_role()
     returns TRIGGER as
@@ -28,6 +35,8 @@ create trigger trg_can_not_change_role
 BEFORE UPDATE of role on users
 FOR each row
 EXECUTE PROCEDURE can_not_change_role();
+
+-- Contraintes Restaurant --
 
 alter table restaurants
     add constraint ck_restaurant_note
@@ -52,7 +61,7 @@ alter table restaurants
     add constraint ck_restaurant_address
         check(length(address) >= 5);
 
-alter table users
-    add constraint ck_users_phone
-        check(
-            replace(phone, ' ', '') ~ '^(0|\+32|0032)[0-9]{8,9}$');
+-- Contraintes Tables --
+alter table tables
+    add constraint ck_table_capacity
+        check(capacity > 0);
