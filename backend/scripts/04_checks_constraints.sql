@@ -63,5 +63,14 @@ alter table restaurants
 
 -- Contraintes Tables --
 alter table tables
+    add constraint ck_table_number_positive
+        check(table_number > 0);
+
+alter table tables
+    add constraint ck_unique_table_number_per_restaurant
+        unique(restaurant, table_number);
+
+alter table tables
     add constraint ck_table_capacity
         check(capacity > 0);
+
