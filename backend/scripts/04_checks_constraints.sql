@@ -1,5 +1,4 @@
 -- Contraintes USERS --
-
 alter table users
     add constraint ck_users_name_length
         check (length(trim(full_name)) >= 3);
@@ -37,7 +36,6 @@ FOR each row
 EXECUTE PROCEDURE can_not_change_role();
 
 -- Contraintes Restaurant --
-
 alter table restaurants
     add constraint ck_restaurant_note
         check(rating >= 0.0 and rating <= 5.0);
@@ -60,6 +58,10 @@ alter table restaurants
 alter table restaurants
     add constraint ck_restaurant_address
         check(length(address) >= 5);
+
+alter table restaurants
+    add constraint ck_restaurant_slot_duration
+        check(slot_duration IN(10, 15, 20, 30, 60));
 
 -- Contraintes Tables --
 alter table tables
