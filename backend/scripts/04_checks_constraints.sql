@@ -96,6 +96,10 @@ for each row
 execute procedure prevent_table_restaurant_update();
 
 -- Contraintes Services --
+alter table services
+    add constraint ck_services_day_of_week
+        check(day_of_week between 1 and 7);
+
 create or replace function prevent_service_restaurant_update() returns trigger as
 $$
     begin
