@@ -82,6 +82,7 @@ $$
         if old.restaurant != new.restaurant then
             raise exception 'On ne peut pas modifier le restaurant d''une table';
         end if;
+
     return new;
     end;
 $$ language plpgsql;
@@ -93,3 +94,23 @@ before update
 on tables
 for each row
 execute procedure prevent_table_restaurant_update();
+
+-- Contraintes Services --
+create or replace function prevent_service_restaurant_update() returns trigger as
+$$
+    begin
+        if old.restaurant != new.restaurant then
+            raise exception 'On ne peut pas modifier le restaurant d''un service.';
+        end if;
+
+        return new;
+    end;
+$$ language plpgsql;
+
+-- drop trigger if exists tgr_prevent_service_restaurant_update on services;
+
+create trigger tgr_prevent_service_restaurant_update
+before update
+on services
+for each row
+execute procedure prevent_service_restaurant_update();
