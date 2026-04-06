@@ -1,5 +1,4 @@
 -- Contraintes USERS --
-
 alter table users
     add constraint ck_users_name_length
         check (length(trim(full_name)) >= 3);
@@ -37,7 +36,6 @@ FOR each row
 EXECUTE PROCEDURE can_not_change_role();
 
 -- Contraintes Restaurant --
-
 alter table restaurants
     add constraint ck_restaurant_note
         check(rating >= 0.0 and rating <= 5.0);
@@ -61,6 +59,10 @@ alter table restaurants
     add constraint ck_restaurant_address
         check(length(address) >= 5);
 
+alter table restaurants
+    add constraint ck_restaurant_slot_duration
+        check(slot_duration IN(10, 15, 20, 30, 60));
+
 -- Contraintes Tables --
 alter table tables
     add constraint ck_table_number_positive
@@ -80,6 +82,7 @@ $$
         if old.restaurant != new.restaurant then
             raise exception 'On ne peut pas modifier le restaurant d''une table';
         end if;
+
     return new;
     end;
 $$ language plpgsql;
@@ -91,3 +94,27 @@ before update
 on tables
 for each row
 execute procedure prevent_table_restaurant_update();
+
+-- Contraintes Services --
+alter table services
+    add constraint ck_services_day_of_week
+        check(day_of_week between 1 and 7);
+
+create or replace function prevent_service_restaurant_update() returns trigger as
+$$
+    begin
+        if old.restaurant != new.restaurant then
+            raise exception 'On ne peut pas modifier le restaurant d''un service.';
+        end if;
+
+        return new;
+    end;
+$$ language plpgsql;
+
+-- drop trigger if exists tgr_prevent_service_restaurant_update on services;
+
+create trigger tgr_prevent_service_restaurant_update
+before update
+on services
+for each row
+execute procedure prevent_service_restaurant_update();
