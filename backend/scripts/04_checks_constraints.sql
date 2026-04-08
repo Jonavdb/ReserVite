@@ -1,3 +1,4 @@
+-- Contraintes USERS --
 alter table users
     add constraint ck_users_name_length
         check (length(trim(full_name)) >= 3);
@@ -11,6 +12,11 @@ alter table users
             and password ~ '[a-z]'
             and password ~ '[,;.:?!&/$%@#]')
             or password ~ '^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$');
+
+alter table users
+    add constraint ck_users_phone
+        check(
+            replace(phone, ' ', '') ~ '^(0|\+32|0032)[0-9]{8,9}$');
 
 create or replace function can_not_change_role()
     returns TRIGGER as
@@ -29,6 +35,7 @@ BEFORE UPDATE of role on users
 FOR each row
 EXECUTE PROCEDURE can_not_change_role();
 
+-- Contraintes Restaurant --
 alter table restaurants
     add constraint ck_restaurant_note
         check(rating >= 0.0 and rating <= 5.0);
@@ -46,13 +53,68 @@ alter table restaurants
 
 alter table restaurants
     add constraint ck_restaurant_name
-        check(length(name) => 5);
+        check(length(name) >= 5);
 
 alter table restaurants
     add constraint ck_restaurant_address
         check(length(address) >= 5);
 
-alter table users
-    add constraint ck_users_phone
-        check(
-            replace(phone, ' ', '') ~ '^(0|\+32|0032)[0-9]{8,9}$');
+alter table restaurants
+    add constraint ck_restaurant_slot_duration
+        check(slot_duration IN(10, 15, 20, 30, 60));
+
+-- Contraintes Tables --
+alter table tables
+    add constraint ck_table_number_positive
+        check(table_number > 0);
+
+alter table tables
+    add constraint ck_unique_table_number_per_restaurant
+        unique(restaurant, table_number);
+
+alter table tables
+    add constraint ck_table_capacity
+        check(capacity > 0);
+
+create or replace function prevent_table_restaurant_update() returns trigger as
+$$
+    begin
+        if old.restaurant != new.restaurant then
+            raise exception 'On ne peut pas modifier le restaurant d''une table';
+        end if;
+
+    return new;
+    end;
+$$ language plpgsql;
+
+-- drop trigger if exists trg_prevent_table_restaurant_update on tables;
+
+create trigger trg_prevent_table_restaurant_update
+before update
+on tables
+for each row
+execute procedure prevent_table_restaurant_update();
+
+-- Contraintes Services --
+alter table services
+    add constraint ck_services_day_of_week
+        check(day_of_week between 1 and 7);
+
+create or replace function prevent_service_restaurant_update() returns trigger as
+$$
+    begin
+        if old.restaurant != new.restaurant then
+            raise exception 'On ne peut pas modifier le restaurant d''un service.';
+        end if;
+
+        return new;
+    end;
+$$ language plpgsql;
+
+-- drop trigger if exists tgr_prevent_service_restaurant_update on services;
+
+create trigger tgr_prevent_service_restaurant_update
+before update
+on services
+for each row
+execute procedure prevent_service_restaurant_update();
