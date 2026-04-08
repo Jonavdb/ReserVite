@@ -6,7 +6,7 @@ alter table users
 alter table users
     add constraint ck_password_format
         check (
-            (length(password) >= 8
+            (length((trim(password)) >= 8
             and password ~ '[A-Z]'
             and password ~ '[0-9]'
             and password ~ '[a-z]'
@@ -53,11 +53,11 @@ alter table restaurants
 
 alter table restaurants
     add constraint ck_restaurant_name
-        check(length(name) >= 5);
+        check(length(trim(name)) >= 5);
 
 alter table restaurants
     add constraint ck_restaurant_address
-        check(length(address) >= 5);
+        check(length(trim(address)) >= 5);
 
 alter table restaurants
     add constraint ck_restaurant_slot_duration
