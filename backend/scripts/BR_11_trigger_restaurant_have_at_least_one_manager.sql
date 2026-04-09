@@ -11,7 +11,28 @@ return old;
 end;
 $$ language plpgsql;
 
+create or replace function restaurant_have_at_least_one_manager_on_restaurants() returns trigger as
+$$
+declare
+    number_of_manager int;
+begin
+    select count(*) from restaurant_managers where restaurant = new.id into number_of_manager;
+    if number_of_manager < 1 then
+        raise exception 'un restaurant doit avoir au moins un manager';
+    end if;
+return new;
+end;
+$$ language plpgsql;
+
 create trigger trg_restaurant_have_at_least_one_manager
 before DELETE on restaurant_managers
 for each row
 execute procedure restaurant_have_at_least_one_manager();
+
+
+create constraint trigger trg_restaurant_have_at_least_one_manager_on_restaurant
+    after insert
+    on restaurants
+    deferrable initially deferred
+    for each row
+execute procedure restaurant_have_at_least_one_manager_on_restaurants();
