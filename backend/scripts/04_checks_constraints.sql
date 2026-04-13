@@ -65,7 +65,7 @@ alter table restaurants
 
 alter table restaurants
     add constraint ck_restaurant_description
-        check(length(trim(description)) <= 0 || length(trim(description)) >= 10);
+        check(length(trim(description)) <= 0 or length(trim(description)) >= 10);
 
 -- Contraintes Tables --
 alter table tables
@@ -91,7 +91,7 @@ $$
     end;
 $$ language plpgsql;
 
--- drop trigger if exists trg_prevent_table_restaurant_update on tables;
+drop trigger if exists trg_prevent_table_restaurant_update on tables;
 
 create trigger trg_prevent_table_restaurant_update
 before update
@@ -115,7 +115,7 @@ $$
     end;
 $$ language plpgsql;
 
--- drop trigger if exists tgr_prevent_service_restaurant_update on services;
+drop trigger if exists tgr_prevent_service_restaurant_update on services;
 
 create trigger tgr_prevent_service_restaurant_update
 before update
