@@ -60,12 +60,16 @@ alter table restaurants
         check(length(trim(address)) >= 5);
 
 alter table restaurants
+    add constraint ck_restaurant_city
+        check(length(trim(city)) >= 3);
+
+alter table restaurants
     add constraint ck_restaurant_slot_duration
         check(slot_duration IN(10, 15, 20, 30, 60));
 
 alter table restaurants
     add constraint ck_restaurant_description
-        check(length(trim(description)) <= 0 || length(trim(description)) >= 10);
+        check(length(trim(description)) <= 0 OR length(trim(description)) >= 10);
 
 -- Contraintes Tables --
 alter table tables
