@@ -1,4 +1,4 @@
--- Contraintes USERS --
+-- CONTRAINTES USERS --
 alter table users
     add constraint ck_users_name_length
         check (length(trim(full_name)) >= 3);
@@ -35,7 +35,7 @@ BEFORE UPDATE of role on users
 FOR each row
 EXECUTE PROCEDURE can_not_change_role();
 
--- Contraintes Restaurant --
+-- CONTRAINTES RESTAURANTS --
 alter table restaurants
     add constraint ck_restaurant_note
         check(rating >= 0.0 and rating <= 5.0);
@@ -67,7 +67,7 @@ alter table restaurants
     add constraint ck_restaurant_description
         check(length(trim(description)) <= 0 || length(trim(description)) >= 10);
 
--- Contraintes Tables --
+-- CONTRAINTES TABLES --
 alter table tables
     add constraint ck_table_number_positive
         check(table_number > 0);
@@ -99,10 +99,14 @@ on tables
 for each row
 execute procedure prevent_table_restaurant_update();
 
--- Contraintes Services --
+-- CONTRAINTES SERVICES --
 alter table services
     add constraint ck_services_day_of_week
         check(day_of_week between 1 and 7);
+
+alter table services
+    add constraint ck_services_minimum_duration
+        check (end_time - start_time >= interval '1 hour');
 
 create or replace function prevent_service_restaurant_update() returns trigger as
 $$
