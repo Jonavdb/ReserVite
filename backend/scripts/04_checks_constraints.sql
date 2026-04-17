@@ -95,7 +95,7 @@ $$
     end;
 $$ language plpgsql;
 
--- drop trigger if exists trg_prevent_table_restaurant_update on tables;
+drop trigger if exists trg_prevent_table_restaurant_update on tables;
 
 create trigger trg_prevent_table_restaurant_update
 before update
@@ -123,7 +123,7 @@ $$
     end;
 $$ language plpgsql;
 
--- drop trigger if exists tgr_prevent_service_restaurant_update on services;
+drop trigger if exists tgr_prevent_service_restaurant_update on services;
 
 create trigger tgr_prevent_service_restaurant_update
 before update
