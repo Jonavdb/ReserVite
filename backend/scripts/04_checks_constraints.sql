@@ -53,15 +53,19 @@ alter table restaurants
 
 alter table restaurants
     add constraint ck_restaurant_name
-        check(length(name) >= 5);
+        check(length(trim(name)) >= 5);
 
 alter table restaurants
     add constraint ck_restaurant_address
-        check(length(address) >= 5);
+        check(length(trim(address)) >= 5);
 
 alter table restaurants
     add constraint ck_restaurant_slot_duration
         check(slot_duration IN(10, 15, 20, 30, 60));
+
+alter table restaurants
+    add constraint ck_restaurant_description
+        check(length(trim(description)) <= 0 || length(trim(description)) >= 10);
 
 -- Contraintes Tables --
 alter table tables
