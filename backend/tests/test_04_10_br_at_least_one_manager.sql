@@ -46,3 +46,13 @@ begin
 end;
 $test$;
 rollback;
+
+begin;
+do
+$test$
+    begin
+        raise notice 'TEST : Les restaurants doivent avoir au moins 1 manager (cas invalide)';
+        perform should_fail($$DELETE from users where id = '2';$$, 'raise_exception');
+    end;
+$test$;
+rollback;
