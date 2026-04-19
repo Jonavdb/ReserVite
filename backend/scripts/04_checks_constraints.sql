@@ -130,3 +130,8 @@ before update
 on services
 for each row
 execute procedure prevent_service_restaurant_update();
+
+-- CONTRAINTES RESERVATION --
+alter table reservations
+    add constraint ck_nb_guests_positive
+        check (number_of_guests > 0);
