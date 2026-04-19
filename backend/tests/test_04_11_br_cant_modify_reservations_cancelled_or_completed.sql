@@ -34,4 +34,18 @@ $test$
 $test$;
 rollback;
 
+begin;
+do
+$test$
+    begin
+        raise notice 'TEST : Une reservation completé ou annulée ne peut pas être modifiée(cas invalide)';
+        perform should_fail($$
+            Delete from reservation_tables where reservation = '12';
+        $$, 'raise_exception');
+    end
+$test$;
+rollback;
+
+
+
 
