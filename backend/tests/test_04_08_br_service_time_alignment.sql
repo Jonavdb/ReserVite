@@ -21,8 +21,8 @@ $test$
         raise notice 'KO : Début à 19h15 (Non aligné sur 30 min)';
         perform should_fail($$
             insert into services (id, restaurant, day_of_week, start_time, end_time)
-            values (101, $1, 1, '19:15:00', '22:30:00');
-        $$, 'raise_exception', test_resto_id);
+            values (101, 1, 1, '19:15:00', '22:30:00');
+        $$, 'raise_exception');
 
         -- ----------------------------------------------------------------
         -- RESTAURANT AVEC CRÉNEAUX DE 15 MINUTES
@@ -36,8 +36,8 @@ $test$
         raise notice 'KO : Fin à 22h20 (Non aligné sur 15 min)';
         perform should_fail($$
             insert into services (id, restaurant, day_of_week, start_time, end_time)
-            values (102, $1, 1, '19:15:00', '22:20:00');
-        $$, 'raise_exception', test_resto_id);
+            values (102, 1, 1, '19:15:00', '22:20:00');
+        $$, 'raise_exception');
 
     end;
 $test$;

@@ -15,7 +15,7 @@ begin
     where id = new."table";
 
     if _restaurant_from_reservation != _table_from_reservation then
-        raise exception 'La table % n''appartient pas au restaurant de la réservation', NEW.table_id;
+        raise exception 'La table % n''appartient pas au restaurant de la réservation', NEW."table";
     end if;
 
     return new;
