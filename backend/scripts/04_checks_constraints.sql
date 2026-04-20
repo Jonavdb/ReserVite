@@ -69,7 +69,7 @@ alter table restaurants
 
 alter table restaurants
     add constraint ck_restaurant_description
-        check(length(trim(description)) <= 0 OR length(trim(description)) >= 10);
+        check(description is null OR length(trim(description)) >= 10);
 
 -- CONTRAINTES TABLES --
 alter table tables
@@ -130,3 +130,12 @@ before update
 on services
 for each row
 execute procedure prevent_service_restaurant_update();
+
+-- CONTRAINTES RESERVATION --
+alter table reservations
+    add constraint ck_reservations_nb_guests_positive
+        check (number_of_guests > 0);
+
+alter table reservations
+    add constraint ck_reservations_format_special_request
+        check (special_requests is null OR length(trim(special_requests)) >= 10);
