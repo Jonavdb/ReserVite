@@ -6,7 +6,7 @@ alter table users
 alter table users
     add constraint ck_password_format
         check (
-            (length((trim(password)) >= 8
+            (length(trim(password)) >= 8
             and password ~ '[A-Z]'
             and password ~ '[0-9]'
             and password ~ '[a-z]'

@@ -32,7 +32,7 @@ begin
             raise exception 'un restaurant doit avoir au moins un manager';
         end if;
     end if;
-return old;
+return new;
 end;
 $$ language plpgsql;
 

@@ -4,6 +4,14 @@
     <script-file value="$PROJECT_DIR$/backend/tests/test_02_impersonation.sql" />
     <script-file value="$PROJECT_DIR$/backend/tests/test_03_reset_database.sql" />
     <script-file value="$PROJECT_DIR$/backend/tests/test_04.00_br_email_unique.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04_01_br_role_client.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04_03_br_reservation_table_match.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04_05_br_into_slot.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04_06_br_not_two_reserv_for_same_tables_same_service.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04_07_br_service_overlap.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04_08_br_service_time_alignment.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04_10_br_at_least_one_manager.sql" />
+    <script-file value="$PROJECT_DIR$/backend/tests/test_04_11_br_cant_modify_reservations_cancelled_or_completed.sql" />
     <script-mode>FILE</script-mode>
     <data-source id="6d275bb5-c69c-4f95-bc29-f6a29631655b" namespace="database/&quot;prbd-2526-f03&quot;" />
     <method v="2">

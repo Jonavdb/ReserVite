@@ -9,11 +9,11 @@ begin
 
     -- opérateur :: permet de cast en int
     if(extract(minute from new.start_time)::int % slot_duration != 0) then
-        raise exception 'BR-08: L''heure de début (%) n''est pas alignée sur les créneaux du restaurant (% min).', new.start_time, v_slot_duration;
+        raise exception 'BR-08: L''heure de début (%) n''est pas alignée sur les créneaux du restaurant (% min).', new.start_time, slot_duration;
     end if;
 
     if(extract(minute from new.end_time)::int % slot_duration != 0) then
-        raise exception 'BR-08: L''heure de fin (%) n''est pas alignée sur les créneaux du restaurant (% min).', new.end_time, v_slot_duration;
+        raise exception 'BR-08: L''heure de fin (%) n''est pas alignée sur les créneaux du restaurant (% min).', new.end_time, slot_duration;
     end if;
 
     return new;
