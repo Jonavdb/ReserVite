@@ -24,7 +24,7 @@ begin
                     and reservations.datetime::time between start_of_service and end_of_service
                     and reservations.datetime::date = date_of_reservation::date
                     and (status = 'confirmed' or status = 'completed')
-                    and reservation_tables.table = new.table
+                    and reservation_tables."table" = new."table"
                     and reservation_tables.reservation != new.reservation)
 
 
@@ -61,9 +61,6 @@ begin
                     and reservations.datetime::date = new.datetime::date
                     and (status = 'confirmed' or status = 'completed')
                     and reservation_tables.reservation != new.id)
-
-
-
         then
             raise exception 'Une reservation est déjà présente à cette table pour ce service pour cette date';
         end if;
