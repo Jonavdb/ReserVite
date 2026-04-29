@@ -3,6 +3,16 @@
     <script-file value="$PROJECT_DIR$/backend/scripts/01_init.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/02_security.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/03_tables_and_data.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04_checks_constraints.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/BR_01_trigger_reservation_for_clients_users.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/BR_02_trigger_reservation_respect_total_capacity.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/BR_05_trigger_reservation_respect_a_slot_duration.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/BR_06_trigger_not_two_reservation_for_same_tables_at_same_service.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/BR_07_trigger_service_no_overlap.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/BR_08_trigger_service_time_alignment.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/BR_10_trigger_restaurant_have_at_least_one_manager.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/BR_11_completed_or_cancelled_reservation_cant_be_updated.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/BR_03_trigger_reservation_table_restaurant_match.sql" />
     <script-mode>FILE</script-mode>
     <data-source id="6d275bb5-c69c-4f95-bc29-f6a29631655b" namespace="database/&quot;prbd-2526-f03&quot;" />
     <method v="2" />
