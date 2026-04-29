@@ -20,7 +20,11 @@ begin
     if status_reservation = 'completed' or status_reservation = 'cancelled' then
         raise exception 'Une réservation annulée ou terminée ne peut pas être modifiée';
     end if;
-    return old;
+    if tg_op = 'DELETE' then
+        return old;
+    else
+        return new;
+    end if;
 end;
 $$ language plpgsql;
 
