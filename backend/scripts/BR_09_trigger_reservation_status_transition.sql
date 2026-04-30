@@ -32,24 +32,24 @@ returns trigger as
     $$
     begin
         -- 1. Erreur : status pas 'pending' à la création
-        if (tg_op = 'insert') then
+        if (tg_op = 'INSERT') then
             if new.status != 'pending'::status_type then
                 RAISE EXCEPTION 'Une nouvelle réservation doit avoir le status pending';
             end if;
         end if;
 
         -- 2. Erreur : transition non autorisée
-        if (tg_op) = 'update' then
+        if (tg_op) = 'UPDATE' then
             -- uniquement si le status change
             if old.status != new.status then
                 -- on vérifie si la transition est autorisée
                 if not (
                 (   old.status = 'pending'::status_type and new.status = 'confirmed'::status_type or
                     old.status = 'pending'::status_type and new.status = 'cancelled'::status_type) or
-                    old.status = 'confirmed'::status_type and new.status = 'conpleted'::status_type or
+                    old.status = 'confirmed'::status_type and new.status = 'completed'::status_type or
                     old.status = 'confirmed'::status_type and new.status = 'cancelled'::status_type
                 ) then
-                    RAISE EXCEPTION 'Transition de [%] à [%] interdite. Une réservation existante ne peut pas revenir en arrière.',
+                    RAISE EXCEPTION 'Transition de [%] à [%] interdite.',
                         old.status,
                         new.status;
                 end if;
