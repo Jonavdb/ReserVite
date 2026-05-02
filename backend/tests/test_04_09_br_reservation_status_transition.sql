@@ -48,14 +48,14 @@ begin;
 do
 $test$
     begin
-        -- TODO : fix erreur
+        -- erreur fix en rendant le trigger table restaurant mismatch en initially deferred
         raise notice 'TEST : modifier le status d.une reservation : pending -> confirmed (cas valide)';
         --  1.augmenter capacité table 1 du restaurant 2 à 100
-        --update tables set capacity = 100 where table_number = 1 and restaurant = 2;
+        update tables set capacity = 100 where table_number = 1 and restaurant = 2;
         --  2.lier reservation 2 à table 1 du restaurant 2
-        --insert into reservation_tables (reservation, "table") values (2, 1);
+        insert into reservation_tables (reservation, "table") values (2, 1);
         --  3.changer de pending à confirmed
-       -- update reservations set status = 'confirmed'::status_type where id = 2;
+        update reservations set status = 'confirmed'::status_type where id = 2;
     end;
 $test$;
 rollback;
@@ -93,6 +93,85 @@ $test$
         raise notice 'TEST : modifier le status d.une reservation : confirmed -> completed (cas valide)';
         --  changer de confirmed à completed
         update reservations set status = 'completed'::status_type where id = 3;
+    end;
+$test$;
+rollback;
+
+-- cas negatif
+rollback;
+begin;
+do
+$test$
+    begin
+        raise notice 'TEST : modifier une reservation de <completed> à <pending> (cas invalide)';
+        perform should_fail($$
+          update reservations set status = 'pending'::status_type where id = 12
+        $$, 'raise_exception');
+    end;
+$test$;
+rollback;
+
+rollback;
+begin;
+do
+$test$
+    begin
+        raise notice 'TEST : modifier une reservation de <completed> à <confirmed> (cas invalide)';
+        perform should_fail($$
+          update reservations set status = 'confirmed'::status_type where id = 12
+        $$, 'raise_exception');
+    end;
+$test$;
+rollback;
+
+rollback;
+begin;
+do
+$test$
+    begin
+        raise notice 'TEST : modifier une reservation de <completed> à <cancelled> (cas invalide)';
+        perform should_fail($$
+          update reservations set status = 'cancelled'::status_type where id = 12
+        $$, 'raise_exception');
+    end;
+$test$;
+rollback;
+
+rollback;
+begin;
+do
+$test$
+    begin
+        raise notice 'TEST : modifier une reservation de <cancelled> à <pending> (cas invalide)';
+        perform should_fail($$
+          update reservations set status = 'pending'::status_type where id = 8
+        $$, 'raise_exception');
+    end;
+$test$;
+rollback;
+
+rollback;
+begin;
+do
+$test$
+    begin
+        raise notice 'TEST : modifier une reservation de <cancelled> à <confirmed> (cas invalide)';
+        perform should_fail($$
+          update reservations set status = 'confirmed'::status_type where id = 8
+        $$, 'raise_exception');
+    end;
+$test$;
+rollback;
+
+rollback;
+begin;
+do
+$test$
+    begin
+        raise notice 'TEST : modifier une reservation de <cancelled> à <completed> (cas invalide)';
+        perform should_fail($$
+          update reservations set status = 'cancelled'::status_type where id = 8
+        $$, 'raise_exception');
     end;
 $test$;
 rollback;

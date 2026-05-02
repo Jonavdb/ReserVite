@@ -24,8 +24,9 @@ $$ language plpgsql;
 
 drop trigger if exists reservation_table_restaurant_match on reservation_tables;
 
-create trigger trg_reservation_table_restaurant_match
-    before insert or update
+create constraint trigger trg_reservation_table_restaurant_match
+    after insert or update
     on reservation_tables
+    deferrable initially deferred
     for each row
 execute procedure reservation_table_restaurant_match();
