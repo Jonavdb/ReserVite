@@ -14,7 +14,7 @@
  * Événements :
  * Table "réservations"
  * INSERT : non
- * UPDATE : oui, si on modifie la colonne status de 'confirmed' / 'completed' à 'pending' / 'cancelled'
+ * UPDATE : oui, si une reservation associée à une table est mise en 'pending' ou 'cancelled'
  * DELETE : non
  * Table "réservation_tables"
  * INSERT : oui, si la réservation introduite est 'pending' ou 'cancelled'
@@ -45,8 +45,8 @@
  begin
      if exists(select r.id, r.status
                 from reservations r
-                left join reservation_tables rt on r.id = rt.reservation
-                left join tables t on t.id = rt."table"
+                join reservation_tables rt on r.id = rt.reservation
+                join tables t on t.id = rt."table"
                 where r.status = 'pending'::status_type OR r.status = 'cancelled'::status_type) then
      raise exception 'Une réservation en attente ou annulée ne peut être associée à aucune une table.';
      end if;
@@ -77,9 +77,10 @@ create constraint trigger trigger_validate_reservation_tables_no_link_pending_ca
         for each row
 execute function check_no_tables_on_pending_or_cancelled();
 
-create trigger trigger_validate_tables_no_link_pending_cancelled
+create constraint trigger trigger_validate_tables_no_link_pending_cancelled
         after insert or update of restaurant, table_number
         on tables
+        deferrable initially deferred
         for each row
 execute function check_no_tables_on_pending_or_cancelled();
 
