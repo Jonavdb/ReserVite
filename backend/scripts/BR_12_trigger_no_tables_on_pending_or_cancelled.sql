@@ -65,7 +65,7 @@
 
 
 create trigger trigger_validate_reservations_no_tables_on_pending_or_cancelled
-        before update of status
+        after update of status
         on reservations
         for each row
     execute function check_no_tables_on_pending_or_cancelled();
