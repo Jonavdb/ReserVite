@@ -510,17 +510,151 @@ rollback;
 /*
  cas 1 : lier une reservation pending à une table
  */
+rollback;
+begin;
+set constraints all immediate;
+do
+$test$
+    declare
+        v_user_id int;
+        v_manager_id int;
+        v_restaurant_id int;
+        v_service_id int;
+        v_reservation_id int;
+        v_table_id int;
+        v_table_number int := 4;
+    begin
+        -- on crée un user (client)
+        insert into users (email, password, full_name)
+        values ('manu@manu.fr', 'MySecureP@ss2026', 'client,')
+        returning id into v_user_id;
+
+        -- on crée un user (manager)
+        insert into users (email, password, full_name)
+        values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
+        returning id into v_manager_id;
+
+        -- bypass
+        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un restaurant
+        insert into restaurants (name, address, city, phone)
+        values ('jannah', 'rue akhira', 'heaven', '0470 12 34 56')
+        returning id into v_restaurant_id;
+
+        -- on crée un restaurant manager
+        insert into restaurant_managers (restaurant, manager)
+        values (v_restaurant_id, v_manager_id);
+
+        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un service
+        insert into services (restaurant, day_of_week, start_time, end_time)
+        values (v_restaurant_id, 1, '12:00:00', '14:00:00')
+        returning id into v_service_id;
+
+        -- on crée une reservation
+        insert into reservations (client, restaurant, datetime, number_of_guests)
+        values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
+        returning id into v_reservation_id;
+
+        -- bypass
+        ALTER TABLE tables DISABLE TRIGGER  trigger_validate_tables_no_link_pending_cancelled;
+        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
+
+        -- on crée une table
+        insert into tables (restaurant, table_number, capacity)
+        values (v_restaurant_id, v_table_number, 999)
+        returning id into v_table_id;
+
+        -- on remet les règles avant le test
+        ALTER TABLE tables ENABLE TRIGGER trigger_validate_tables_no_link_pending_cancelled;
+        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
+
+        -- test sur la réservation fictive
+        perform should_fail(
+                'insert into reservation_tables (reservation, "table") values (' || v_reservation_id || ', ' || v_table_id || ')',
+                'raise_exception'
+                );
+
+    end;
+$test$;
+rollback;
 
 /*
  cas 2 : lier une reservation cancelled à une table
  */
 
+rollback;
+begin;
+set constraints all immediate;
+do
+$test$
+    declare
+        v_user_id int;
+        v_manager_id int;
+        v_restaurant_id int;
+        v_service_id int;
+        v_reservation_id int;
+        v_table_id int;
+        v_table_number int := 4;
+    begin
+        -- on crée un user (client)
+        insert into users (email, password, full_name)
+        values ('manu@manu.fr', 'MySecureP@ss2026', 'client,')
+        returning id into v_user_id;
 
--- table "tables"
--- INSERT
--- cas posiifs
--- cas negatifs
+        -- on crée un user (manager)
+        insert into users (email, password, full_name)
+        values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
+        returning id into v_manager_id;
 
--- UPDATE
--- cas posiifs
--- cas negatifs
+        -- bypass
+        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un restaurant
+        insert into restaurants (name, address, city, phone)
+        values ('jannah', 'rue akhira', 'heaven', '0470 12 34 56')
+        returning id into v_restaurant_id;
+
+        -- on crée un restaurant manager
+        insert into restaurant_managers (restaurant, manager)
+        values (v_restaurant_id, v_manager_id);
+
+        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un service
+        insert into services (restaurant, day_of_week, start_time, end_time)
+        values (v_restaurant_id, 1, '12:00:00', '14:00:00')
+        returning id into v_service_id;
+
+        -- on crée une reservation
+        insert into reservations (client, restaurant, datetime, number_of_guests)
+        values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
+        returning id into v_reservation_id;
+
+        -- on la met en attente
+        update reservations set status = 'cancelled'::status_type where id = v_reservation_id;
+
+        -- bypass
+        ALTER TABLE tables DISABLE TRIGGER  trigger_validate_tables_no_link_pending_cancelled;
+        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
+
+        -- on crée une table
+        insert into tables (restaurant, table_number, capacity)
+        values (v_restaurant_id, v_table_number, 999)
+        returning id into v_table_id;
+
+        -- on remet les règles avant le test
+        ALTER TABLE tables ENABLE TRIGGER trigger_validate_tables_no_link_pending_cancelled;
+        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
+
+        -- test sur la réservation fictive
+        perform should_fail(
+                'insert into reservation_tables (reservation, "table") values (' || v_reservation_id || ', ' || v_table_id || ')',
+                'raise_exception'
+                );
+
+    end;
+$test$;
+rollback;
