@@ -20,11 +20,6 @@
  * INSERT : oui, si la réservation introduite est 'pending' ou 'cancelled'
  * UPDATE : non, car update interdit
  * DELETE : non
- * Table "tables"
- * INSERT : oui, si la table insérée est liée à un restaurant dont la réservation est 'pending' ou 'cancelled'
- * UPDATE : oui, si on modifie la colonne restaurant, et que c'est un restaurant dont la réservation est 'pending' ou 'cancelled'
-            ou table number et c'est le numero d'une table dont la réservation associée est 'pending' ou 'cancelled'
- * DELETE : non
  * --------------------------------------------------------------------------------------
  * ANALYSE (Etape 2) - Requête de contrôle
  * --------------------------------------------------------------------------------------
@@ -73,13 +68,6 @@ create trigger trigger_validate_reservations_no_tables_on_pending_or_cancelled
 create constraint trigger trigger_validate_reservation_tables_no_link_pending_cancelled
         after insert
         on reservation_tables
-        deferrable initially deferred
-        for each row
-execute function check_no_tables_on_pending_or_cancelled();
-
-create constraint trigger trigger_validate_tables_no_link_pending_cancelled
-        after insert or update of restaurant, table_number
-        on tables
         deferrable initially deferred
         for each row
 execute function check_no_tables_on_pending_or_cancelled();
