@@ -140,7 +140,7 @@ $test$
         returning id into v_reservation_id;
 
         -- bypass
-        ALTER TABLE tables DISABLE TRIGGER  trigger_validate_tables_no_link_pending_cancelled;
+
         ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
         ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_capacity;
 
@@ -159,7 +159,7 @@ $test$
         delete from reservation_tables where reservation = v_reservation_id;
 
         -- on remet les règles avant le test
-        ALTER TABLE tables ENABLE TRIGGER  trigger_validate_tables_no_link_pending_cancelled;
+
         ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
         ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_capacity;
 
@@ -224,7 +224,7 @@ $test$
         returning id into v_reservation_id;
 
         -- bypass
-        ALTER TABLE tables DISABLE TRIGGER  trigger_validate_tables_no_link_pending_cancelled;
+
         ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
 
 
@@ -237,7 +237,7 @@ $test$
         insert into reservation_tables (reservation, "table") values (v_reservation_id, v_table_id);
 
         -- on remet les règles avant le test
-        ALTER TABLE tables ENABLE TRIGGER trigger_validate_tables_no_link_pending_cancelled;
+
         ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
 
 
@@ -304,7 +304,6 @@ $test$
         returning id into v_reservation_id;
 
         -- bypass
-        ALTER TABLE tables DISABLE TRIGGER  trigger_validate_tables_no_link_pending_cancelled;
         ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
 
 
@@ -317,7 +316,7 @@ $test$
         insert into reservation_tables (reservation, "table") values (v_reservation_id, v_table_id);
 
         -- on remet les règles avant le test
-        ALTER TABLE tables ENABLE TRIGGER trigger_validate_tables_no_link_pending_cancelled;
+
         ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
 
 
@@ -389,7 +388,6 @@ $test$
         returning id into v_reservation_id;
 
         -- bypass
-        ALTER TABLE tables DISABLE TRIGGER  trigger_validate_tables_no_link_pending_cancelled;
         ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
         ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_capacity;
 
@@ -405,7 +403,6 @@ $test$
         update reservations set status = 'confirmed'::status_type where id = v_reservation_id;
 
         -- on remet les règles avant le test
-        ALTER TABLE tables ENABLE TRIGGER trigger_validate_tables_no_link_pending_cancelled;
         ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
         ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_capacity;
 
@@ -474,7 +471,6 @@ $test$
         returning id into v_reservation_id;
 
         -- bypass
-        ALTER TABLE tables DISABLE TRIGGER  trigger_validate_tables_no_link_pending_cancelled;
         ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
         ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_capacity;
 
@@ -491,7 +487,6 @@ $test$
         update reservations set status = 'completed'::status_type where id = v_reservation_id;
 
         -- on remet les règles avant le test
-        ALTER TABLE tables ENABLE TRIGGER trigger_validate_tables_no_link_pending_cancelled;
         ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
         ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_capacity;
 
@@ -559,7 +554,6 @@ $test$
         returning id into v_reservation_id;
 
         -- bypass
-        ALTER TABLE tables DISABLE TRIGGER  trigger_validate_tables_no_link_pending_cancelled;
         ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
 
         -- on crée une table
@@ -568,7 +562,6 @@ $test$
         returning id into v_table_id;
 
         -- on remet les règles avant le test
-        ALTER TABLE tables ENABLE TRIGGER trigger_validate_tables_no_link_pending_cancelled;
         ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
 
         -- test sur la réservation fictive
@@ -637,7 +630,7 @@ $test$
         update reservations set status = 'cancelled'::status_type where id = v_reservation_id;
 
         -- bypass
-        ALTER TABLE tables DISABLE TRIGGER  trigger_validate_tables_no_link_pending_cancelled;
+
         ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
 
         -- on crée une table
@@ -646,7 +639,7 @@ $test$
         returning id into v_table_id;
 
         -- on remet les règles avant le test
-        ALTER TABLE tables ENABLE TRIGGER trigger_validate_tables_no_link_pending_cancelled;
+
         ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
 
         -- test sur la réservation fictive
