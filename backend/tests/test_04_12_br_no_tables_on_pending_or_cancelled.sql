@@ -316,7 +316,6 @@ $test$
         insert into reservation_tables (reservation, "table") values (v_reservation_id, v_table_id);
 
         -- on remet les règles avant le test
-
         ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
 
 
