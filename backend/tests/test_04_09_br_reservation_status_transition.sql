@@ -13,167 +13,725 @@
 -- Table "reservations"
 -- INSERT
 -- (cas positif)
+/*
+  cas 1 : insérer une réservation en attente
+ */
+
 rollback;
 begin;
+set constraints all immediate;
 do
 $test$
+    declare
+        v_user_id int;
+        v_manager_id int;
+        v_restaurant_id int;
+        v_service_id int;
+        v_reservation_id int;
+        v_table_id int;
+        v_table2_id int;
+        v_table_number int := 4;
     begin
-        raise notice 'TEST : insérer une réservation avec status <pending> (cas valide)';
-        insert into reservations(id, client, restaurant, datetime, number_of_guests, status, special_requests)
-        VALUES (23, 6, 4, '20260501 19:00:00'::timestamp, 10,
-                'pending'::status_type, null);
+        -- on crée un user (client)
+        insert into users (email, password, full_name)
+        values ('manu@manu.fr', 'MySecureP@ss2026', 'client,')
+        returning id into v_user_id;
+
+        -- on crée un user (manager)
+        insert into users (email, password, full_name)
+        values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
+        returning id into v_manager_id;
+
+        -- bypass
+        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un restaurant
+        insert into restaurants (name, address, city, phone)
+        values ('jannah', 'rue akhira', 'heaven', '0470 12 34 56')
+        returning id into v_restaurant_id;
+
+        -- on crée un restaurant manager
+        insert into restaurant_managers (restaurant, manager)
+        values (v_restaurant_id, v_manager_id);
+        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un service
+        insert into services (restaurant, day_of_week, start_time, end_time)
+        values (v_restaurant_id, 1, '12:00:00', '14:00:00')
+        returning id into v_service_id;
+
+        -- on crée une reservation
+        raise notice 'insérer une réservation en attente (cas valide)';
+        insert into reservations (client, restaurant, datetime, number_of_guests)
+        values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
+        returning id into v_reservation_id;
     end;
 $test$;
 rollback;
 
 -- (cas negatif)
+/*
+  cas 1 : insérer une réservation confirmée
+ */
+
 rollback;
 begin;
+set constraints all immediate;
 do
 $test$
+    declare
+        v_user_id int;
+        v_manager_id int;
+        v_restaurant_id int;
+        v_service_id int;
+        v_reservation_id int;
+        v_table_id int;
+        v_table2_id int;
+        v_table_number int := 4;
     begin
-        raise notice 'TEST : insérer une réservation avec un status different de <pending> (cas invalide)';
-        perform should_fail($$
-           insert into reservations (id, client, restaurant, datetime, number_of_guests, status, special_requests)
-            values (23, 6, 4,'20260501 19:00:00'::timestamp, 2, 'cancelled'::status_type, null);
-        $$, 'raise_exception');
+        -- on crée un user (client)
+        insert into users (email, password, full_name)
+        values ('manu@manu.fr', 'MySecureP@ss2026', 'client,')
+        returning id into v_user_id;
+
+        -- on crée un user (manager)
+        insert into users (email, password, full_name)
+        values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
+        returning id into v_manager_id;
+
+        -- bypass
+        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un restaurant
+        insert into restaurants (name, address, city, phone)
+        values ('jannah', 'rue akhira', 'heaven', '0470 12 34 56')
+        returning id into v_restaurant_id;
+
+        -- on crée un restaurant manager
+        insert into restaurant_managers (restaurant, manager)
+        values (v_restaurant_id, v_manager_id);
+        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un service
+        insert into services (restaurant, day_of_week, start_time, end_time)
+        values (v_restaurant_id, 1, '12:00:00', '14:00:00')
+        returning id into v_service_id;
+
+        -- on crée une reservation
+        raise notice 'insérer une réservation confirmée (cas invalide)';
+        perform should_fail(
+                'insert into reservations (client, restaurant, datetime, number_of_guests, status)
+                 values (' || v_user_id || ', ' || v_restaurant_id || ', ''2026-05-04 13:00:00'', 10, ''confirmed''::status_type)',
+                'raise_exception'
+                );
+    end;
+$test$;
+rollback;
+
+/*
+  cas 2 : insérer une réservation complété
+ */
+
+rollback;
+begin;
+set constraints all immediate;
+do
+$test$
+    declare
+        v_user_id int;
+        v_manager_id int;
+        v_restaurant_id int;
+        v_service_id int;
+        v_reservation_id int;
+        v_table_id int;
+        v_table2_id int;
+        v_table_number int := 4;
+    begin
+        -- on crée un user (client)
+        insert into users (email, password, full_name)
+        values ('manu@manu.fr', 'MySecureP@ss2026', 'client,')
+        returning id into v_user_id;
+
+        -- on crée un user (manager)
+        insert into users (email, password, full_name)
+        values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
+        returning id into v_manager_id;
+
+        -- bypass
+        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un restaurant
+        insert into restaurants (name, address, city, phone)
+        values ('jannah', 'rue akhira', 'heaven', '0470 12 34 56')
+        returning id into v_restaurant_id;
+
+        -- on crée un restaurant manager
+        insert into restaurant_managers (restaurant, manager)
+        values (v_restaurant_id, v_manager_id);
+        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un service
+        insert into services (restaurant, day_of_week, start_time, end_time)
+        values (v_restaurant_id, 1, '12:00:00', '14:00:00')
+        returning id into v_service_id;
+
+        -- on crée une reservation
+        raise notice 'insérer une réservation complété (cas invalide)';
+        perform should_fail(
+                'insert into reservations (client, restaurant, datetime, number_of_guests, status)
+                 values (' || v_user_id || ', ' || v_restaurant_id || ', ''2026-05-04 13:00:00'', 10, ''completed''::status_type)',
+                'raise_exception'
+                );
+    end;
+$test$;
+rollback;
+
+
+/*
+  cas 3 : insérer une réservation cancelled
+ */
+
+rollback;
+begin;
+set constraints all immediate;
+do
+$test$
+    declare
+        v_user_id int;
+        v_manager_id int;
+        v_restaurant_id int;
+        v_service_id int;
+        v_reservation_id int;
+        v_table_id int;
+        v_table2_id int;
+        v_table_number int := 4;
+    begin
+        -- on crée un user (client)
+        insert into users (email, password, full_name)
+        values ('manu@manu.fr', 'MySecureP@ss2026', 'client,')
+        returning id into v_user_id;
+
+        -- on crée un user (manager)
+        insert into users (email, password, full_name)
+        values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
+        returning id into v_manager_id;
+
+        -- bypass
+        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un restaurant
+        insert into restaurants (name, address, city, phone)
+        values ('jannah', 'rue akhira', 'heaven', '0470 12 34 56')
+        returning id into v_restaurant_id;
+
+        -- on crée un restaurant manager
+        insert into restaurant_managers (restaurant, manager)
+        values (v_restaurant_id, v_manager_id);
+        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un service
+        insert into services (restaurant, day_of_week, start_time, end_time)
+        values (v_restaurant_id, 1, '12:00:00', '14:00:00')
+        returning id into v_service_id;
+
+        -- on crée une reservation
+        raise notice 'insérer une réservation cancelled (cas invalide)';
+        perform should_fail(
+                'insert into reservations (client, restaurant, datetime, number_of_guests, status)
+                 values (' || v_user_id || ', ' || v_restaurant_id || ', ''2026-05-04 13:00:00'', 10, ''cancelled''::status_type)',
+                'raise_exception'
+                );
     end;
 $test$;
 rollback;
 
 -- UPDATE
--- cas positif
+-- (cas positif)
+/*
+  cas 1 : faire la transition : pending -> confirmed
+ */
+
 rollback;
 begin;
+set constraints all immediate;
 do
 $test$
+    declare
+        v_user_id int;
+        v_manager_id int;
+        v_restaurant_id int;
+        v_service_id int;
+        v_reservation_id int;
+        v_table_id int;
+        v_table2_id int;
+        v_table_number int := 4;
     begin
-        -- erreur fix en rendant le trigger table restaurant mismatch en initially deferred
-        raise notice 'TEST : modifier le status d.une reservation : pending -> confirmed (cas valide)';
-        --  1.augmenter capacité table 1 du restaurant 2 à 100
-        update tables set capacity = 100 where table_number = 1 and restaurant = 2;
-        --  2.lier reservation 2 à table 1 du restaurant 2
-        insert into reservation_tables (reservation, "table") values (2, 1);
-        --  3.changer de pending à confirmed
-        update reservations set status = 'confirmed'::status_type where id = 2;
+        -- on crée un user (client)
+        insert into users (email, password, full_name)
+        values ('manu@manu.fr', 'MySecureP@ss2026', 'client,')
+        returning id into v_user_id;
+
+        -- on crée un user (manager)
+        insert into users (email, password, full_name)
+        values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
+        returning id into v_manager_id;
+
+        -- bypass
+        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un restaurant
+        insert into restaurants (name, address, city, phone)
+        values ('jannah', 'rue akhira', 'heaven', '0470 12 34 56')
+        returning id into v_restaurant_id;
+
+        -- on crée un restaurant manager
+        insert into restaurant_managers (restaurant, manager)
+        values (v_restaurant_id, v_manager_id);
+        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un service
+        insert into services (restaurant, day_of_week, start_time, end_time)
+        values (v_restaurant_id, 1, '12:00:00', '14:00:00')
+        returning id into v_service_id;
+
+        -- on crée une reservation
+        insert into reservations (client, restaurant, datetime, number_of_guests)
+        values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
+        returning id into v_reservation_id;
+
+        -- bypass
+        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
+        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_capacity;
+        ALTER TABLE reservations DISABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
+
+        -- on crée une table
+        insert into tables (restaurant, table_number, capacity)
+        values (v_restaurant_id, v_table_number, 999)
+        returning id into v_table_id;
+
+        -- on lie à la réservation
+        insert into reservation_tables (reservation, "table") values (v_reservation_id, v_table_id);
+
+        -- on remet les règles avant le test
+        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
+        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_capacity;
+        ALTER TABLE reservations ENABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
+
+        -- test sur la réservation fictive
+        raise notice 'TEST : pending -> confirmed (cas valide)';
+        update reservations set status = 'confirmed'::status_type where id = v_reservation_id;
+
     end;
 $test$;
 rollback;
 
+/*
+  cas 2 : faire la transition : pending -> cancelled
+ */
+
 rollback;
 begin;
+set constraints all immediate;
 do
 $test$
+    declare
+        v_user_id int;
+        v_manager_id int;
+        v_restaurant_id int;
+        v_service_id int;
+        v_reservation_id int;
+        v_table_id int;
+        v_table2_id int;
+        v_table_number int := 4;
     begin
-        raise notice 'TEST : modifier le status d.une reservation : pending -> cancelled (cas valide)';
-        --  changer de pending à cancelled
-        update reservations set status = 'cancelled'::status_type where id = 2;
+        -- on crée un user (client)
+        insert into users (email, password, full_name)
+        values ('manu@manu.fr', 'MySecureP@ss2026', 'client,')
+        returning id into v_user_id;
+
+        -- on crée un user (manager)
+        insert into users (email, password, full_name)
+        values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
+        returning id into v_manager_id;
+
+        -- bypass
+        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un restaurant
+        insert into restaurants (name, address, city, phone)
+        values ('jannah', 'rue akhira', 'heaven', '0470 12 34 56')
+        returning id into v_restaurant_id;
+
+        -- on crée un restaurant manager
+        insert into restaurant_managers (restaurant, manager)
+        values (v_restaurant_id, v_manager_id);
+        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un service
+        insert into services (restaurant, day_of_week, start_time, end_time)
+        values (v_restaurant_id, 1, '12:00:00', '14:00:00')
+        returning id into v_service_id;
+
+        -- on crée une reservation
+        insert into reservations (client, restaurant, datetime, number_of_guests)
+        values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
+        returning id into v_reservation_id;
+
+        -- bypass
+        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
+        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_capacity;
+        ALTER TABLE reservations DISABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
+
+        -- on crée une table
+        insert into tables (restaurant, table_number, capacity)
+        values (v_restaurant_id, v_table_number, 999)
+        returning id into v_table_id;
+
+        -- on lie à la réservation
+        insert into reservation_tables (reservation, "table") values (v_reservation_id, v_table_id);
+
+        -- on remet les règles avant le test
+        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
+        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_capacity;
+        ALTER TABLE reservations ENABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
+
+        -- test sur la réservation fictive
+        raise notice 'TEST : pending -> cancelled (cas valide)';
+        update reservations set status = 'confirmed'::status_type where id = v_reservation_id;
+
     end;
 $test$;
 rollback;
 
+/*
+    cas 3 : faire la transition : confirmed -> cancelled
+*/
 
 rollback;
 begin;
+set constraints all immediate;
 do
 $test$
+    declare
+        v_user_id int;
+        v_manager_id int;
+        v_restaurant_id int;
+        v_service_id int;
+        v_reservation_id int;
+        v_table_id int;
+        v_table2_id int;
+        v_table_number int := 4;
     begin
-        raise notice 'TEST : modifier le status d.une reservation : confirmed -> cancelled (cas valide)';
-        --  changer de confirmed à cancelled
-        update reservations set status = 'cancelled'::status_type where id = 3;
+        -- on crée un user (client)
+        insert into users (email, password, full_name)
+        values ('manu@manu.fr', 'MySecureP@ss2026', 'client,')
+        returning id into v_user_id;
+
+        -- on crée un user (manager)
+        insert into users (email, password, full_name)
+        values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
+        returning id into v_manager_id;
+
+        -- bypass
+        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un restaurant
+        insert into restaurants (name, address, city, phone)
+        values ('jannah', 'rue akhira', 'heaven', '0470 12 34 56')
+        returning id into v_restaurant_id;
+
+        -- on crée un restaurant manager
+        insert into restaurant_managers (restaurant, manager)
+        values (v_restaurant_id, v_manager_id);
+        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un service
+        insert into services (restaurant, day_of_week, start_time, end_time)
+        values (v_restaurant_id, 1, '12:00:00', '14:00:00')
+        returning id into v_service_id;
+
+        -- on crée une reservation
+        insert into reservations (client, restaurant, datetime, number_of_guests)
+        values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
+        returning id into v_reservation_id;
+
+        -- bypass
+        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
+        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_capacity;
+        ALTER TABLE reservation_tables DISABLE TRIGGER cant_updated_reservation_cpl_ccl_reservation_tables;
+        ALTER TABLE reservations DISABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
+        ALTER TABLE reservations DISABLE TRIGGER trigger_validate_reservations_no_tables_on_pending_or_cancelled;
+
+
+
+        -- on crée une table
+        insert into tables (restaurant, table_number, capacity)
+        values (v_restaurant_id, v_table_number, 999)
+        returning id into v_table_id;
+
+        -- on la lie à une réservatuin
+        insert into reservation_tables (reservation, "table") values (v_reservation_id, v_table_id);
+
+        -- on confirme la réservation
+        update reservations set status = 'confirmed'::status_type where id = v_reservation_id;
+
+        -- on remet les règles avant le test
+        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_capacity;
+
+
+        -- test sur la réservation fictive
+        raise notice 'TEST : confirmed -> cancelled (cas valide)';
+        update reservations set status = 'cancelled'::status_type where id = v_reservation_id;
     end;
 $test$;
 rollback;
 
+/*
+    cas 4 : faire la transition : confirmed -> completed
+*/
+
 rollback;
 begin;
+set constraints all immediate;
 do
 $test$
+    declare
+        v_user_id int;
+        v_manager_id int;
+        v_restaurant_id int;
+        v_service_id int;
+        v_reservation_id int;
+        v_table_id int;
+        v_table2_id int;
+        v_table_number int := 4;
     begin
-        raise notice 'TEST : modifier le status d.une reservation : confirmed -> completed (cas valide)';
-        --  changer de confirmed à completed
-        update reservations set status = 'completed'::status_type where id = 3;
+        -- on crée un user (client)
+        insert into users (email, password, full_name)
+        values ('manu@manu.fr', 'MySecureP@ss2026', 'client,')
+        returning id into v_user_id;
+
+        -- on crée un user (manager)
+        insert into users (email, password, full_name)
+        values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
+        returning id into v_manager_id;
+
+        -- bypass
+        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un restaurant
+        insert into restaurants (name, address, city, phone)
+        values ('jannah', 'rue akhira', 'heaven', '0470 12 34 56')
+        returning id into v_restaurant_id;
+
+        -- on crée un restaurant manager
+        insert into restaurant_managers (restaurant, manager)
+        values (v_restaurant_id, v_manager_id);
+        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un service
+        insert into services (restaurant, day_of_week, start_time, end_time)
+        values (v_restaurant_id, 1, '12:00:00', '14:00:00')
+        returning id into v_service_id;
+
+        -- on crée une reservation
+        insert into reservations (client, restaurant, datetime, number_of_guests)
+        values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
+        returning id into v_reservation_id;
+
+        -- bypass
+        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
+        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_capacity;
+        ALTER TABLE reservations DISABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
+
+        -- on crée une table
+        insert into tables (restaurant, table_number, capacity)
+        values (v_restaurant_id, v_table_number, 999)
+        returning id into v_table_id;
+
+        -- on lie à la réservation
+        insert into reservation_tables (reservation, "table") values (v_reservation_id, v_table_id);
+
+        -- on la confirme
+        update reservations set status = 'confirmed'::status_type where id = v_reservation_id;
+
+        -- on remet les règles avant le test
+        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
+        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_capacity;
+
+
+        -- test sur la réservation fictive
+        raise notice 'TEST : confirmed -> completed (cas valide)';
+        update reservations set status = 'completed'::status_type where id = v_reservation_id;
+
     end;
 $test$;
 rollback;
 
--- cas negatif
+-- (cas negatif)
+/*
+  cas 1 : mettre une réservation complété en attente
+ */
+
 rollback;
 begin;
+set constraints all immediate;
 do
 $test$
+    declare
+        v_user_id int;
+        v_manager_id int;
+        v_restaurant_id int;
+        v_service_id int;
+        v_reservation_id int;
+        v_table_id int;
+        v_table2_id int;
+        v_table_number int := 4;
     begin
-        raise notice 'TEST : modifier une reservation de <completed> à <pending> (cas invalide)';
-        perform should_fail($$
-          update reservations set status = 'pending'::status_type where id = 12
-        $$, 'raise_exception');
+        -- on crée un user (client)
+        insert into users (email, password, full_name)
+        values ('manu@manu.fr', 'MySecureP@ss2026', 'client,')
+        returning id into v_user_id;
+
+        -- on crée un user (manager)
+        insert into users (email, password, full_name)
+        values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
+        returning id into v_manager_id;
+
+        -- bypass
+        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un restaurant
+        insert into restaurants (name, address, city, phone)
+        values ('jannah', 'rue akhira', 'heaven', '0470 12 34 56')
+        returning id into v_restaurant_id;
+
+        -- on crée un restaurant manager
+        insert into restaurant_managers (restaurant, manager)
+        values (v_restaurant_id, v_manager_id);
+        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un service
+        insert into services (restaurant, day_of_week, start_time, end_time)
+        values (v_restaurant_id, 1, '12:00:00', '14:00:00')
+        returning id into v_service_id;
+
+        -- on crée une reservation
+        insert into reservations (client, restaurant, datetime, number_of_guests)
+        values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
+        returning id into v_reservation_id;
+
+        -- bypass
+        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
+        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_capacity;
+        ALTER TABLE reservations DISABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
+
+        -- on crée une table
+        insert into tables (restaurant, table_number, capacity)
+        values (v_restaurant_id, v_table_number, 999)
+        returning id into v_table_id;
+
+        -- on lie à la réservation
+        insert into reservation_tables (reservation, "table") values (v_reservation_id, v_table_id);
+
+        -- on la confirme, on complète
+        update reservations set status = 'confirmed'::status_type where id = v_reservation_id;
+        update reservations set status = 'completed'::status_type where id = v_reservation_id;
+
+        -- on remet les règles avant le test
+        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_capacity;
+
+
+        -- test sur la réservation fictive
+        raise notice 'TEST : mettre une réservation completé en attente (cas invalide)';
+        perform should_fail(
+                'update reservations set status = ''cancelled''::status_type where id = ' || v_reservation_id,
+                'raise_exception'
+                );
+
     end;
 $test$;
 rollback;
 
-rollback;
-begin;
-do
-$test$
-    begin
-        raise notice 'TEST : modifier une reservation de <completed> à <confirmed> (cas invalide)';
-        perform should_fail($$
-          update reservations set status = 'confirmed'::status_type where id = 12
-        $$, 'raise_exception');
-    end;
-$test$;
-rollback;
+/*
+  cas 2 : mettre une réservation complété à confirmée
+ */
 
 rollback;
 begin;
+set constraints all immediate;
 do
 $test$
+    declare
+        v_user_id int;
+        v_manager_id int;
+        v_restaurant_id int;
+        v_service_id int;
+        v_reservation_id int;
+        v_table_id int;
+        v_table2_id int;
+        v_table_number int := 4;
     begin
-        raise notice 'TEST : modifier une reservation de <completed> à <cancelled> (cas invalide)';
-        perform should_fail($$
-          update reservations set status = 'cancelled'::status_type where id = 12
-        $$, 'raise_exception');
+        -- on crée un user (client)
+        insert into users (email, password, full_name)
+        values ('manu@manu.fr', 'MySecureP@ss2026', 'client,')
+        returning id into v_user_id;
+
+        -- on crée un user (manager)
+        insert into users (email, password, full_name)
+        values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
+        returning id into v_manager_id;
+
+        -- bypass
+        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un restaurant
+        insert into restaurants (name, address, city, phone)
+        values ('jannah', 'rue akhira', 'heaven', '0470 12 34 56')
+        returning id into v_restaurant_id;
+
+        -- on crée un restaurant manager
+        insert into restaurant_managers (restaurant, manager)
+        values (v_restaurant_id, v_manager_id);
+        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
+        -- on crée un service
+        insert into services (restaurant, day_of_week, start_time, end_time)
+        values (v_restaurant_id, 1, '12:00:00', '14:00:00')
+        returning id into v_service_id;
+
+        -- on crée une reservation
+        insert into reservations (client, restaurant, datetime, number_of_guests)
+        values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
+        returning id into v_reservation_id;
+
+        -- bypass
+        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
+        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_capacity;
+        ALTER TABLE reservations DISABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
+
+        -- on crée une table
+        insert into tables (restaurant, table_number, capacity)
+        values (v_restaurant_id, v_table_number, 999)
+        returning id into v_table_id;
+
+        -- on lie à la réservation
+        insert into reservation_tables (reservation, "table") values (v_reservation_id, v_table_id);
+
+        -- on la confirme, on complète
+        update reservations set status = 'confirmed'::status_type where id = v_reservation_id;
+        update reservations set status = 'completed'::status_type where id = v_reservation_id;
+
+        -- on remet les règles avant le test
+        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_capacity;
+
+
+        -- test sur la réservation fictive
+        raise notice 'TEST : mettre une réservation completé en attente (cas invalide)';
+        perform should_fail(
+                'update reservations set status = ''confirmed''::status_type where id = ' || v_reservation_id,
+                'raise_exception'
+                );
+
     end;
 $test$;
 rollback;
-
-rollback;
-begin;
-do
-$test$
-    begin
-        raise notice 'TEST : modifier une reservation de <cancelled> à <pending> (cas invalide)';
-        perform should_fail($$
-          update reservations set status = 'pending'::status_type where id = 8
-        $$, 'raise_exception');
-    end;
-$test$;
-rollback;
-
-rollback;
-begin;
-do
-$test$
-    begin
-        raise notice 'TEST : modifier une reservation de <cancelled> à <confirmed> (cas invalide)';
-        perform should_fail($$
-          update reservations set status = 'confirmed'::status_type where id = 8
-        $$, 'raise_exception');
-    end;
-$test$;
-rollback;
-
-rollback;
-begin;
-do
-$test$
-    begin
-        raise notice 'TEST : modifier une reservation de <cancelled> à <completed> (cas invalide)';
-        perform should_fail($$
-          update reservations set status = 'cancelled'::status_type where id = 8
-        $$, 'raise_exception');
-    end;
-$test$;
-rollback;
-
-
