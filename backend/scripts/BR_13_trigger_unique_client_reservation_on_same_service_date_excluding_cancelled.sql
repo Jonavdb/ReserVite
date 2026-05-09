@@ -28,3 +28,19 @@
  * UPDATE : oui, sur la colonne restaurant
  * DELETE : non
  * --------------------------------------------------------------------------------------
+ * ANALYSE (Etape 2) - Requête de contrôle (ne doit rien retourner)
+ * --------------------------------------------------------------------------------------
+ *
+ * select count(*) as nb_reservations_same_time
+ * from reservations r
+ * join users c on c.id = r.client
+ * join restaurants res on res.id = r.restaurant
+ * join services s on s.restaurant = res.id
+ * where r.status = 'pending'::status_type
+ *   OR r.status = 'confirmed'::status_type
+ *   OR r.status = 'completed'::status_type
+ * group by c.id, r.datetime, s.id having count(*) > 1;
+
+/* --------------------------------------------------------------------------------------
+ * ANALYSE (Etape 3) - Fonction trigger
+ * --------------------------------------------------------------------------------------
