@@ -29,12 +29,14 @@ end;
 $$ language plpgsql;
 
 
-create trigger completed_or_cancelled_reservation_cant_be_updated
-before UPDATE on reservations
+create constraint trigger completed_or_cancelled_reservation_cant_be_updated
+after UPDATE on reservations
+deferrable initially deferred
 for each row
 execute procedure completed_or_cancelled_reservation_cant_be_updated();
 
-create trigger cant_updated_reservation_cpl_ccl_reservation_tables
-before UPDATE or delete on reservation_tables
+create constraint trigger cant_updated_reservation_cpl_ccl_reservation_tables
+after UPDATE or delete on reservation_tables
+deferrable initially deferred
 for each row
 execute procedure completed_or_cancelled_reservation_cant_be_updated_2()
