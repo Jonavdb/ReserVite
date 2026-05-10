@@ -140,7 +140,6 @@ $test$
         returning id into v_reservation_id;
 
         -- bypass
-
         ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
         ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_capacity;
 
