@@ -81,6 +81,9 @@ $test$
         values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
         returning id into v_reservation_id;
 
+        -- bypass
+        ALTER TABLE reservations DISABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
+
         -- test sur la réservation fictive
         raise notice 'TEST : on annule une nouvelle réservation (cas valide)';
         update reservations set status = 'cancelled'::status_type where id = v_reservation_id;
@@ -158,9 +161,11 @@ $test$
         delete from reservation_tables where reservation = v_reservation_id;
 
         -- on remet les règles avant le test
-
         ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
         ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_capacity;
+
+        -- bypass
+        ALTER TABLE reservations DISABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
 
         -- test sur la réservation fictive
         raise notice 'TEST : on annule une réservation confirmée (cas valide)';
@@ -223,7 +228,6 @@ $test$
         returning id into v_reservation_id;
 
         -- bypass
-
         ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
 
 
@@ -480,8 +484,13 @@ $test$
         -- on la lie à la réservation fictive
         insert into reservation_tables (reservation, "table") values (v_reservation_id, v_table_id);
 
-        -- on confirma la réservation, puis on la complete
+        -- on confirma la réservation
         update reservations set status = 'confirmed'::status_type where id = v_reservation_id;
+
+        -- bypass
+        ALTER TABLE reservations DISABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
+
+        -- on la complète
         update reservations set status = 'completed'::status_type where id = v_reservation_id;
 
         -- on remet les règles avant le test
@@ -623,6 +632,9 @@ $test$
         insert into reservations (client, restaurant, datetime, number_of_guests)
         values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
         returning id into v_reservation_id;
+
+        -- bypass
+        ALTER TABLE reservations DISABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
 
         -- on la met en attente
         update reservations set status = 'cancelled'::status_type where id = v_reservation_id;
