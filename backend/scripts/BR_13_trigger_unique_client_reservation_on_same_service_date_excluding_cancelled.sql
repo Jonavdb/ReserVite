@@ -49,55 +49,23 @@ create or replace function check_unique_client_reservation_same_service_excl_can
     returns trigger as
 $$
 begin
-    if (TG_OP = 'INSERT') then
-        if exists (
-            select 1
-            from reservations r
-            join services s on s.restaurant = r.restaurant
+    if NEW.status not in ('pending', 'confirmed', 'completed') then
+        return NEW; -- on sort direct, la règle ne s'applique pas aux annulations
+    end if;
 
-            -- pour ce client, on regarde ses réservations..
-            where r.client = NEW.client
-
-              -- de ce type
-              and r.status in ('pending', 'confirmed', 'completed')
-
-              and r.datetime::date = NEW.datetime::date -- pour la même date..
-              and s.day_of_week = extract(isodow from NEW.datetime) -- donc pour le même jour ..
-
-              -- et le même que créneau
-              and NEW.datetime::time between s.start_time and s.end_time
-              and r.datetime::time between s.start_time and s.end_time
-        ) then
-            -- erreur : on a trouvé une autre réservation de ce client à la même date au même créneau..
-            -- que la réservation qu'on essaie d'insérer
-            raise exception 'Un client ne peut pas avoir deux réservations en attente, confirmées ou terminées pour une même date et un même service.';
-        end if;
-
-
-    elsif (TG_OP = 'UPDATE') then
-        if exists (
-            select 1
-            from reservations r
-                     join services s on s.restaurant = r.restaurant
-            where r.client = NEW.client
-
-              -- on exclue la réservation en modification..
-              and r.id <> NEW.id
-
-              -- on regarde pour ces types de réservations
-              and r.status in ('pending', 'confirmed', 'completed')
-
-              -- on regarde si l'update a créé une réservation à la même date et même service..
-              -- que la réservation modifiée
-              and r.datetime::date = NEW.datetime::date
-              and s.day_of_week = extract(isodow from NEW.datetime)
-              and NEW.datetime::time between s.start_time and s.end_time
-              and r.datetime::time between s.start_time and s.end_time
-        ) then
-            -- erreur : duplicata créé et on se retrouve avec deux  réservations de ce client à la même date au même créneau..
-            -- que la réservation qu'on essaie d'insérer
-            raise exception 'Un client ne peut pas avoir deux réservations en attente, confirmées ou terminées pour une même date et un même service.';
-        end if;
+    if exists (
+        select 1
+        from reservations r
+                 join services s on s.restaurant = r.restaurant
+        where r.client = NEW.client
+          and r.id is distinct from NEW.id -- important si c'est une UPDATE
+          and r.status in ('pending', 'confirmed', 'completed')
+          and r.datetime::date = NEW.datetime::date
+          and s.day_of_week = extract(isodow from NEW.datetime)
+          and NEW.datetime::time between s.start_time and s.end_time
+          and r.datetime::time between s.start_time and s.end_time
+    ) then
+        raise exception 'Un client ne peut pas avoir deux réservations actives pour le même service.';
     end if;
 
     return NEW;
