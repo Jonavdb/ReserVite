@@ -62,7 +62,7 @@ $$ LANGUAGE plpgsql;
      WHERE id = NEW.reservation;
 
      -- Maintenant on peut tester la variable locale v_status
-     IF v_status IN ('pending', 'cancelled') THEN
+     IF v_status IN ('pending', 'cancelled') and exists(select * from reservation_tables rt where rt.reservation = new.reservation) then
          RAISE EXCEPTION 'BR: Impossible d''assigner une table à une réservation en statut %.', v_status;
      END IF;
 

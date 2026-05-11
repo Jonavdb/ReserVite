@@ -501,6 +501,11 @@ $test$
 $test$;
 rollback;
 
+/*
+  cas 5 : mettre une réservation de confirmed à pending pour une réservation dans le futur
+ */
+
+
 -- (cas negatif)
 /*
   cas 1 : mettre une réservation complété en attente
@@ -567,7 +572,7 @@ $test$
         -- test sur la réservation fictive
         raise notice 'TEST : mettre une réservation completé en attente (cas invalide)';
         perform should_fail(
-                'update reservations set status = ''cancelled''::status_type where id = ' || v_reservation_id,
+                'update reservations set status = ''pending''::status_type where id = ' || v_reservation_id,
                 'raise_exception'
                 );
 
@@ -646,3 +651,5 @@ $test$
     end;
 $test$;
 rollback;
+
+

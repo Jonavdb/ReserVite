@@ -44,10 +44,12 @@ returns trigger as
             if old.status != new.status then
                 -- on vérifie si la transition est autorisée
                 if not (
-                (   old.status = 'pending'::status_type and new.status = 'confirmed'::status_type or
+                (
+                    old.status = 'pending'::status_type and new.status = 'confirmed'::status_type or
                     old.status = 'pending'::status_type and new.status = 'cancelled'::status_type) or
                     old.status = 'confirmed'::status_type and new.status = 'completed'::status_type or
                     old.status = 'confirmed'::status_type and new.status = 'cancelled'::status_type
+
                 ) then
                     RAISE EXCEPTION 'Transition de [%] à [%] interdite.',
                         old.status,
