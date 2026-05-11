@@ -505,6 +505,74 @@ rollback;
   cas 5 : mettre une réservation de confirmed à pending pour une réservation dans le futur
  */
 
+rollback;
+begin;
+do
+$test$
+    declare
+        v_user_id int;
+        v_manager_id int;
+        v_restaurant_id int;
+        v_service_id int;
+        v_reservation_id int;
+        v_table_id int;
+        v_table2_id int;
+        v_table_number int := 4;
+    begin
+        -- on crée un user (client)
+        insert into users (email, password, full_name)
+        values ('manu@manu.fr', 'MySecureP@ss2026', 'client,')
+        returning id into v_user_id;
+
+        -- on crée un user (manager)
+        insert into users (email, password, full_name)
+        values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
+        returning id into v_manager_id;
+
+
+        -- on crée un restaurant
+        insert into restaurants (name, address, city, phone)
+        values ('jannah', 'rue akhira', 'heaven', '0470 12 34 56')
+        returning id into v_restaurant_id;
+
+        -- on crée un restaurant manager
+        insert into restaurant_managers (restaurant, manager)
+        values (v_restaurant_id, v_manager_id);
+
+        -- on crée un service
+        insert into services (restaurant, day_of_week, start_time, end_time)
+        values (v_restaurant_id, 1, '12:00:00', '14:00:00')
+        returning id into v_service_id;
+
+        -- on crée une reservation
+        insert into reservations (client, restaurant, datetime, number_of_guests)
+        values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
+        returning id into v_reservation_id;
+
+
+        -- on crée une table
+        insert into tables (restaurant, table_number, capacity)
+        values (v_restaurant_id, v_table_number, 999)
+        returning id into v_table_id;
+
+        -- on lie à la réservation
+        insert into reservation_tables (reservation, "table") values (v_reservation_id, v_table_id);
+
+        -- on la confirme
+        update reservations set status = 'confirmed'::status_type where id = v_reservation_id;
+
+
+        -- on supprime le lien
+        delete from reservation_tables where reservation = v_reservation_id;
+
+        -- test sur la réservation fictive
+        raise notice 'TEST : confirmed -> pending (cas valide)';
+        update reservations set status = 'pending'::status_type where id = v_reservation_id;
+
+    end;
+$test$;
+rollback;
+
 
 -- (cas negatif)
 /*

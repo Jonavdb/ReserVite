@@ -30,6 +30,8 @@
 create or replace function check_reservation_status_transition()
 returns trigger as
     $$
+    declare
+        v_now timestamp;
     begin
         -- 1. Erreur : status pas 'pending' à la création
         if (tg_op = 'INSERT') then
@@ -42,14 +44,22 @@ returns trigger as
         if (tg_op) = 'UPDATE' then
             -- uniquement si le status change
             if old.status != new.status then
+                -- on récupère la date simulée
+                select * from system_time limit 1 into v_now;
+
+                -- si elle existe pas on prend la date actuelle
+                if(v_now is null) then
+                    v_now := now();
+                end if;
+
                 -- on vérifie si la transition est autorisée
                 if not (
                 (
                     old.status = 'pending'::status_type and new.status = 'confirmed'::status_type or
                     old.status = 'pending'::status_type and new.status = 'cancelled'::status_type) or
                     old.status = 'confirmed'::status_type and new.status = 'completed'::status_type or
-                    old.status = 'confirmed'::status_type and new.status = 'cancelled'::status_type
-
+                    old.status = 'confirmed'::status_type and new.status = 'cancelled'::status_type or
+                    old.status = 'confirmed'::status_type and new.status = 'pending'::status_type and new.datetime > v_now
                 ) then
                     RAISE EXCEPTION 'Transition de [%] à [%] interdite.',
                         old.status,
