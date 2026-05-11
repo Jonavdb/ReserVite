@@ -3,8 +3,7 @@ $$
 declare
     status_reservation status_type;
 begin
-    select status from reservations where id = old.id into status_reservation;
-    if status_reservation = 'completed' or status_reservation = 'cancelled' then
+    if old.status = 'completed' or old.status = 'cancelled' then
         raise exception 'Une réservation annulée ou terminée ne peut pas être modifiée';
     end if;
     return new;
