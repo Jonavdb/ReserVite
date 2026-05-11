@@ -19,7 +19,6 @@
 
 rollback;
 begin;
-set constraints all immediate;
 do
 $test$
     declare
@@ -42,8 +41,6 @@ $test$
         values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
         returning id into v_manager_id;
 
-        -- bypass
-        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un restaurant
         insert into restaurants (name, address, city, phone)
@@ -53,7 +50,6 @@ $test$
         -- on crée un restaurant manager
         insert into restaurant_managers (restaurant, manager)
         values (v_restaurant_id, v_manager_id);
-        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un service
         insert into services (restaurant, day_of_week, start_time, end_time)
@@ -76,7 +72,6 @@ rollback;
 
 rollback;
 begin;
-set constraints all immediate;
 do
 $test$
     declare
@@ -99,8 +94,6 @@ $test$
         values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
         returning id into v_manager_id;
 
-        -- bypass
-        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un restaurant
         insert into restaurants (name, address, city, phone)
@@ -110,7 +103,6 @@ $test$
         -- on crée un restaurant manager
         insert into restaurant_managers (restaurant, manager)
         values (v_restaurant_id, v_manager_id);
-        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un service
         insert into services (restaurant, day_of_week, start_time, end_time)
@@ -134,7 +126,6 @@ rollback;
 
 rollback;
 begin;
-set constraints all immediate;
 do
 $test$
     declare
@@ -157,9 +148,6 @@ $test$
         values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
         returning id into v_manager_id;
 
-        -- bypass
-        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
-
         -- on crée un restaurant
         insert into restaurants (name, address, city, phone)
         values ('jannah', 'rue akhira', 'heaven', '0470 12 34 56')
@@ -168,7 +156,6 @@ $test$
         -- on crée un restaurant manager
         insert into restaurant_managers (restaurant, manager)
         values (v_restaurant_id, v_manager_id);
-        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un service
         insert into services (restaurant, day_of_week, start_time, end_time)
@@ -193,7 +180,6 @@ rollback;
 
 rollback;
 begin;
-set constraints all immediate;
 do
 $test$
     declare
@@ -216,9 +202,6 @@ $test$
         values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
         returning id into v_manager_id;
 
-        -- bypass
-        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
-
         -- on crée un restaurant
         insert into restaurants (name, address, city, phone)
         values ('jannah', 'rue akhira', 'heaven', '0470 12 34 56')
@@ -227,7 +210,6 @@ $test$
         -- on crée un restaurant manager
         insert into restaurant_managers (restaurant, manager)
         values (v_restaurant_id, v_manager_id);
-        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un service
         insert into services (restaurant, day_of_week, start_time, end_time)
@@ -253,7 +235,6 @@ rollback;
 
 rollback;
 begin;
-set constraints all immediate;
 do
 $test$
     declare
@@ -276,8 +257,6 @@ $test$
         values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
         returning id into v_manager_id;
 
-        -- bypass
-        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un restaurant
         insert into restaurants (name, address, city, phone)
@@ -287,7 +266,6 @@ $test$
         -- on crée un restaurant manager
         insert into restaurant_managers (restaurant, manager)
         values (v_restaurant_id, v_manager_id);
-        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un service
         insert into services (restaurant, day_of_week, start_time, end_time)
@@ -299,10 +277,6 @@ $test$
         values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
         returning id into v_reservation_id;
 
-        -- bypass
-        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
-        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_capacity;
-        ALTER TABLE reservations DISABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
 
         -- on crée une table
         insert into tables (restaurant, table_number, capacity)
@@ -312,10 +286,6 @@ $test$
         -- on lie à la réservation
         insert into reservation_tables (reservation, "table") values (v_reservation_id, v_table_id);
 
-        -- on remet les règles avant le test
-        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
-        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_capacity;
-        ALTER TABLE reservations ENABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
 
         -- test sur la réservation fictive
         raise notice 'TEST : pending -> confirmed (cas valide)';
@@ -331,7 +301,6 @@ rollback;
 
 rollback;
 begin;
-set constraints all immediate;
 do
 $test$
     declare
@@ -354,8 +323,6 @@ $test$
         values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
         returning id into v_manager_id;
 
-        -- bypass
-        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un restaurant
         insert into restaurants (name, address, city, phone)
@@ -365,7 +332,6 @@ $test$
         -- on crée un restaurant manager
         insert into restaurant_managers (restaurant, manager)
         values (v_restaurant_id, v_manager_id);
-        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un service
         insert into services (restaurant, day_of_week, start_time, end_time)
@@ -377,10 +343,6 @@ $test$
         values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
         returning id into v_reservation_id;
 
-        -- bypass
-        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
-        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_capacity;
-        ALTER TABLE reservations DISABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
 
         -- on crée une table
         insert into tables (restaurant, table_number, capacity)
@@ -390,10 +352,6 @@ $test$
         -- on lie à la réservation
         insert into reservation_tables (reservation, "table") values (v_reservation_id, v_table_id);
 
-        -- on remet les règles avant le test
-        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
-        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_capacity;
-        ALTER TABLE reservations ENABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
 
         -- test sur la réservation fictive
         raise notice 'TEST : pending -> cancelled (cas valide)';
@@ -409,7 +367,6 @@ rollback;
 
 rollback;
 begin;
-set constraints all immediate;
 do
 $test$
     declare
@@ -432,8 +389,6 @@ $test$
         values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
         returning id into v_manager_id;
 
-        -- bypass
-        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un restaurant
         insert into restaurants (name, address, city, phone)
@@ -443,7 +398,7 @@ $test$
         -- on crée un restaurant manager
         insert into restaurant_managers (restaurant, manager)
         values (v_restaurant_id, v_manager_id);
-        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
 
         -- on crée un service
         insert into services (restaurant, day_of_week, start_time, end_time)
@@ -454,14 +409,6 @@ $test$
         insert into reservations (client, restaurant, datetime, number_of_guests)
         values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
         returning id into v_reservation_id;
-
-        -- bypass
-        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
-        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_capacity;
-        ALTER TABLE reservation_tables DISABLE TRIGGER cant_updated_reservation_cpl_ccl_reservation_tables;
-        ALTER TABLE reservations DISABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
-        ALTER TABLE reservations DISABLE TRIGGER trigger_validate_reservations_no_tables_on_pending_or_cancelled;
-
 
 
         -- on crée une table
@@ -475,9 +422,8 @@ $test$
         -- on confirme la réservation
         update reservations set status = 'confirmed'::status_type where id = v_reservation_id;
 
-        -- on remet les règles avant le test
-        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_capacity;
-
+        -- ..
+        delete from reservation_tables where reservation = v_reservation_id;
 
         -- test sur la réservation fictive
         raise notice 'TEST : confirmed -> cancelled (cas valide)';
@@ -492,7 +438,6 @@ rollback;
 
 rollback;
 begin;
-set constraints all immediate;
 do
 $test$
     declare
@@ -515,8 +460,6 @@ $test$
         values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
         returning id into v_manager_id;
 
-        -- bypass
-        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un restaurant
         insert into restaurants (name, address, city, phone)
@@ -526,7 +469,6 @@ $test$
         -- on crée un restaurant manager
         insert into restaurant_managers (restaurant, manager)
         values (v_restaurant_id, v_manager_id);
-        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un service
         insert into services (restaurant, day_of_week, start_time, end_time)
@@ -538,10 +480,6 @@ $test$
         values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
         returning id into v_reservation_id;
 
-        -- bypass
-        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
-        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_capacity;
-        ALTER TABLE reservations DISABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
 
         -- on crée une table
         insert into tables (restaurant, table_number, capacity)
@@ -553,10 +491,6 @@ $test$
 
         -- on la confirme
         update reservations set status = 'confirmed'::status_type where id = v_reservation_id;
-
-        -- on remet les règles avant le test
-        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
-        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_capacity;
 
 
         -- test sur la réservation fictive
@@ -574,7 +508,6 @@ rollback;
 
 rollback;
 begin;
-set constraints all immediate;
 do
 $test$
     declare
@@ -597,8 +530,6 @@ $test$
         values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
         returning id into v_manager_id;
 
-        -- bypass
-        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un restaurant
         insert into restaurants (name, address, city, phone)
@@ -608,7 +539,6 @@ $test$
         -- on crée un restaurant manager
         insert into restaurant_managers (restaurant, manager)
         values (v_restaurant_id, v_manager_id);
-        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un service
         insert into services (restaurant, day_of_week, start_time, end_time)
@@ -620,10 +550,6 @@ $test$
         values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
         returning id into v_reservation_id;
 
-        -- bypass
-        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
-        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_capacity;
-        ALTER TABLE reservations DISABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
 
         -- on crée une table
         insert into tables (restaurant, table_number, capacity)
@@ -636,9 +562,6 @@ $test$
         -- on la confirme, on complète
         update reservations set status = 'confirmed'::status_type where id = v_reservation_id;
         update reservations set status = 'completed'::status_type where id = v_reservation_id;
-
-        -- on remet les règles avant le test
-        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_capacity;
 
 
         -- test sur la réservation fictive
@@ -658,7 +581,6 @@ rollback;
 
 rollback;
 begin;
-set constraints all immediate;
 do
 $test$
     declare
@@ -681,9 +603,6 @@ $test$
         values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
         returning id into v_manager_id;
 
-        -- bypass
-        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
-
         -- on crée un restaurant
         insert into restaurants (name, address, city, phone)
         values ('jannah', 'rue akhira', 'heaven', '0470 12 34 56')
@@ -692,7 +611,6 @@ $test$
         -- on crée un restaurant manager
         insert into restaurant_managers (restaurant, manager)
         values (v_restaurant_id, v_manager_id);
-        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un service
         insert into services (restaurant, day_of_week, start_time, end_time)
@@ -704,10 +622,6 @@ $test$
         values (v_user_id, v_restaurant_id, '2026-05-04 13:00:00', 10)
         returning id into v_reservation_id;
 
-        -- bypass
-        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_no_link_pending_cancelled;
-        ALTER TABLE reservation_tables DISABLE TRIGGER trigger_validate_reservation_tables_capacity;
-        ALTER TABLE reservations DISABLE TRIGGER completed_or_cancelled_reservation_cant_be_updated;
 
         -- on crée une table
         insert into tables (restaurant, table_number, capacity)
@@ -720,9 +634,6 @@ $test$
         -- on la confirme, on complète
         update reservations set status = 'confirmed'::status_type where id = v_reservation_id;
         update reservations set status = 'completed'::status_type where id = v_reservation_id;
-
-        -- on remet les règles avant le test
-        ALTER TABLE reservation_tables ENABLE TRIGGER trigger_validate_reservation_tables_capacity;
 
 
         -- test sur la réservation fictive

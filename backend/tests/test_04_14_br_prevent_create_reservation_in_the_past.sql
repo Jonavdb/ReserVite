@@ -14,7 +14,6 @@
 
 rollback;
 begin;
-set constraints all immediate;
 do
 $test$
     declare
@@ -37,8 +36,6 @@ $test$
         values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
         returning id into v_manager_id;
 
-        -- bypass
-        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un restaurant
         insert into restaurants (name, address, city, phone)
@@ -48,7 +45,7 @@ $test$
         -- on crée un restaurant manager
         insert into restaurant_managers (restaurant, manager)
         values (v_restaurant_id, v_manager_id);
-        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
+
 
         -- on crée un service
         insert into services (restaurant, day_of_week, start_time, end_time)
@@ -71,7 +68,6 @@ rollback;
 
 rollback;
 begin;
-set constraints all immediate;
 do
 $test$
     declare
@@ -94,8 +90,6 @@ $test$
         values ('manager@manu.fr', 'MySecureP@ss2026', 'manager,')
         returning id into v_manager_id;
 
-        -- bypass
-        ALTER TABLE restaurants DISABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un restaurant
         insert into restaurants (name, address, city, phone)
@@ -105,7 +99,6 @@ $test$
         -- on crée un restaurant manager
         insert into restaurant_managers (restaurant, manager)
         values (v_restaurant_id, v_manager_id);
-        ALTER TABLE restaurants ENABLE TRIGGER trg_restaurant_have_at_least_one_manager_on_restaurant;
 
         -- on crée un service
         insert into services (restaurant, day_of_week, start_time, end_time)

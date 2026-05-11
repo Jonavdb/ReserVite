@@ -34,21 +34,43 @@
  * ANALYSE (Etape 3) - Fonction trigger
  * --------------------------------------------------------------------------------------
  */
- create or replace function check_no_tables_on_pending_or_cancelled()
- returns trigger as
- $$
- begin
-     if exists(select r.id, r.status
-                from reservations r
-                join reservation_tables rt on r.id = rt.reservation
-                join tables t on t.id = rt."table"
-                where r.status = 'pending'::status_type OR r.status = 'cancelled'::status_type) then
-     raise exception 'Une réservation en attente ou annulée ne peut être associée à aucune une table.';
-     end if;
+ -- check_res_no_tables_on_pending_or_cancelled
+create or replace function check_res_no_tables_on_pending_or_cancelled()
+    RETURNS TRIGGER AS $$
+BEGIN
+    -- Ici NEW.status existe !
+    IF NEW.status IN ('pending', 'cancelled') THEN
+        -- On regarde si des tables sont déjà liées dans l'autre table
+        IF EXISTS (SELECT 1 FROM reservation_tables WHERE reservation = NEW.id) THEN
+            RAISE EXCEPTION 'BR: Impossible de passer en % car des tables sont déjà liées.', NEW.status;
+        END IF;
+    END IF;
 
- return null;
- end;
- $$ language plpgsql security definer;
+    RETURN NEW; -- Important : autorise la modification
+END;
+$$ LANGUAGE plpgsql;
+
+ -- check_rt_no_tables_on_pending_or_cancelled
+ create or replace function check_rt_no_tables_on_pending_or_cancelled()
+     RETURNS TRIGGER AS $$
+ DECLARE
+     v_status status_type; -- ou status_type selon ton type exact
+ BEGIN
+     -- On doit récupérer le statut depuis l'autre table
+     SELECT status INTO v_status
+     FROM reservations
+     WHERE id = NEW.reservation;
+
+     -- Maintenant on peut tester la variable locale v_status
+     IF v_status IN ('pending', 'cancelled') THEN
+         RAISE EXCEPTION 'BR: Impossible d''assigner une table à une réservation en statut %.', v_status;
+     END IF;
+
+     RETURN NEW; -- Important : autorise l'ajout de la ligne
+ END;
+ $$ LANGUAGE plpgsql;
+
+
 /* --------------------------------------------------------------------------------------
  * ANALYSE (Etape 4) - Triggers associés
  * --------------------------------------------------------------------------------------
@@ -60,17 +82,17 @@
 
 
 create trigger trigger_validate_reservations_no_tables_on_pending_or_cancelled
-        after update of status
+        before update of status
         on reservations
         for each row
-    execute function check_no_tables_on_pending_or_cancelled();
+    execute function check_res_no_tables_on_pending_or_cancelled();
 
 create constraint trigger trigger_validate_reservation_tables_no_link_pending_cancelled
         after insert
         on reservation_tables
         deferrable initially deferred
         for each row
-execute function check_no_tables_on_pending_or_cancelled();
+execute function check_rt_no_tables_on_pending_or_cancelled();
 
 
 
