@@ -52,13 +52,13 @@ begin
         select 1
         from reservations r
                  join services s on s.restaurant = r.restaurant
-                 join restaurants res on res.id = r.restaurant
+                 join restaurants res on res.id = s.restaurant
 
         where r.client = NEW.client
           and r.id is distinct from NEW.id -- en cas d'update, pour exclure la réservation en modification
 
           -- on cherche une autre réservation de ce client ..
-          and r.status in ('pending', 'confirmed', 'completed') --  qui a un de ces statuts ..
+          and status in ('pending', 'confirmed', 'completed') --  qui a un de ces statuts ..
           and r.datetime::date = NEW.datetime::date --  à la même date ..
           and s.day_of_week = extract(isodow from NEW.datetime) -- le même jour ..
 
@@ -84,10 +84,9 @@ $$ language plpgsql security definer;
  * ======================================================================================
  */
 
-create constraint trigger trg_val_res_unique_client_same_service_excl_cancelled
-        after insert or update of client, restaurant, datetime, status
+create trigger trg_val_res_unique_client_same_service_excl_cancelled
+        before insert or update of client, restaurant, datetime, status
         on reservations
-        deferrable initially deferred
         for each row
     execute function check_unique_client_res_same_service_on_res();
 
