@@ -3,7 +3,7 @@ $$
 begin
     raise exception 'Interdit de modifier une table d''association';
 end;
-$$;
+$$ language plpgsql security definer;
 
 create or replace trigger tgr_prevent_update
     before update
