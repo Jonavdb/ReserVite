@@ -5,7 +5,7 @@ $test$
     begin
         raise notice 'OK : INSERT une réservation couverte par les services';
         insert into reservations(client, restaurant, datetime, number_of_guests, status, special_requests)
-        values (3, 2, '2026-04-14 13:00:00', 3, 'confirmed', null);
+        values (3, 2, '2026-04-14 13:00:00', 3, 'pending', null);
     end;
 $test$;
 rollback;
@@ -72,6 +72,18 @@ $test$
         raise notice 'KO : UPDATE un service dont une réservation existe déjà.';
         perform should_fail($$
         update services set end_time = '19:30:00' where id = '20';
+        $$, 'raise_exception');
+    end;
+$test$;
+rollback;
+
+begin;
+do
+$test$
+    begin
+        raise notice 'KO : DELETE un service dont une réservation existe déjà.';
+        perform should_fail($$
+        delete from services where id = '1'
         $$, 'raise_exception');
     end;
 $test$;

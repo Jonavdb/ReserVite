@@ -22,7 +22,7 @@ begin
 end;
 $$ language plpgsql;
 
-drop trigger if exists reservation_within_service on reservations;
+drop trigger if exists tgr_reservation_within_service_on_reservations on reservations;
 
 create trigger tgr_reservation_within_service_on_reservations
 before insert or update
@@ -34,23 +34,37 @@ execute procedure reservation_within_service_on_reservations();
 create or replace function reservation_within_service_on_services() returns trigger as
 $$
 begin
-    if exists (
-        select * from reservations
-        where restaurant = NEW.restaurant
-          and extract(isodow from datetime) = OLD.day_of_week
-          and status != 'cancelled'
-          and datetime::time between OLD.start_time and OLD.end_time
-          and datetime::time not between NEW.start_time and NEW.end_time
-    ) then
-        raise exception 'BR-04: Impossible de réduire le service, des réservations existent déjà en dehors de ces nouveaux horaires.';
+    if tg_op = 'UPDATE' then
+        if exists (
+            select * from reservations
+            where restaurant = NEW.restaurant
+              and extract(isodow from datetime) = OLD.day_of_week
+              and status != 'cancelled'
+              and datetime::time between OLD.start_time and OLD.end_time
+              and datetime::time not between NEW.start_time and NEW.end_time
+        ) then
+            raise exception 'BR-04: Impossible de réduire le service, des réservations existent déjà en dehors de ces nouveaux horaires.';
+        end if;
+        return NEW;
+    elseif tg_op = 'DELETE' then
+        if exists (
+            select * from reservations
+            where restaurant = OLD.restaurant
+              and extract(isodow from datetime) = OLD.day_of_week
+              and status != 'cancelled'
+              and datetime::time between OLD.start_time and OLD.end_time
+        ) then
+            raise exception 'BR-04: Impossible de supprimer le service, des réservations existent déjà en dehors de ces nouveaux horaires.';
+        end if;
+        return OLD;
     end if;
-
-    return NEW;
 end;
 $$ language plpgsql;
 
+drop trigger if exists tgr_reservation_within_service_on_services on services;
+
 create trigger tgr_reservation_within_service_on_services
-before update of start_time, end_time, day_of_week
+before update of start_time, end_time, day_of_week or delete
 on services
 for each row
 execute procedure reservation_within_service_on_services();
