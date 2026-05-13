@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:intl/date_symbol_data_local.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_f03/core/tools/validating_text_editing_controller.dart';
+import '../../core/widgets/dialog_box.dart';
+import '../../models/user.dart';
+import '../../providers/security_provider.dart';
 
-void main() async {
-  await initializeDateFormatting('fr_FR', null);
-  runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      home: const LoginMockupScreen(),
-    ),
-  );
+class LoginScreen extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class LoginMockupScreen extends StatelessWidget {
-  const LoginMockupScreen({super.key});
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  final _emailController = ValidatingTextEditingController(
+    validator: User.validateEmail,
+    initialValue: '',
+  );
+
+  final _passwordController = ValidatingTextEditingController(
+    validator: User.validatePassword,
+    initialValue: '',
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +51,10 @@ class LoginMockupScreen extends StatelessWidget {
                 message:
                     'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
                 child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
+                  DateFormat(
+                    'EEEE dd/MM/yyyy HH:mm',
+                    'fr_FR',
+                  ).format(simulatedTime),
                   style: TextStyle(
                     fontSize: 10,
                     color: Colors.grey[400],
@@ -119,9 +124,7 @@ class LoginMockupScreen extends StatelessWidget {
                       const SizedBox(height: 6),
                       TextButton(
                         onPressed: () {},
-                        child: const Text(
-                          'Pas encore de compte ? S\'inscrire',
-                        ),
+                        child: const Text('Pas encore de compte ? S\'inscrire'),
                       ),
                     ],
                   ),
@@ -222,6 +225,45 @@ class LoginMockupScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  // supprime ce qu'il y a en mémoire quand on quitte la page
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  _submitForm(BuildContext context) {
+    if (!_validateForm()) return;
+    _login(context, _emailController.text, password: _passwordController.text);
+  }
+
+  bool _validateForm() {
+    _emailController.validate();
+    _passwordController.validate();
+    return _isFormValid;
+  }
+
+  bool get _isFormValid =>
+      _emailController.isValid == true && _passwordController.isValid == true;
+
+  void _login(BuildContext context, String mail, {String? password}) async {
+    await ref.read(securityProvider.notifier).login(mail, password ?? mail);
+    var securityState = ref.read(securityProvider);
+
+    if (!context.mounted) return;
+
+    securityState.when(
+      data: (_) => Navigator.pushReplacementNamed(context, '/home'),
+      error: (error, _) => DialogBox(
+        title: 'Login failed',
+        message: 'Bad pseudo and/or password!',
+        actions: ['OK'],
+      ).show(context),
+      loading: () {},
     );
   }
 }

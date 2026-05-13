@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:prbd_2526_f03/views/screens/login_screen.dart';
 import 'assign_tables_mockup.dart';
 import 'edit_service_mockup.dart';
 import 'edit_table_mockup.dart';
 import 'home_client_mockup.dart';
-import 'login_mockup.dart';
 import 'my_restaurants_mockup.dart';
 import 'reservation_details_manager_mockup.dart';
 import 'reservation_details_mockup.dart';
@@ -30,18 +30,42 @@ class _MockupCarouselScreenState extends State<MockupCarouselScreen> {
   int _currentPage = 0;
 
   static final List<({String label, Widget screen})> _mockups = [
-    (label: 'Connexion', screen: const LoginMockupScreen()),
+    (label: 'Connexion', screen: LoginScreen()),
     (label: 'Inscription', screen: const SignupMockupScreen()),
     (label: 'Accueil client', screen: const HomeClientMockupScreen()),
-    (label: 'Recherche restaurants', screen: const SearchRestaurantsMockupScreen()),
-    (label: 'Détails restaurant', screen: const RestaurantDetailsMockupScreen()),
-    (label: 'Formulaire réservation', screen: const ReservationFormMockupScreen()),
-    (label: 'Détails réservation', screen: const ReservationDetailsMockupScreen()),
+    (
+      label: 'Recherche restaurants',
+      screen: const SearchRestaurantsMockupScreen(),
+    ),
+    (
+      label: 'Détails restaurant',
+      screen: const RestaurantDetailsMockupScreen(),
+    ),
+    (
+      label: 'Formulaire réservation',
+      screen: const ReservationFormMockupScreen(),
+    ),
+    (
+      label: 'Détails réservation',
+      screen: const ReservationDetailsMockupScreen(),
+    ),
     (label: 'Mes restaurants', screen: const MyRestaurantsMockupScreen()),
-    (label: 'Gestion restaurant - Réservations', screen: const RestaurantManagementReservationsMockupScreen()),
-    (label: 'Gestion restaurant - Services', screen: const RestaurantManagementServicesMockupScreen()),
-    (label: 'Gestion restaurant - Tables', screen: const RestaurantManagementTablesMockupScreen()),
-    (label: 'Détails réservation (manager)', screen: const ReservationDetailsManagerMockupScreen()),
+    (
+      label: 'Gestion restaurant - Réservations',
+      screen: const RestaurantManagementReservationsMockupScreen(),
+    ),
+    (
+      label: 'Gestion restaurant - Services',
+      screen: const RestaurantManagementServicesMockupScreen(),
+    ),
+    (
+      label: 'Gestion restaurant - Tables',
+      screen: const RestaurantManagementTablesMockupScreen(),
+    ),
+    (
+      label: 'Détails réservation (manager)',
+      screen: const ReservationDetailsManagerMockupScreen(),
+    ),
     (label: 'Assigner des tables', screen: const AssignTablesMockupScreen()),
     (label: 'Modifier le service', screen: const EditServiceMockupScreen()),
     (label: 'Modifier la table', screen: const EditTableMockupScreen()),
