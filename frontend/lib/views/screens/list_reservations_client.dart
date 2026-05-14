@@ -3,8 +3,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../providers/security_provider.dart';
 
-class HomeClientScreen extends ConsumerWidget {
-  const HomeClientScreen({super.key});
+class ListReservationsClient extends ConsumerWidget {
+  const ListReservationsClient({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

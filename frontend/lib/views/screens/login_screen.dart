@@ -279,7 +279,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           if (notifier.isManager) {
             Navigator.pushReplacementNamed(context, '/my_restaurants');
           } else {
-            Navigator.pushReplacementNamed(context, '/home_client');
+            Navigator.pushReplacementNamed(context, '/list_reservation_client');
           }
         }
       },

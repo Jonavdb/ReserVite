@@ -32,7 +32,7 @@ class _MockupCarouselScreenState extends State<MockupCarouselScreen> {
   static final List<({String label, Widget screen})> _mockups = [
     (label: 'Connexion', screen: LoginScreen()),
     (label: 'Inscription', screen: const SignupMockupScreen()),
-    (label: 'Accueil client', screen: const HomeClientScreen()),
+    (label: 'Accueil client', screen: const ListReservationsClient()),
     (
       label: 'Recherche restaurants',
       screen: const SearchRestaurantsMockupScreen(),

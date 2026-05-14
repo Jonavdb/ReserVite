@@ -20,7 +20,7 @@ class App extends ConsumerWidget {
       routes: {
         '/login': (context) => LoginScreen(),
         '/my_restaurants': (context) => MyRestaurantsScreen(),
-        '/home_client': (context) => const HomeClientScreen(),
+        '/list_reservation_client': (context) => const ListReservationsClient(),
       },
     );
   }
