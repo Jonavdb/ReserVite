@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/date_symbol_data_local.dart';
 
 import '../../providers/security_provider.dart';
 
@@ -10,7 +9,7 @@ class HomeClientScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(securityProvider.notifier);
-    final userName = notifier.loggedUser;
+    final userName = notifier.loggedUserName;
 
     final theme = Theme.of(context);
 

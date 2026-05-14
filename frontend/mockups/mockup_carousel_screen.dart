@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:prbd_2526_f03/views/screens/home_client_screen.dart';
+import 'package:prbd_2526_f03/views/screens/list_reservations_client.dart';
 import 'package:prbd_2526_f03/views/screens/login_screen.dart';
 import 'package:prbd_2526_f03/views/screens/my_restaurants_screen.dart';
 import 'assign_tables_mockup.dart';

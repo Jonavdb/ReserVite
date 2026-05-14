@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_f03/core/tools/validating_text_editing_controller.dart';
-import '../../core/widgets/dialog_box.dart';
 import '../../models/user.dart';
 import '../../providers/security_provider.dart';
 
@@ -25,9 +24,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     ref.watch(securityProvider);
-    final securityNotifier = ref.read(securityProvider.notifier);
-    final isManager = ref.watch(securityProvider.notifier).isManager;
-    final isClient = ref.watch(securityProvider.notifier).isClient;
 
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
@@ -287,11 +283,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           }
         }
       },
-      error: (error, _) => DialogBox(
-        title: 'Login failed',
-        message: 'Bad pseudo and/or password!',
-        actions: ['OK'],
-      ).show(context),
+      error: (error, _) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Email ou mot de passe incorrect.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      },
       loading: () {},
     );
   }

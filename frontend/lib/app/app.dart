@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:prbd_2526_f03/views/screens/home_client_screen.dart';
+import 'package:prbd_2526_f03/views/screens/list_reservations_client.dart';
 import 'package:prbd_2526_f03/views/screens/my_restaurants_screen.dart';
-import '../providers/security_provider.dart';
 import '../views/screens/login_screen.dart';
 
 class App extends ConsumerWidget {
@@ -21,7 +20,7 @@ class App extends ConsumerWidget {
       routes: {
         '/login': (context) => LoginScreen(),
         '/my_restaurants': (context) => MyRestaurantsScreen(),
-        '/home_client': (context) => const HomeClientMockupScreen(),
+        '/home_client': (context) => const HomeClientScreen(),
       },
     );
   }

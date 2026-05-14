@@ -40,6 +40,16 @@ class SecurityNotifier extends AsyncNotifier<String?> {
     return _getUserFromToken(state.value);
   }
 
+  String? get loggedUserName {
+    if (state.value == null) return null;
+    try {
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(state.value!);
+      return decodedToken['name'];
+    } catch (e) {
+      return null;
+    }
+  }
+
   static String? _getUserFromToken(String? token) {
     if (token == null) return null;
     try {
