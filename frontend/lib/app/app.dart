@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:prbd_2526_f03/views/screens/home_client_mockup.dart';
-import 'package:prbd_2526_f03/views/screens/my_restaurants_mockup.dart';
+import 'package:prbd_2526_f03/views/screens/home_client_screen.dart';
+import 'package:prbd_2526_f03/views/screens/my_restaurants_screen.dart';
 import '../providers/security_provider.dart';
 import '../views/screens/login_screen.dart';
 
@@ -10,8 +10,6 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final securityNotifier = ref.read(securityProvider.notifier);
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'ReserVite',
@@ -21,7 +19,8 @@ class App extends ConsumerWidget {
       ),
       home: LoginScreen(),
       routes: {
-        '/my_restaurants': (context) => const MyRestaurantsMockupScreen(),
+        '/login': (context) => LoginScreen(),
+        '/my_restaurants': (context) => MyRestaurantsScreen(),
         '/home_client': (context) => const HomeClientMockupScreen(),
       },
     );
