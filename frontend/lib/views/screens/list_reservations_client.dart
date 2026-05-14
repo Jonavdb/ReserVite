@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
 import '../../providers/security_provider.dart';
 
 class ListReservationsClient extends ConsumerWidget {
@@ -67,16 +66,19 @@ class ListReservationsClient extends ConsumerWidget {
                 showSelectedIcon: false,
                 segments: const [
                   ButtonSegment(
+                    // point d'entrée : affichage de toutes les réservations
                     value: 'all',
                     icon: Icon(Icons.list, size: 24),
                     tooltip: 'Toutes',
                   ),
                   ButtonSegment(
+                    // point d'entrée : affichage des réservations en attente
                     value: 'pending',
                     icon: Icon(Icons.pending, size: 24, color: Colors.orange),
                     tooltip: 'En attente',
                   ),
                   ButtonSegment(
+                    // point d'entrée : affichage des réservations confirmées
                     value: 'confirmed',
                     icon: Icon(
                       Icons.check_circle,
@@ -86,6 +88,7 @@ class ListReservationsClient extends ConsumerWidget {
                     tooltip: 'Confirmées',
                   ),
                   ButtonSegment(
+                    // point d'entrée : affichage des réservations complétées
                     value: 'completed',
                     icon: Icon(
                       Icons.event_available,
@@ -95,6 +98,7 @@ class ListReservationsClient extends ConsumerWidget {
                     tooltip: 'Terminées',
                   ),
                   ButtonSegment(
+                    // point d'entrée : affichage des réservations annumlées
                     value: 'cancelled',
                     icon: Icon(Icons.cancel, size: 24, color: Colors.red),
                     tooltip: 'Annulées',
