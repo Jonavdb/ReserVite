@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:prbd_2526_f03/views/screens/list_reservations_client.dart';
-import 'package:prbd_2526_f03/views/screens/my_restaurants_screen.dart';
-import '../views/screens/login_screen.dart';
+import 'package:prbd_2526_f03/views/screens/my_restaurants.dart';
+import '../views/screens/login.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
