@@ -1,26 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:intl/date_symbol_data_local.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_f03/providers/security_provider.dart';
 
-void main() async {
-  await initializeDateFormatting('fr_FR', null);
-  runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      home: const MyRestaurantsMockupScreen(),
-    ),
-  );
-}
-
-class MyRestaurantsMockupScreen extends StatelessWidget {
-  const MyRestaurantsMockupScreen({super.key});
+class MyRestaurantsScreen extends ConsumerWidget {
+  const MyRestaurantsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notifier = ref.read(securityProvider.notifier);
+    final userName = notifier.loggedUserName;
+
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
 
@@ -36,8 +26,11 @@ class MyRestaurantsMockupScreen extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.logout),
-            tooltip: 'Déconnexion (Benoît P.)',
-            onPressed: () {},
+            tooltip: 'Déconnexion ($userName)',
+            onPressed: () {
+              ref.read(securityProvider.notifier).logout();
+              Navigator.pushReplacementNamed(context, '/login');
+            },
           ),
         ],
         elevation: 2,
@@ -53,8 +46,10 @@ class MyRestaurantsMockupScreen extends StatelessWidget {
                 message:
                     'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
                 child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
+                  DateFormat(
+                    'EEEE dd/MM/yyyy HH:mm',
+                    'fr_FR',
+                  ).format(simulatedTime),
                   style: TextStyle(
                     fontSize: 10,
                     color: Colors.grey[400],
@@ -80,7 +75,11 @@ class MyRestaurantsMockupScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                        const Icon(
+                          Icons.location_on,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 4),
                         const Text('Bruxelles'),
                         const SizedBox(width: 12),
@@ -88,23 +87,36 @@ class MyRestaurantsMockupScreen extends StatelessWidget {
                         const SizedBox(width: 2),
                         Text(
                           '4.5',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Text(
                           '€€€',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                        const Icon(
+                          Icons.access_time,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           'Dernière réservation: mer. 04/12/2024',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
                         ),
                       ],
                     ),
@@ -139,7 +151,11 @@ class MyRestaurantsMockupScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                        const Icon(
+                          Icons.location_on,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 4),
                         const Text('Bruxelles'),
                         const SizedBox(width: 12),
@@ -147,23 +163,36 @@ class MyRestaurantsMockupScreen extends StatelessWidget {
                         const SizedBox(width: 2),
                         Text(
                           '4.2',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Text(
                           '€€',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                        const Icon(
+                          Icons.access_time,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           'Dernière réservation: jeu. 05/12/2024',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
                         ),
                       ],
                     ),
@@ -198,7 +227,11 @@ class MyRestaurantsMockupScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                        const Icon(
+                          Icons.location_on,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 4),
                         const Text('Bruxelles'),
                         const SizedBox(width: 12),
@@ -206,12 +239,18 @@ class MyRestaurantsMockupScreen extends StatelessWidget {
                         const SizedBox(width: 2),
                         Text(
                           '4.7',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Text(
                           '€€€',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
                         ),
                       ],
                     ),

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:prbd_2526_f03/views/screens/login_screen.dart';
+import 'package:prbd_2526_f03/views/screens/list_reservations_client.dart';
+import 'package:prbd_2526_f03/views/screens/login.dart';
+import 'package:prbd_2526_f03/views/screens/my_restaurants.dart';
 import 'assign_tables_mockup.dart';
 import 'edit_service_mockup.dart';
 import 'edit_table_mockup.dart';
-import 'home_client_mockup.dart';
-import 'my_restaurants_mockup.dart';
 import 'reservation_details_manager_mockup.dart';
 import 'reservation_details_mockup.dart';
 import 'reservation_form_mockup.dart';
@@ -32,7 +32,7 @@ class _MockupCarouselScreenState extends State<MockupCarouselScreen> {
   static final List<({String label, Widget screen})> _mockups = [
     (label: 'Connexion', screen: LoginScreen()),
     (label: 'Inscription', screen: const SignupMockupScreen()),
-    (label: 'Accueil client', screen: const HomeClientMockupScreen()),
+    (label: 'Accueil client', screen: const ListReservationsClient()),
     (
       label: 'Recherche restaurants',
       screen: const SearchRestaurantsMockupScreen(),
@@ -49,7 +49,7 @@ class _MockupCarouselScreenState extends State<MockupCarouselScreen> {
       label: 'Détails réservation',
       screen: const ReservationDetailsMockupScreen(),
     ),
-    (label: 'Mes restaurants', screen: const MyRestaurantsMockupScreen()),
+    (label: 'Mes restaurants', screen: const MyRestaurantsScreen()),
     (
       label: 'Gestion restaurant - Réservations',
       screen: const RestaurantManagementReservationsMockupScreen(),

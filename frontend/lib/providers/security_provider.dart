@@ -15,10 +15,10 @@ class SecurityNotifier extends AsyncNotifier<String?> {
     return state.value;
   }
 
-  Future<void> login(String pseudo, String password) async {
+  Future<void> login(String email, String password) async {
     state = const AsyncLoading();
     try {
-      var token = await Security.login(pseudo, password);
+      var token = await Security.login(email, password);
       Params.setValue('token', token);
       state = AsyncData(token);
     } catch (e) {
@@ -40,6 +40,16 @@ class SecurityNotifier extends AsyncNotifier<String?> {
     return _getUserFromToken(state.value);
   }
 
+  String? get loggedUserName {
+    if (state.value == null) return null;
+    try {
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(state.value!);
+      return decodedToken['name'];
+    } catch (e) {
+      return null;
+    }
+  }
+
   static String? _getUserFromToken(String? token) {
     if (token == null) return null;
     try {
@@ -49,4 +59,18 @@ class SecurityNotifier extends AsyncNotifier<String?> {
       return null;
     }
   }
+
+  static String? _getRoleFromToken(String? token) {
+    if (token == null) return null;
+    try {
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+      return decodedToken['role'];
+    } catch (e) {
+      return null;
+    }
+  }
+
+  bool get isManager => _getRoleFromToken(state.value) == 'manager';
+
+  bool get isClient => _getRoleFromToken(state.value) == 'client';
 }
