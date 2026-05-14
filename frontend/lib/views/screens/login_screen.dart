@@ -24,6 +24,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(securityProvider);
+    final securityNotifier = ref.read(securityProvider.notifier);
+    final isManager = ref.watch(securityProvider.notifier).isManager;
+    final isClient = ref.watch(securityProvider.notifier).isClient;
+
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
 
@@ -97,6 +102,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
+                        controller: _emailController,
+                        onFieldSubmitted: (value) => _submitForm(context),
                         decoration: const InputDecoration(
                           labelText: 'Email',
                           border: OutlineInputBorder(),
@@ -106,6 +113,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 10),
                       TextFormField(
+                        controller: _passwordController,
+                        onFieldSubmitted: (value) => _submitForm(context),
                         decoration: const InputDecoration(
                           labelText: 'Mot de passe',
                           border: OutlineInputBorder(),
@@ -115,7 +124,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 12),
                       ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () => _submitForm(context),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
@@ -153,12 +162,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     style: TextStyle(fontSize: 13, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
+
+                  // Raccourcis Clients
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () => _login(context, 'brlacroix@epfc.eu'),
                           icon: const Icon(Icons.person),
                           label: const Text('Client (Bruno)'),
                           style: OutlinedButton.styleFrom(
@@ -169,7 +180,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () => _login(context, 'mamichel@epfc.eu'),
                           icon: const Icon(Icons.person),
                           label: const Text('Client (Marc)'),
                           style: OutlinedButton.styleFrom(
@@ -179,12 +190,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ],
                   ),
+
+                  // Raccourcis Managers
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () => _login(context, 'bepenelle@epfc.eu'),
                           icon: const Icon(Icons.manage_accounts),
                           label: const Text('Manager (Benoît)'),
                           style: OutlinedButton.styleFrom(
@@ -195,7 +208,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () => _login(context, 'gedielman@epfc.eu'),
                           icon: const Icon(Icons.manage_accounts),
                           label: const Text('Manager (Geoffrey)'),
                           style: OutlinedButton.styleFrom(
@@ -236,7 +249,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  _submitForm(BuildContext context) {
+  void _submitForm(BuildContext context) {
     if (!_validateForm()) return;
     _login(context, _emailController.text, password: _passwordController.text);
   }
@@ -251,13 +264,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _emailController.isValid == true && _passwordController.isValid == true;
 
   void _login(BuildContext context, String mail, {String? password}) async {
-    await ref.read(securityProvider.notifier).login(mail, password ?? mail);
-    var securityState = ref.read(securityProvider);
+    // si password est null, on utilise 'Password1' par défaut
+    final passwordToUse = password ?? 'Password1,';
+
+    await ref.read(securityProvider.notifier).login(mail, passwordToUse);
 
     if (!context.mounted) return;
 
+    final securityState = ref.read(
+      securityProvider,
+    ); // récupère l'état APRÈS l'appel
+
     securityState.when(
-      data: (_) => Navigator.pushReplacementNamed(context, '/home'),
+      data: (token) {
+        if (token != null) {
+          final notifier = ref.read(securityProvider.notifier);
+
+          if (notifier.isManager) {
+            Navigator.pushReplacementNamed(context, '/my_restaurants');
+          } else {
+            Navigator.pushReplacementNamed(context, '/home_client');
+          }
+        }
+      },
       error: (error, _) => DialogBox(
         title: 'Login failed',
         message: 'Bad pseudo and/or password!',
