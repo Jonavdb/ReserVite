@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:prbd_2526_f03/providers/security_provider.dart';
+import 'package:prbd_2526_f03/providers/current_user_provider.dart';
 
 class MyRestaurantsScreen extends ConsumerWidget {
   const MyRestaurantsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(securityProvider.notifier);
+    final notifier = ref.read(currentUserProvider.notifier);
     final userName = notifier.loggedUserName;
 
     final theme = Theme.of(context);
@@ -19,16 +19,12 @@ class MyRestaurantsScreen extends ConsumerWidget {
         title: const Text('Mes restaurants'),
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Rafraîchir les données',
-            onPressed: () {},
-          ),
+          IconButton(icon: const Icon(Icons.refresh), tooltip: 'Rafraîchir les données', onPressed: () {}),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Déconnexion ($userName)',
             onPressed: () {
-              ref.read(securityProvider.notifier).logout();
+              ref.read(currentUserProvider.notifier).logout();
               Navigator.pushReplacementNamed(context, '/login');
             },
           ),
@@ -43,18 +39,10 @@ class MyRestaurantsScreen extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
               child: Tooltip(
-                message:
-                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                message: 'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
                 child: Text(
-                  DateFormat(
-                    'EEEE dd/MM/yyyy HH:mm',
-                    'fr_FR',
-                  ).format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
-                  ),
+                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR').format(simulatedTime),
+                  style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.normal),
                 ),
               ),
             ),
@@ -75,48 +63,25 @@ class MyRestaurantsScreen extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(
-                          Icons.location_on,
-                          size: 14,
-                          color: Colors.grey,
-                        ),
+                        const Icon(Icons.location_on, size: 14, color: Colors.grey),
                         const SizedBox(width: 4),
                         const Text('Bruxelles'),
                         const SizedBox(width: 12),
                         const Icon(Icons.star, size: 14, color: Colors.amber),
                         const SizedBox(width: 2),
-                        Text(
-                          '4.5',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
+                        Text('4.5', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                         const SizedBox(width: 12),
-                        Text(
-                          '€€€',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
+                        Text('€€€', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(
-                          Icons.access_time,
-                          size: 14,
-                          color: Colors.grey,
-                        ),
+                        const Icon(Icons.access_time, size: 14, color: Colors.grey),
                         const SizedBox(width: 4),
                         Text(
                           'Dernière réservation: mer. 04/12/2024',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
+                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                         ),
                       ],
                     ),
@@ -127,11 +92,7 @@ class MyRestaurantsScreen extends ConsumerWidget {
                         SizedBox(width: 4),
                         Text(
                           '2 demandes en attente',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.orange,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: TextStyle(fontSize: 12, color: Colors.orange, fontWeight: FontWeight.w500),
                         ),
                       ],
                     ),
@@ -151,48 +112,25 @@ class MyRestaurantsScreen extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(
-                          Icons.location_on,
-                          size: 14,
-                          color: Colors.grey,
-                        ),
+                        const Icon(Icons.location_on, size: 14, color: Colors.grey),
                         const SizedBox(width: 4),
                         const Text('Bruxelles'),
                         const SizedBox(width: 12),
                         const Icon(Icons.star, size: 14, color: Colors.amber),
                         const SizedBox(width: 2),
-                        Text(
-                          '4.2',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
+                        Text('4.2', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                         const SizedBox(width: 12),
-                        Text(
-                          '€€',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
+                        Text('€€', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(
-                          Icons.access_time,
-                          size: 14,
-                          color: Colors.grey,
-                        ),
+                        const Icon(Icons.access_time, size: 14, color: Colors.grey),
                         const SizedBox(width: 4),
                         Text(
                           'Dernière réservation: jeu. 05/12/2024',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
+                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                         ),
                       ],
                     ),
@@ -203,11 +141,7 @@ class MyRestaurantsScreen extends ConsumerWidget {
                         SizedBox(width: 4),
                         Text(
                           '1 demande en attente',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.orange,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: TextStyle(fontSize: 12, color: Colors.orange, fontWeight: FontWeight.w500),
                         ),
                       ],
                     ),
@@ -227,31 +161,15 @@ class MyRestaurantsScreen extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(
-                          Icons.location_on,
-                          size: 14,
-                          color: Colors.grey,
-                        ),
+                        const Icon(Icons.location_on, size: 14, color: Colors.grey),
                         const SizedBox(width: 4),
                         const Text('Bruxelles'),
                         const SizedBox(width: 12),
                         const Icon(Icons.star, size: 14, color: Colors.amber),
                         const SizedBox(width: 2),
-                        Text(
-                          '4.7',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
+                        Text('4.7', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                         const SizedBox(width: 12),
-                        Text(
-                          '€€€',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
+                        Text('€€€', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                       ],
                     ),
                   ],
