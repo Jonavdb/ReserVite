@@ -12,8 +12,14 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = ValidatingTextEditingController(validator: User.validateEmail, initialValue: '');
-
   final _passwordController = ValidatingTextEditingController(validator: User.validatePassword, initialValue: '');
+
+  @override
+  void initState() {
+    _emailController.onAfterValidated = () => setState(() {});
+    _passwordController.onAfterValidated = () => setState(() {});
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,25 +72,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),
+
+                      // Champ Email
                       const SizedBox(height: 12),
                       TextFormField(
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         controller: _emailController,
                         onFieldSubmitted: (value) => _submitForm(context),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Email',
+                          errorText: _emailController.errorText,
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.email),
                         ),
                         keyboardType: TextInputType.emailAddress,
                       ),
+
+                      // Champ Password
                       const SizedBox(height: 10),
                       TextFormField(
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         controller: _passwordController,
                         onFieldSubmitted: (value) => _submitForm(context),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Mot de passe',
+                          errorText: _passwordController.errorText,
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.lock),
                         ),
@@ -214,7 +226,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool get _isFormValid => _emailController.isValid == true && _passwordController.isValid == true;
 
   void _login(BuildContext context, String mail, {String? password}) async {
-    // si password est null, on utilise 'Password1' par défaut
+    // si password est null, on utilise 'Password1,' par défaut
     final passwordToUse = password ?? 'Password1,';
 
     await ref.read(securityProvider.notifier).login(mail, passwordToUse);
