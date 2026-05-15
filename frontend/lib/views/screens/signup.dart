@@ -2,22 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
-void main() async {
-  await initializeDateFormatting('fr_FR', null);
-  runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      home: const SignupMockupScreen(),
-    ),
-  );
-}
-
-class SignupMockupScreen extends StatelessWidget {
-  const SignupMockupScreen({super.key});
+class Signup extends StatelessWidget {
+  const Signup({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,19 +12,10 @@ class SignupMockupScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {},
-        ),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () {}),
         title: const Text('Inscription'),
         automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Rafraîchir les données',
-            onPressed: () {},
-          ),
-        ],
+        actions: [IconButton(icon: const Icon(Icons.refresh), tooltip: 'Rafraîchir les données', onPressed: () {})],
         elevation: 2,
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
@@ -49,16 +26,10 @@ class SignupMockupScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
               child: Tooltip(
-                message:
-                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                message: 'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
                 child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
-                  ),
+                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR').format(simulatedTime),
+                  style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.normal),
                 ),
               ),
             ),
@@ -78,10 +49,7 @@ class SignupMockupScreen extends StatelessWidget {
                 const SizedBox(height: 32),
                 const Text(
                   'Créez votre compte',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
@@ -131,16 +99,11 @@ class SignupMockupScreen extends StatelessWidget {
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
+                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
                   child: const Text('S\'inscrire'),
                 ),
                 const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text('Déjà un compte ? Se connecter'),
-                ),
+                TextButton(onPressed: () {}, child: const Text('Déjà un compte ? Se connecter')),
               ],
             ),
           ),

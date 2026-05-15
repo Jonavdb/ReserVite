@@ -15,7 +15,7 @@ import 'restaurant_management_reservations_mockup.dart';
 import 'restaurant_management_services_mockup.dart';
 import 'restaurant_management_tables_mockup.dart';
 import 'search_restaurants_mockup.dart';
-import 'signup_mockup.dart';
+import '../lib/views/screens/signup.dart';
 
 /// Écran carousel qui affiche tous les mockups du projet.
 class MockupCarouselScreen extends StatefulWidget {
@@ -30,42 +30,18 @@ class _MockupCarouselScreenState extends State<MockupCarouselScreen> {
   int _currentPage = 0;
 
   static final List<({String label, Widget screen})> _mockups = [
-    (label: 'Connexion', screen: LoginScreen()),
-    (label: 'Inscription', screen: const SignupMockupScreen()),
+    (label: 'Connexion', screen: Login()),
+    (label: 'Inscription', screen: const Signup()),
     (label: 'Accueil client', screen: const ListReservationsClient()),
-    (
-      label: 'Recherche restaurants',
-      screen: const SearchRestaurantsMockupScreen(),
-    ),
-    (
-      label: 'Détails restaurant',
-      screen: const RestaurantDetailsMockupScreen(),
-    ),
-    (
-      label: 'Formulaire réservation',
-      screen: const ReservationFormMockupScreen(),
-    ),
-    (
-      label: 'Détails réservation',
-      screen: const ReservationDetailsMockupScreen(),
-    ),
-    (label: 'Mes restaurants', screen: const MyRestaurantsScreen()),
-    (
-      label: 'Gestion restaurant - Réservations',
-      screen: const RestaurantManagementReservationsMockupScreen(),
-    ),
-    (
-      label: 'Gestion restaurant - Services',
-      screen: const RestaurantManagementServicesMockupScreen(),
-    ),
-    (
-      label: 'Gestion restaurant - Tables',
-      screen: const RestaurantManagementTablesMockupScreen(),
-    ),
-    (
-      label: 'Détails réservation (manager)',
-      screen: const ReservationDetailsManagerMockupScreen(),
-    ),
+    (label: 'Recherche restaurants', screen: const SearchRestaurantsMockupScreen()),
+    (label: 'Détails restaurant', screen: const RestaurantDetailsMockupScreen()),
+    (label: 'Formulaire réservation', screen: const ReservationFormMockupScreen()),
+    (label: 'Détails réservation', screen: const ReservationDetailsMockupScreen()),
+    (label: 'Mes restaurants', screen: const MyRestaurants()),
+    (label: 'Gestion restaurant - Réservations', screen: const RestaurantManagementReservationsMockupScreen()),
+    (label: 'Gestion restaurant - Services', screen: const RestaurantManagementServicesMockupScreen()),
+    (label: 'Gestion restaurant - Tables', screen: const RestaurantManagementTablesMockupScreen()),
+    (label: 'Détails réservation (manager)', screen: const ReservationDetailsManagerMockupScreen()),
     (label: 'Assigner des tables', screen: const AssignTablesMockupScreen()),
     (label: 'Modifier le service', screen: const EditServiceMockupScreen()),
     (label: 'Modifier la table', screen: const EditTableMockupScreen()),
@@ -90,22 +66,16 @@ class _MockupCarouselScreenState extends State<MockupCarouselScreen> {
 
   void _goToPage(int index) {
     if (index < 0 || index >= _mockups.length) return;
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+    _pageController.animateToPage(index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
   }
 
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (event.logicalKey == LogicalKeyboardKey.arrowRight ||
-        event.logicalKey == LogicalKeyboardKey.arrowDown) {
+    if (event.logicalKey == LogicalKeyboardKey.arrowRight || event.logicalKey == LogicalKeyboardKey.arrowDown) {
       _goToPage(_currentPage + 1);
       return KeyEventResult.handled;
     }
-    if (event.logicalKey == LogicalKeyboardKey.arrowLeft ||
-        event.logicalKey == LogicalKeyboardKey.arrowUp) {
+    if (event.logicalKey == LogicalKeyboardKey.arrowLeft || event.logicalKey == LogicalKeyboardKey.arrowUp) {
       _goToPage(_currentPage - 1);
       return KeyEventResult.handled;
     }
@@ -184,11 +154,7 @@ class _MockupCarouselScreenState extends State<MockupCarouselScreen> {
 }
 
 class _DotIndicator extends StatelessWidget {
-  const _DotIndicator({
-    required this.label,
-    required this.isActive,
-    required this.onTap,
-  });
+  const _DotIndicator({required this.label, required this.isActive, required this.onTap});
 
   final String label;
   final bool isActive;
@@ -211,10 +177,7 @@ class _DotIndicator extends StatelessWidget {
             duration: const Duration(milliseconds: 200),
             width: isActive ? 24 : 8,
             height: 8,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(4),
-            ),
+            decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4)),
           ),
         ),
       ),
