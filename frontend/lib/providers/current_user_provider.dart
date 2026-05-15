@@ -3,11 +3,9 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import '../app/params.dart';
 import '../models/security.dart';
 
-final securityProvider = AsyncNotifierProvider<SecurityNotifier, String?>(
-  () => SecurityNotifier(),
-);
+final currentUserProvider = AsyncNotifierProvider<CurrentUserNotifier, String?>(() => CurrentUserNotifier());
 
-class SecurityNotifier extends AsyncNotifier<String?> {
+class CurrentUserNotifier extends AsyncNotifier<String?> {
   @override
   Future<String?> build() async {
     // pour que le state soit initialisée de manière synchrone
@@ -22,10 +20,7 @@ class SecurityNotifier extends AsyncNotifier<String?> {
       Params.setValue('token', token);
       state = AsyncData(token);
     } catch (e) {
-      state = AsyncError(
-        "Something went wrong!\nPlease try again later.",
-        StackTrace.current,
-      );
+      state = AsyncError("Something went wrong!\nPlease try again later.", StackTrace.current);
     }
   }
 

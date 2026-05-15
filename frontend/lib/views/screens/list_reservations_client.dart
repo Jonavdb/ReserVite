@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import '../../providers/security_provider.dart';
+import '../../providers/current_user_provider.dart';
 
 class ListReservationsClient extends ConsumerWidget {
   const ListReservationsClient({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(securityProvider.notifier);
+    final notifier = ref.read(currentUserProvider.notifier);
     final userName = notifier.loggedUserName;
 
     final theme = Theme.of(context);
@@ -18,16 +18,12 @@ class ListReservationsClient extends ConsumerWidget {
         automaticallyImplyLeading: false,
         actions: [
           IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Rafraîchir les données',
-            onPressed: () {},
-          ),
+          IconButton(icon: const Icon(Icons.refresh), tooltip: 'Rafraîchir les données', onPressed: () {}),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Déconnexion ($userName)',
             onPressed: () {
-              ref.read(securityProvider.notifier).logout();
+              ref.read(currentUserProvider.notifier).logout();
               Navigator.pushReplacementNamed(context, '/login');
             },
           ),
@@ -42,15 +38,10 @@ class ListReservationsClient extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
               child: Tooltip(
-                message:
-                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                message: 'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
                 child: Text(
                   'mercredi 04/12/2024 16:00',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
-                  ),
+                  style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.normal),
                 ),
               ),
             ),
@@ -80,21 +71,13 @@ class ListReservationsClient extends ConsumerWidget {
                   ButtonSegment(
                     // point d'entrée : affichage des réservations confirmées
                     value: 'confirmed',
-                    icon: Icon(
-                      Icons.check_circle,
-                      size: 24,
-                      color: Colors.green,
-                    ),
+                    icon: Icon(Icons.check_circle, size: 24, color: Colors.green),
                     tooltip: 'Confirmées',
                   ),
                   ButtonSegment(
                     // point d'entrée : affichage des réservations complétées
                     value: 'completed',
-                    icon: Icon(
-                      Icons.event_available,
-                      size: 24,
-                      color: Colors.blue,
-                    ),
+                    icon: Icon(Icons.event_available, size: 24, color: Colors.blue),
                     tooltip: 'Terminées',
                   ),
                   ButtonSegment(
@@ -123,11 +106,7 @@ class ListReservationsClient extends ConsumerWidget {
                           children: [
                             Tooltip(
                               message: 'En attente',
-                              child: const Icon(
-                                Icons.pending,
-                                size: 32,
-                                color: Colors.orange,
-                              ),
+                              child: const Icon(Icons.pending, size: 32, color: Colors.orange),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -136,23 +115,14 @@ class ListReservationsClient extends ConsumerWidget {
                                 children: [
                                   const Text(
                                     'Bistrot du port',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 4),
                                   Row(
                                     children: [
                                       const Icon(Icons.location_on, size: 14),
                                       const SizedBox(width: 4),
-                                      Text(
-                                        'Anvers',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
+                                      Text('Anvers', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                                     ],
                                   ),
                                   const SizedBox(height: 4),
@@ -162,21 +132,12 @@ class ListReservationsClient extends ConsumerWidget {
                                       const SizedBox(width: 4),
                                       Text(
                                         'sam. 06/12/2024 à 19:00',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey[600],
-                                        ),
+                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                                       ),
                                       const SizedBox(width: 12),
                                       const Icon(Icons.people, size: 16),
                                       const SizedBox(width: 4),
-                                      Text(
-                                        '2 convives',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
+                                      Text('2 convives', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
                                     ],
                                   ),
                                 ],
@@ -198,11 +159,7 @@ class ListReservationsClient extends ConsumerWidget {
                           children: [
                             Tooltip(
                               message: 'En attente',
-                              child: const Icon(
-                                Icons.pending,
-                                size: 32,
-                                color: Colors.orange,
-                              ),
+                              child: const Icon(Icons.pending, size: 32, color: Colors.orange),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -211,23 +168,14 @@ class ListReservationsClient extends ConsumerWidget {
                                 children: [
                                   const Text(
                                     'La Trattoria',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 4),
                                   Row(
                                     children: [
                                       const Icon(Icons.location_on, size: 14),
                                       const SizedBox(width: 4),
-                                      Text(
-                                        'Bruxelles',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
+                                      Text('Bruxelles', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                                     ],
                                   ),
                                   const SizedBox(height: 4),
@@ -237,21 +185,12 @@ class ListReservationsClient extends ConsumerWidget {
                                       const SizedBox(width: 4),
                                       Text(
                                         'ven. 05/12/2024 à 20:00',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey[600],
-                                        ),
+                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                                       ),
                                       const SizedBox(width: 12),
                                       const Icon(Icons.people, size: 16),
                                       const SizedBox(width: 4),
-                                      Text(
-                                        '4 convives',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
+                                      Text('4 convives', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
                                     ],
                                   ),
                                 ],
@@ -273,11 +212,7 @@ class ListReservationsClient extends ConsumerWidget {
                           children: [
                             Tooltip(
                               message: 'Confirmée',
-                              child: const Icon(
-                                Icons.check_circle,
-                                size: 32,
-                                color: Colors.green,
-                              ),
+                              child: const Icon(Icons.check_circle, size: 32, color: Colors.green),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -286,23 +221,14 @@ class ListReservationsClient extends ConsumerWidget {
                                 children: [
                                   const Text(
                                     'La Table du Chef',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 4),
                                   Row(
                                     children: [
                                       const Icon(Icons.location_on, size: 14),
                                       const SizedBox(width: 4),
-                                      Text(
-                                        'Liège',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
+                                      Text('Liège', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                                     ],
                                   ),
                                   const SizedBox(height: 4),
@@ -312,21 +238,12 @@ class ListReservationsClient extends ConsumerWidget {
                                       const SizedBox(width: 4),
                                       Text(
                                         'dim. 01/12/2024 à 13:00',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey[600],
-                                        ),
+                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                                       ),
                                       const SizedBox(width: 12),
                                       const Icon(Icons.people, size: 16),
                                       const SizedBox(width: 4),
-                                      Text(
-                                        '4 convives',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
+                                      Text('4 convives', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
                                     ],
                                   ),
                                 ],
@@ -348,11 +265,7 @@ class ListReservationsClient extends ConsumerWidget {
                           children: [
                             Tooltip(
                               message: 'Terminée',
-                              child: const Icon(
-                                Icons.event_available,
-                                size: 32,
-                                color: Colors.blue,
-                              ),
+                              child: const Icon(Icons.event_available, size: 32, color: Colors.blue),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -361,23 +274,14 @@ class ListReservationsClient extends ConsumerWidget {
                                 children: [
                                   const Text(
                                     'Sushi House',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 4),
                                   Row(
                                     children: [
                                       const Icon(Icons.location_on, size: 14),
                                       const SizedBox(width: 4),
-                                      Text(
-                                        'Bruxelles',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
+                                      Text('Bruxelles', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                                     ],
                                   ),
                                   const SizedBox(height: 4),
@@ -387,21 +291,12 @@ class ListReservationsClient extends ConsumerWidget {
                                       const SizedBox(width: 4),
                                       Text(
                                         'mar. 26/11/2024 à 19:30',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey[600],
-                                        ),
+                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                                       ),
                                       const SizedBox(width: 12),
                                       const Icon(Icons.people, size: 16),
                                       const SizedBox(width: 4),
-                                      Text(
-                                        '2 convives',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
+                                      Text('2 convives', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
                                     ],
                                   ),
                                 ],
