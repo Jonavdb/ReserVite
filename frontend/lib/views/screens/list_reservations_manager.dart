@@ -1,28 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:intl/date_symbol_data_local.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_f03/providers/reservations_provider.dart';
 
-void main() async {
-  await initializeDateFormatting('fr_FR', null);
-  runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      home: const RestaurantManagementReservationsMockupScreen(),
-    ),
-  );
+class ListReservationsManager extends ConsumerStatefulWidget {
+  final int restaurantId;
+  final String restaurantName;
+
+  const ListReservationsManager({
+    super.key,
+    required this.restaurantId,
+    required this.restaurantName
+  });
+
+  @override
+  ConsumerState<ListReservationsManager> createState() =>
+      _ListReservationsManagerScreenState();
 }
 
-class RestaurantManagementReservationsMockupScreen extends StatelessWidget {
-  const RestaurantManagementReservationsMockupScreen({super.key});
+class _ListReservationsManagerScreenState
+    extends ConsumerState<ListReservationsManager> {
+    String _selectedFilter = 'all';
+
+  @override
+  void initState() {
+    super.initState();
+    // charger les réservations au démarrage
+    // ref n'est pas encore disponible dans InitState donc on utilise Future.microTask
+    Future.microtask(() => ref
+        .read(reservationProvider.notifier)
+        .getReservations(widget.restaurantId));
+  }
+
+    Icon _statusIcon(String status) {
+      switch (status) {
+        case 'pending':
+          return const Icon(Icons.pending, size: 32, color: Colors.orange);
+        case 'confirmed':
+          return const Icon(Icons.check_circle, size: 32, color: Colors.green);
+        case 'completed':
+          return const Icon(Icons.event_available, size: 32, color: Colors.blue);
+        case 'cancelled':
+          return const Icon(Icons.cancel, size: 32, color: Colors.red);
+        default:
+          return const Icon(Icons.help, size: 32);
+      }
+    }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
+    final reservationsState = ref.watch(reservationProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -30,13 +59,13 @@ class RestaurantManagementReservationsMockupScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () {},
         ),
-        title: const Text('Le Gourmet'),
+        title: Text(widget.restaurantName),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Rafraîchir les données',
-            onPressed: () {},
+            onPressed: () => ref.read(reservationProvider.notifier).getReservations(widget.restaurantId),
           ),
         ],
         elevation: 2,
@@ -99,16 +128,32 @@ class RestaurantManagementReservationsMockupScreen extends StatelessWidget {
                     tooltip: 'Annulées',
                   ),
                 ],
-                selected: const {'all'},
-                onSelectionChanged: (_) {},
+                selected: {_selectedFilter},
+                onSelectionChanged: (value) {
+                  setState(() {
+                    _selectedFilter = value.first;
+                  });
+                },
               ),
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(16.0),
-                children: [
-                  Card(
+              child: reservationsState.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, _ ) => Center(child: Text('Erreur: $error')),
+                data: (reservations) {
+                  final filteredReservations = _selectedFilter == 'all'
+                      ? reservations
+                      : reservations.where((r) => r.status == _selectedFilter).toList();
+                  if (filteredReservations.isEmpty) {
+                    return const Center(child: Text('Aucune réservation trouvée.'));
+                  }
+                  return ListView.builder(
+                  padding: const EdgeInsets.all(16.0),
+                  itemCount: filteredReservations.length,
+                  itemBuilder: (context, index) {
+                    final reservation = filteredReservations[index];
+                    return Card(
                     margin: const EdgeInsets.only(bottom: 16),
                     child: InkWell(
                       onTap: () {},
@@ -116,18 +161,14 @@ class RestaurantManagementReservationsMockupScreen extends StatelessWidget {
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
                           children: [
-                            const SizedBox(
-                              width: 32,
-                              height: 32,
-                              child: Icon(Icons.pending, size: 32, color: Colors.orange),
-                            ),
+                            _statusIcon(reservation.status),
                             const SizedBox(width: 16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
-                                    'Bruno Lacroix',
+                                  Text(
+                                    reservation.clientName,
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
@@ -139,7 +180,7 @@ class RestaurantManagementReservationsMockupScreen extends StatelessWidget {
                                       const Icon(Icons.restaurant, size: 16),
                                       const SizedBox(width: 4),
                                       Text(
-                                        'Le Gourmet',
+                                        widget.restaurantName,
                                         style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                                       ),
                                     ],
@@ -150,14 +191,14 @@ class RestaurantManagementReservationsMockupScreen extends StatelessWidget {
                                       const Icon(Icons.access_time, size: 16),
                                       const SizedBox(width: 4),
                                       Text(
-                                        'dim. 24/11/2024 12:30',
+                                        DateFormat('EEE dd/MM/yyyy HH:mm', 'fr_FR').format(reservation.datetime),
                                         style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                                       ),
                                       const SizedBox(width: 12),
                                       const Icon(Icons.people, size: 16),
                                       const SizedBox(width: 4),
                                       Text(
-                                        '2 convives',
+                                        '${reservation.number_of_guests} convive${reservation.number_of_guests > 1 ? 's' : ''}',
                                         style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                                       ),
                                     ],
@@ -170,76 +211,14 @@ class RestaurantManagementReservationsMockupScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ),
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: InkWell(
-                      onTap: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            const SizedBox(
-                              width: 32,
-                              height: 32,
-                              child: Icon(Icons.check_circle, size: 32, color: Colors.green),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Marc Michel',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.restaurant, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'Le Gourmet',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.access_time, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'mer. 04/12/2024 12:30',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      const Icon(Icons.people, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '2 convives',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(Icons.chevron_right),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                  );
+                  },
+                );
+                },
               ),
             ),
           ],
-        ),
-      ),
+        ),      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: 0,

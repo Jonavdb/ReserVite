@@ -10,13 +10,14 @@ class Reservation {
   final int number_of_guests;
   final String status;
   final String? special_requests;
+  final String clientName;
 
   Reservation({
-    required this.id, required this.client, required this.datetime, required this.number_of_guests, required this.restaurant, required this.status, this.special_requests
+    required this.id, required this.client, required this.datetime, required this.number_of_guests, required this.restaurant, required this.status, required this.clientName, this.special_requests
   });
 
   factory Reservation.fromJson(Map<String, dynamic> json){
-      return Reservation(id: json['id'], client: json['client'], restaurant: json['restaurant'], datetime: DateTime.parse(json['datetime']), number_of_guests: json['number_of_guests'], status: json['status'], special_requests: json['special_requests']);
+      return Reservation(id: json['id'], client: json['client'], restaurant: json['restaurant'], datetime: DateTime.parse(json['datetime']), number_of_guests: json['number_of_guests'], status: json['status'], special_requests: json['special_requests'], clientName: json['client_name']);
   }
 
   static Future<List<Reservation>> getReservations(int restaurantId) async {

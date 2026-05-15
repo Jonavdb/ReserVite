@@ -138,7 +138,13 @@ class MyRestaurantsScreen extends ConsumerWidget {
                   ],
                 ),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () {},
+                onTap: () {
+                  Navigator.pushNamed(context, '/list_reservations_manager', arguments: {
+                    'restaurantId': 1,
+                    'restaurantName': 'Le Gourmet',
+                  },
+                  );
+                },
               ),
             ),
             Card(

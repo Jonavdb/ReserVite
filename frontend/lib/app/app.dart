@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:prbd_2526_f03/views/screens/list_reservations_client.dart';
+import 'package:prbd_2526_f03/views/screens/list_reservations_manager.dart';
 import 'package:prbd_2526_f03/views/screens/my_restaurants.dart';
 import '../views/screens/login.dart';
 
@@ -21,6 +22,18 @@ class App extends ConsumerWidget {
         '/login': (context) => LoginScreen(),
         '/my_restaurants': (context) => MyRestaurantsScreen(),
         '/list_reservation_client': (context) => const ListReservationsClient(),
+      },
+      onGenerateRoute: (settings){
+        if (settings.name == '/list_reservations_manager') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+              builder: (context) => ListReservationsManager(
+                restaurantId: args['restaurantId'],
+                restaurantName: args['restaurantName'],
+              ),
+          );
+        }
+        return null;
       },
     );
   }
