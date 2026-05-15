@@ -11,15 +11,9 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _emailController = ValidatingTextEditingController(
-    validator: User.validateEmail,
-    initialValue: '',
-  );
+  final _emailController = ValidatingTextEditingController(validator: User.validateEmail, initialValue: '');
 
-  final _passwordController = ValidatingTextEditingController(
-    validator: User.validatePassword,
-    initialValue: '',
-  );
+  final _passwordController = ValidatingTextEditingController(validator: User.validatePassword, initialValue: '');
 
   @override
   Widget build(BuildContext context) {
@@ -32,13 +26,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       appBar: AppBar(
         title: const Text('Connexion'),
         automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Rafraîchir les données',
-            onPressed: () {},
-          ),
-        ],
+        actions: [IconButton(icon: const Icon(Icons.refresh), tooltip: 'Rafraîchir les données', onPressed: () {})],
         elevation: 2,
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
@@ -49,18 +37,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
               child: Tooltip(
-                message:
-                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                message: 'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
                 child: Text(
-                  DateFormat(
-                    'EEEE dd/MM/yyyy HH:mm',
-                    'fr_FR',
-                  ).format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
-                  ),
+                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR').format(simulatedTime),
+                  style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.normal),
                 ),
               ),
             ),
@@ -73,31 +53,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Form(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const SizedBox(height: 32),
-                      const Icon(
-                        Icons.restaurant,
-                        size: 80,
-                        color: Colors.blue,
-                      ),
+                      const Icon(Icons.restaurant, size: 80, color: Colors.blue),
                       const SizedBox(height: 12),
                       const Text(
                         'Connectez-vous',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         controller: _emailController,
                         onFieldSubmitted: (value) => _submitForm(context),
                         decoration: const InputDecoration(
@@ -109,6 +80,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 10),
                       TextFormField(
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         controller: _passwordController,
                         onFieldSubmitted: (value) => _submitForm(context),
                         decoration: const InputDecoration(
@@ -121,16 +93,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 12),
                       ElevatedButton(
                         onPressed: () => _submitForm(context),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
+                        style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
                         child: const Text('Se connecter'),
                       ),
                       const SizedBox(height: 6),
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text('Pas encore de compte ? S\'inscrire'),
-                      ),
+                      TextButton(onPressed: () {}, child: const Text('Pas encore de compte ? S\'inscrire')),
                     ],
                   ),
                 ),
@@ -145,11 +112,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 8),
                   const Text(
                     'Raccourcis de débogage',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 4),
@@ -168,9 +131,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           onPressed: () => _login(context, 'brlacroix@epfc.eu'),
                           icon: const Icon(Icons.person),
                           label: const Text('Client (Bruno)'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                          ),
+                          style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 8)),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -179,9 +140,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           onPressed: () => _login(context, 'mamichel@epfc.eu'),
                           icon: const Icon(Icons.person),
                           label: const Text('Client (Marc)'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                          ),
+                          style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 8)),
                         ),
                       ),
                     ],
@@ -196,9 +155,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           onPressed: () => _login(context, 'bepenelle@epfc.eu'),
                           icon: const Icon(Icons.manage_accounts),
                           label: const Text('Manager (Benoît)'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                          ),
+                          style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 8)),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -207,9 +164,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           onPressed: () => _login(context, 'gedielman@epfc.eu'),
                           icon: const Icon(Icons.manage_accounts),
                           label: const Text('Manager (Geoffrey)'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                          ),
+                          style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 8)),
                         ),
                       ),
                     ],
@@ -256,20 +211,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return _isFormValid;
   }
 
-  bool get _isFormValid =>
-      _emailController.isValid == true && _passwordController.isValid == true;
+  bool get _isFormValid => _emailController.isValid == true && _passwordController.isValid == true;
 
   void _login(BuildContext context, String mail, {String? password}) async {
     // si password est null, on utilise 'Password1' par défaut
     final passwordToUse = password ?? 'Password1,';
 
     await ref.read(securityProvider.notifier).login(mail, passwordToUse);
+    final securityState = ref.read(securityProvider);
 
     if (!context.mounted) return;
-
-    final securityState = ref.read(
-      securityProvider,
-    ); // récupère l'état APRÈS l'appel
 
     securityState.when(
       data: (token) {
@@ -284,12 +235,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         }
       },
       error: (error, _) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Email ou mot de passe incorrect.'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Email ou mot de passe incorrect.'), backgroundColor: Colors.red));
       },
       loading: () {},
     );
