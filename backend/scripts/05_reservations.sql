@@ -8,7 +8,22 @@ create type reservation_info as (
     status status_type,
     special_requests text,
     client_name varchar
-    );
+);
+
+drop type if exists reservation_details cascade;
+create type reservation_details as (
+    id int,
+    client int,
+    restaurant int,
+    restaurant_name varchar,
+    datetime timestamp,
+    number_of_guests int,
+    status status_type,
+    special_requests text,
+    client_name varchar,
+    client_email varchar,
+    client_phone varchar
+);
 
 
 create or replace function get_reservations_manager(restaurant_id int)
@@ -77,7 +92,7 @@ grant execute on function get_user_reservations(status_type) to authenticated;
 
 
 create or replace function get_reservation_manager(reservation_id int)
-    returns setof reservation_info as
+    returns setof reservation_details as
 $$
 begin
     perform auth.check_logged();
@@ -91,12 +106,17 @@ end if;
 return query select     reservations.id,
                         reservations.client,
                         reservations.restaurant,
+                        restaurants.name,
                         reservations.datetime,
                         reservations.number_of_guests,
                         reservations.status,
                         reservations.special_requests,
-                        users.full_name
-                 from reservations join users on reservations.client = users.id
+                        users.full_name,
+                        users.email,
+                        users.phone
+                 from reservations
+                     join users on reservations.client = users.id
+                     join restaurants on reservations.restaurant = restaurants.id
                  where reservations.id = reservation_id;
 end;
 $$ language plpgsql security definer;

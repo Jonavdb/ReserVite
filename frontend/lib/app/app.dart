@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:prbd_2526_f03/views/screens/list_reservations_client.dart';
 import 'package:prbd_2526_f03/views/screens/list_reservations_manager.dart';
 import 'package:prbd_2526_f03/views/screens/my_restaurants.dart';
+import 'package:prbd_2526_f03/views/screens/reservation_details_manager.dart';
 import '../views/screens/login.dart';
 
 class App extends ConsumerWidget {
@@ -31,6 +32,14 @@ class App extends ConsumerWidget {
                 restaurantId: args['restaurantId'],
                 restaurantName: args['restaurantName'],
               ),
+          );
+        }
+        if (settings.name == '/reservation_details_manager') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+              builder: (context) => ReservationDetailsManager(
+                  reservationId: args['reservationId']
+              )
           );
         }
         return null;
