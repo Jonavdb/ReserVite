@@ -29,4 +29,15 @@ class Reservation {
       throw Exception('Failed to get list of reservation');
     }
   }
+
+  static Future<Reservation> getReservation(int reservationId) async {
+    final response = await ApiClient.post('get_reservation', body: jsonEncode({'reservation_id' : reservationId}));
+    if (response.statusCode == 200) {
+      final List<dynamic> body = jsonDecode(response.body);
+      return Reservation.fromJson(body.first);
+    } else {
+      throw Exception('Failed to get reservation');
+    }
+  }
+
 }

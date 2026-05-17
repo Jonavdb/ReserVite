@@ -11,7 +11,7 @@ create type reservation_info as (
     );
 
 
-create or replace function get_reservations(restaurant_id int)
+create or replace function get_reservations_manager(restaurant_id int)
     returns setof reservation_info as
 $$
 begin
@@ -37,7 +37,7 @@ begin
 end;
 $$ language plpgsql security definer;
 
-grant execute on function get_reservations to authenticated;
+grant execute on function get_reservations_manager(int) to authenticated;
 
 create or replace function get_user_reservations(
     status_filter status_type default null -- paramètre optionnel
@@ -74,3 +74,31 @@ end;
 $$;
 
 grant execute on function get_user_reservations(status_type) to authenticated;
+
+
+create or replace function get_reservation_manager(reservation_id int)
+    returns setof reservation_info as
+$$
+begin
+    perform auth.check_logged();
+    if (auth.role() != 'manager') then
+        raise exception 'Vous n''êtes pas autorisé à accéder à ces réservations';
+end if;
+
+    if not exists(select 1 from restaurant_managers join reservations on reservations.restaurant = restaurant_managers.restaurant where reservations.id = reservation_id and restaurant_managers.manager = auth.id()) then
+        raise exception 'Vous n''êtes pas manager de ce restaurant';
+end if;
+return query select     reservations.id,
+                        reservations.client,
+                        reservations.restaurant,
+                        reservations.datetime,
+                        reservations.number_of_guests,
+                        reservations.status,
+                        reservations.special_requests,
+                        users.full_name
+                 from reservations join users on reservations.client = users.id
+                 where reservations.id = reservation_id;
+end;
+$$ language plpgsql security definer;
+
+grant execute on function get_reservation_manager(int) to authenticated;
