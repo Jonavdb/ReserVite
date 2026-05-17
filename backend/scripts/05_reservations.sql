@@ -22,7 +22,9 @@ create type reservation_details as (
     special_requests text,
     client_name varchar,
     client_email varchar,
-    client_phone varchar
+    client_phone varchar,
+    table_numbers int[],
+    table_capacities int[]
 );
 
 
@@ -113,12 +115,21 @@ return query select     reservations.id,
                         reservations.special_requests,
                         users.full_name,
                         users.email,
-                        users.phone
+                        users.phone,
+                        array_agg(tables.table_number order by tables.table_number) filter (where tables.id is not null),
+                        array_agg(tables.capacity order by tables.table_number) filter (where tables.id is not null)
                  from reservations
                      join users on reservations.client = users.id
                      join restaurants on reservations.restaurant = restaurants.id
-                 where reservations.id = reservation_id;
+                     left join reservation_tables on reservation_tables.reservation = reservations.id
+                     left join tables on tables.id = reservation_tables."table"
+                 where reservations.id = reservation_id
+                 group by reservations.id, users.full_name, users.email, users.phone, restaurants.name;
 end;
 $$ language plpgsql security definer;
+
+--                      left join car pas forcément de résultat pour les réservations sans table associée
+--                      group by obligatoire pour les fonctions aggrégées
+--                      array_agg afin de retourner un tableau de numéros de tables et un tableau de capacité de tables
 
 grant execute on function get_reservation_manager(int) to authenticated;

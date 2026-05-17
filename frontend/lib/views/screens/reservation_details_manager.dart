@@ -37,6 +37,22 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
         return Colors.grey;
     }
   }
+  
+  String _statusInFrench(String status) {
+    switch (status) {
+      case 'pending':
+        return "En attente";
+      case 'confirmed':
+        return "Confirmée";
+      case 'completed':
+        return "Completée";
+      case 'cancelled':
+        return "Annulée";
+      default:
+        return "";
+    }
+  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +120,7 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
                             children: [
                               const Icon(Icons.person, size: 20),
                               const SizedBox(width: 8),
-                              Text('Nom:${reservation.clientName}'),
+                              Text('Nom: ${reservation.clientName}'),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -191,7 +207,7 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
                               const SizedBox(width: 8),
                               const Text('Statut: '),
                               Chip(
-                                label: Text(reservation.status, style: TextStyle(fontSize: 12, color: Colors.white)),
+                                label: Text(_statusInFrench(reservation.status), style: TextStyle(fontSize: 12, color: Colors.white)),
                                 backgroundColor: _colorStatus(reservation.status),
                                 padding: EdgeInsets.zero,
                               ),
@@ -205,7 +221,7 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
                           Text(
                             reservation.special_requests?.isNotEmpty == true
                                 ? reservation.special_requests!
-                                : 'Aucune request spéciale',
+                                : 'Aucune requêtes spéciales',
                             style: TextStyle(color: Colors.grey[700]),
                           ),
                         ],
@@ -218,31 +234,25 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Column(
+                      child : reservation.tableNumbers == null || reservation.tableNumbers!.isEmpty
+                          ? Text('Aucune table assignée')
+                       : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
+                        children: List.generate(reservation.tableNumbers!.length,
+                                (index) => Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
                             child: Row(
                               children: [
                                 const Icon(Icons.table_restaurant, size: 20),
                                 const SizedBox(width: 8),
-                                const Text('Table 2'),
+                                Text('Table ${reservation.tableNumbers![index]}'),
                                 const SizedBox(width: 16),
-                                Text('(4 places)', style: TextStyle(color: Colors.grey[600])),
+                                Text('${reservation.tableCapacities![index]} places', style: TextStyle(color: Colors.grey[600])
+                                ),
                               ],
                             ),
                           ),
-                          Row(
-                            children: [
-                              const Icon(Icons.table_restaurant, size: 20),
-                              const SizedBox(width: 8),
-                              const Text('Table 3'),
-                              const SizedBox(width: 16),
-                              Text('(6 places)', style: TextStyle(color: Colors.grey[600])),
-                            ],
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
