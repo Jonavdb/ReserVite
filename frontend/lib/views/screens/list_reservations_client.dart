@@ -10,6 +10,8 @@ class ListReservationsClient extends ConsumerWidget {
     final notifier = ref.read(currentUserProvider.notifier);
     final userName = notifier.loggedUserName;
 
+
+
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -88,7 +90,9 @@ class ListReservationsClient extends ConsumerWidget {
                   ),
                 ],
                 selected: const {'pending'},
-                onSelectionChanged: (_) {},
+                onSelectionChanged: (_) {
+                  // TODO : ajouter code pour afficher les réservations du client connecté
+                },
               ),
             ),
             const SizedBox(height: 8),
