@@ -156,7 +156,11 @@ class _ListReservationsManagerScreenState
                     return Card(
                     margin: const EdgeInsets.only(bottom: 16),
                     child: InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.pushNamed(context, '/reservation_details_manager', arguments: {
+                          'reservationId' : reservation.id
+                        });
+                      },
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Row(

@@ -21,6 +21,25 @@ Content-Type: application/json
   "status_filter": "pending"
 }
 
+### Test 1 JO : connexion d'un manager
+
+POST http://localhost:3000/rpc/login
+Content-Type: application/json
+
+{
+  "email": "bepenelle@epfc.eu",
+  "password": "Password1,"
+}
+
+### Test 1 JO : récupération de toutes les informations liées à une reservation
+POST http://localhost:3000/rpc/get_reservation_manager
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoibWFuYWdlciIsInN1YiI6ImJlcGVuZWxsZUBlcGZjLmV1IiwibmFtZSI6IkJlbm_DrnQiLCJ1c2VyX2lkIjoyLCJleHAiOjE3NzkxMjA1NDd9.svVzgch3J0KXlwLEBIMbdi9f1X1L2nmP9cTo3rguY0I
+Context-Type: application/json
+
+{
+  "reservation_id": 7
+}
+
 
 
 

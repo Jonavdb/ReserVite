@@ -8,10 +8,27 @@ create type reservation_info as (
     status status_type,
     special_requests text,
     client_name varchar
-    );
+);
+
+drop type if exists reservation_details cascade;
+create type reservation_details as (
+    id int,
+    client int,
+    restaurant int,
+    restaurant_name varchar,
+    datetime timestamp,
+    number_of_guests int,
+    status status_type,
+    special_requests text,
+    client_name varchar,
+    client_email varchar,
+    client_phone varchar,
+    table_numbers int[],
+    table_capacities int[]
+);
 
 
-create or replace function get_reservations(restaurant_id int)
+create or replace function get_reservations_manager(restaurant_id int)
     returns setof reservation_info as
 $$
 begin
@@ -37,7 +54,7 @@ begin
 end;
 $$ language plpgsql security definer;
 
-grant execute on function get_reservations to authenticated;
+grant execute on function get_reservations_manager(int) to authenticated;
 
 create or replace function get_user_reservations(
     status_filter status_type default null -- paramètre optionnel
@@ -74,3 +91,45 @@ end;
 $$;
 
 grant execute on function get_user_reservations(status_type) to authenticated;
+
+
+create or replace function get_reservation_manager(reservation_id int)
+    returns setof reservation_details as
+$$
+begin
+    perform auth.check_logged();
+    if (auth.role() != 'manager') then
+        raise exception 'Vous n''êtes pas autorisé à accéder à ces réservations';
+end if;
+
+    if not exists(select 1 from restaurant_managers join reservations on reservations.restaurant = restaurant_managers.restaurant where reservations.id = reservation_id and restaurant_managers.manager = auth.id()) then
+        raise exception 'Vous n''êtes pas manager de ce restaurant';
+end if;
+return query select     reservations.id,
+                        reservations.client,
+                        reservations.restaurant,
+                        restaurants.name,
+                        reservations.datetime,
+                        reservations.number_of_guests,
+                        reservations.status,
+                        reservations.special_requests,
+                        users.full_name,
+                        users.email,
+                        users.phone,
+                        array_agg(tables.table_number order by tables.table_number) filter (where tables.id is not null),
+                        array_agg(tables.capacity order by tables.table_number) filter (where tables.id is not null)
+                 from reservations
+                     join users on reservations.client = users.id
+                     join restaurants on reservations.restaurant = restaurants.id
+                     left join reservation_tables on reservation_tables.reservation = reservations.id
+                     left join tables on tables.id = reservation_tables."table"
+                 where reservations.id = reservation_id
+                 group by reservations.id, users.full_name, users.email, users.phone, restaurants.name;
+end;
+$$ language plpgsql security definer;
+
+--                      left join car pas forcément de résultat pour les réservations sans table associée
+--                      group by obligatoire pour les fonctions aggrégées
+--                      array_agg afin de retourner un tableau de numéros de tables et un tableau de capacité de tables
+
+grant execute on function get_reservation_manager(int) to authenticated;
