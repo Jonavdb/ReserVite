@@ -1,9 +1,54 @@
 import 'package:flutter/material.dart';
-import 'package:intl/date_symbol_data_local.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_f03/core/tools/validating_text_editing_controller.dart';
+import 'package:prbd_2526_f03/providers/current_user_provider.dart';
 
-class Signup extends StatelessWidget {
-  const Signup({super.key});
+import '../../models/user.dart';
+
+class Signup extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<Signup> createState() => _SignupState();
+}
+
+class _SignupState extends ConsumerState<Signup> {
+  late ValidatingTextEditingController _fullNameController;
+  late ValidatingTextEditingController _emailController;
+  late ValidatingTextEditingController _passwordController;
+  late ValidatingTextEditingController _confirmPasswordController;
+  late ValidatingTextEditingController _phoneController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _fullNameController = ValidatingTextEditingController(
+      validator: User.validateFullname,
+      asyncValidator: User.validateFullnameUnicity,
+    );
+    _fullNameController.onAfterValidated = () => setState(() {});
+
+    _emailController = ValidatingTextEditingController(
+      validator: User.validateEmail,
+      asyncValidator: User.validateEmailUnicity,
+    );
+    _emailController.onAfterValidated = () => setState(() {});
+
+    _passwordController = ValidatingTextEditingController(validator: User.validatePassword);
+    _passwordController.onAfterValidated = () {
+      setState(() {});
+      // on force le champ 'confirm' à s'évaluer dès qu'on touche au champ password
+      _confirmPasswordController.validate();
+    };
+
+    _confirmPasswordController = ValidatingTextEditingController(
+      validator: (value) => User.validateConfirmPassword(value, _passwordController.text),
+    );
+    _confirmPasswordController.onAfterValidated = () => setState(() {});
+
+    _phoneController = ValidatingTextEditingController(validator: (value) => User.validatePhone(value));
+    _phoneController.onAfterValidated = () => setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +57,12 @@ class Signup extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () {}),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/login');
+          },
+        ),
         title: const Text('Inscription'),
         automaticallyImplyLeading: false,
         actions: [IconButton(icon: const Icon(Icons.refresh), tooltip: 'Rafraîchir les données', onPressed: () {})],
@@ -52,58 +102,35 @@ class Signup extends StatelessWidget {
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
+
+                _fullNameFormField(context, (_) => _submitForm(context)),
+                const SizedBox(height: 16),
+
+                _emailFormField(context, (_) => _submitForm(context)),
+                const SizedBox(height: 16),
+
+                _passwordFormField(context, (_) => _submitForm(context)),
+                const SizedBox(height: 16),
+
+                _confirmPasswordFormField(context, (_) => _submitForm(context)),
+                const SizedBox(height: 16),
+
+                _phoneFormField(context, (_) => _submitForm(context)),
                 const SizedBox(height: 32),
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Nom complet',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.email),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Mot de passe',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock),
-                  ),
-                  obscureText: true,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Confirmer le mot de passe',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock_outline),
-                  ),
-                  obscureText: true,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Téléphone (optionnel)',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.phone),
-                  ),
-                  keyboardType: TextInputType.phone,
-                ),
+
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async => await _submitForm(context),
                   style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
                   child: const Text('S\'inscrire'),
                 ),
                 const SizedBox(height: 16),
-                TextButton(onPressed: () {}, child: const Text('Déjà un compte ? Se connecter')),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(context, '/login');
+                  },
+                  child: const Text('Déjà un compte ? Se connecter'),
+                ),
               ],
             ),
           ),
@@ -111,4 +138,123 @@ class Signup extends StatelessWidget {
       ),
     );
   }
+
+  // Widgets découpés
+  Widget _fullNameFormField(BuildContext context, Future<void> Function(String) onFieldSubmitted) {
+    return TextFormField(
+      controller: _fullNameController,
+      onFieldSubmitted: onFieldSubmitted,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      decoration: InputDecoration(
+        labelText: 'Nom complet',
+        errorText: _fullNameController.errorText,
+        border: OutlineInputBorder(),
+        prefixIcon: Icon(Icons.person),
+      ),
+    );
+  }
+
+  Widget _emailFormField(BuildContext context, Future<void> Function(String) onFieldSubmitted) {
+    return TextFormField(
+      controller: _emailController,
+      onFieldSubmitted: onFieldSubmitted,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      decoration: InputDecoration(
+        labelText: 'Email',
+        errorText: _emailController.errorText,
+        border: OutlineInputBorder(),
+        prefixIcon: Icon(Icons.email),
+      ),
+      keyboardType: TextInputType.emailAddress,
+    );
+  }
+
+  Widget _passwordFormField(BuildContext context, Future<void> Function(String) onFieldSubmitted) {
+    return TextFormField(
+      controller: _passwordController,
+      onFieldSubmitted: onFieldSubmitted,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      keyboardType: TextInputType.visiblePassword,
+      obscureText: true,
+      obscuringCharacter: '•',
+      decoration: InputDecoration(
+        labelText: 'Mot de passe',
+        errorText: _passwordController.errorText,
+        border: OutlineInputBorder(),
+        prefixIcon: Icon(Icons.lock),
+      ),
+    );
+  }
+
+  Widget _confirmPasswordFormField(BuildContext context, Future<void> Function(String) onFieldSubmitted) {
+    return TextFormField(
+      controller: _confirmPasswordController,
+      onFieldSubmitted: onFieldSubmitted,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      keyboardType: TextInputType.visiblePassword,
+      obscureText: true,
+      obscuringCharacter: '•',
+      decoration: InputDecoration(
+        labelText: 'Confirmer le mot de passe',
+        errorText: _confirmPasswordController.errorText,
+        border: OutlineInputBorder(),
+        prefixIcon: Icon(Icons.lock_outline),
+      ),
+    );
+  }
+
+  Widget _phoneFormField(BuildContext context, Future<void> Function(String) onFieldSubmitted) {
+    return TextFormField(
+      controller: _phoneController,
+      onFieldSubmitted: onFieldSubmitted,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      decoration: InputDecoration(
+        labelText: 'Téléphone (optionnel)',
+        errorText: _phoneController.errorText,
+        border: OutlineInputBorder(),
+        prefixIcon: Icon(Icons.phone),
+      ),
+      keyboardType: TextInputType.phone,
+    );
+  }
+
+  // Méthodes
+  @override
+  void dispose() {
+    _fullNameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submitForm(BuildContext context) async {
+    if (!await _validateForm()) return;
+    await ref
+        .read(currentUserProvider.notifier)
+        .signup(
+          fullname: _fullNameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+        );
+    if (context.mounted) {
+      Navigator.pushNamedAndRemoveUntil(context, '/list_reservation_client', (route) => false);
+    }
+  }
+
+  Future<bool> _validateForm() async {
+    await _fullNameController.validateAndWait();
+    await _emailController.validateAndWait();
+    await _passwordController.validateAndWait();
+    await _confirmPasswordController.validateAndWait();
+    return _isFormValid;
+  }
+
+  bool get _isFormValid =>
+      _fullNameController.isValid == true &&
+      _emailController.isValid == true &&
+      _passwordController.isValid == true &&
+      _confirmPasswordController.isValid == true;
 }

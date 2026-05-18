@@ -19,7 +19,7 @@ class App extends ConsumerWidget {
         '/login': (context) => Login(),
         '/signup': (context) => Signup(),
         '/my_restaurants': (context) => MyRestaurants(),
-        '/list_reservation_client': (context) => const ListReservationsClient(),
+        '/list_reservation_client': (context) => ListReservationsClient(),
       },
     );
   }
