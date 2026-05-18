@@ -39,4 +39,11 @@ class Reservation {
     }
   }
 
+  Future<void> cancelReservation(int reservationId) async {
+    final response = await ApiClient.post('cancel_reservation_manager', body: jsonEncode({'reservation_id' : reservationId}));
+    if (response.statusCode != 204) {
+        throw Exception('failed to cancel the reservation');
+    }
+  }
+
 }

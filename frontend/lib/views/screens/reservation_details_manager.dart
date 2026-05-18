@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_f03/models/reservation_detail.dart';
 import 'package:prbd_2526_f03/providers/reservation_detail_provider.dart';
 
 class ReservationDetailsManager extends ConsumerStatefulWidget {
@@ -272,7 +273,23 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
                     ),
                   if (reservation.status != 'cancelled' && reservation.status != 'completed') ...[
                     const SizedBox(height: 8),
-                    OutlinedButton.icon(onPressed: () {}, icon: const Icon(Icons.cancel), label: const Text('Annuler')),
+                    OutlinedButton.icon(onPressed: () {
+                      showDialog(context: context, builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('test Modale'),
+                          content: const Text ('supprimer ?'),
+                          actions : [
+                            TextButton(onPressed: () => Navigator.pop(context),
+                            child: const Text('Annuler'),
+                            ),
+                            TextButton(onPressed: () => _delete(context, reservation) ,
+                            child: const Text('Confirmer')
+                            ),
+                          ],
+                        );
+                      },
+                      );
+                    }, icon: const Icon(Icons.cancel), label: const Text('Annuler')),
                   ],
                 ],
               ),
@@ -281,5 +298,13 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
         ),
       ),
     );
+  }
+  _delete(BuildContext context, ReservationDetail res) async {
+    final notifier = ref.read(reservationDetailProvider.notifier);
+    notifier.cancelledReservation(res);
+    if (context.mounted) {
+      ref.read(reservationDetailProvider.notifier).getReservation(widget.reservationId);
+      Navigator.of(context).pop(null);
+    }
   }
 }

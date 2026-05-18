@@ -34,5 +34,11 @@ class ReservationDetail {
     } else {
       throw Exception('Status: ${response.statusCode} - ${response.body}');    }
   }
+  Future<void> cancelReservation(int reservationId) async {
+    final response = await ApiClient.post('cancel_reservation_manager', body: jsonEncode({'reservation_id' : reservationId}));
+    if (response.statusCode != 204) {
+      throw Exception('Status: ${response.statusCode} - ${response.body}');
+    }
+  }
 
 }

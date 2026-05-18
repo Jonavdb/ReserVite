@@ -28,4 +28,18 @@ class ReservationDetailNotifier extends AbstractAsyncNotifier<ReservationDetail?
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
   }
+
+
+  Future<void> cancelledReservation(ReservationDetail res) async {
+    state = const AsyncValue.loading();
+    try {
+      await res.cancelReservation(res.id);
+      state = AsyncData(res);
+    } catch (e) {
+      state = AsyncValue.error(
+        e.toString(),
+        StackTrace.current,
+      );
+    }
+  }
 }
