@@ -5,12 +5,12 @@ import 'package:prbd_2526_f03/core/tools/validating_text_editing_controller.dart
 import '../../models/security/user.dart';
 import '../../providers/security/current_user_provider.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
+class Login extends ConsumerStatefulWidget {
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<Login> createState() => _LoginState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _LoginState extends ConsumerState<Login> {
   final _emailController = ValidatingTextEditingController(validator: User.validateEmail, initialValue: '');
   final _passwordController = ValidatingTextEditingController(validator: User.validatePassword, initialValue: '');
 
@@ -109,7 +109,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: const Text('Se connecter'),
                       ),
                       const SizedBox(height: 6),
-                      TextButton(onPressed: () {}, child: const Text('Pas encore de compte ? S\'inscrire')),
+                      TextButton(
+                        onPressed: () => {Navigator.pushReplacementNamed(context, '/signup')},
+                        child: const Text('Pas encore de compte ? S\'inscrire'),
+                      ),
                     ],
                   ),
                 ),
