@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:prbd_2526_f03/models/reservation_client.dart';
+import 'package:prbd_2526_f03/models/client/reservation_client.dart';
 
-import '../core/services/api_client.dart';
+import '../../core/services/api_client.dart';
 
 class ClientState {
   final String currentFilter;

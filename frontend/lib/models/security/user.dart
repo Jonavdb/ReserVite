@@ -1,4 +1,4 @@
-import 'package:prbd_2526_f03/models/security.dart';
+import 'package:prbd_2526_f03/models/security/security.dart';
 
 class User {
   static String? validateEmail(String? email) {

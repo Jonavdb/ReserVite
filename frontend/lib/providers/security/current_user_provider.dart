@@ -1,7 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import '../app/params.dart';
-import '../models/security.dart';
+import '../../app/params.dart';
+import '../../models/security/security.dart';
 
 final currentUserProvider = AsyncNotifierProvider<CurrentUserNotifier, String?>(() => CurrentUserNotifier());
 
