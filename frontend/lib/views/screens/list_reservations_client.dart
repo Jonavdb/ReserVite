@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:prbd_2526_f03/providers/client_state_provider.dart';
-import '../../providers/current_user_provider.dart';
+import 'package:prbd_2526_f03/providers/client/client_state_provider.dart';
+import '../../providers/security/current_user_provider.dart';
 
 class ListReservationsClient extends ConsumerWidget {
   const ListReservationsClient({super.key});

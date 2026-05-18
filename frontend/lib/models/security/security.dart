@@ -1,5 +1,5 @@
 import 'dart:convert';
-import '../core/services/api_client.dart';
+import '../../core/services/api_client.dart';
 
 class Security {
   static Future<String?> login(String email, String password) async {

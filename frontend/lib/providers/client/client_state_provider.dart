@@ -1,7 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:prbd_2526_f03/providers/current_user_provider.dart';
-import '../models/client_state.dart';
+import 'package:prbd_2526_f03/providers/security/current_user_provider.dart';
+import '../../models/client/client_state.dart';
 
 final clientStateProvider = AsyncNotifierProvider<ClientStateNotifier, ClientState>(
       () => ClientStateNotifier(),

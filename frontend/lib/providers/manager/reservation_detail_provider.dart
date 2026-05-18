@@ -1,8 +1,8 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:prbd_2526_f03/models/reservation_detail.dart';
+import 'package:prbd_2526_f03/models/manager/reservation_detail.dart';
 
-import '../core/tools/abstract_async_notifier.dart';
-import '../models/reservation.dart';
+import '../../core/tools/abstract_async_notifier.dart';
+import '../../models/manager/reservation.dart';
 
 final reservationDetailProvider = AsyncNotifierProvider<ReservationDetailNotifier, ReservationDetail?>(() => ReservationDetailNotifier());
 
