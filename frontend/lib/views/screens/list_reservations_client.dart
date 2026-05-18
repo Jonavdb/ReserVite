@@ -112,27 +112,72 @@ class ListReservationsClient extends ConsumerWidget {
                   final list = clientState.reservations;
 
                   if (list.isEmpty) {
-                    return const Center(child: Text('Aucune réservation trouvée.'));
+                    // Détermine le texte en fonction du filtre actif pour correspondre parfaitement à l'écran
+                    String emptyMessage = 'Aucune réservation trouvée.';
+                    switch (clientState.currentFilter) {
+                      case 'all':
+                        emptyMessage = 'Aucune réservation';
+                        break;
+                      case 'pending':
+                        emptyMessage = 'Aucune réservation en attente';
+                        break;
+                      case 'confirmed':
+                        emptyMessage = 'Aucune réservation confirmée';
+                        break;
+                      case 'completed':
+                        emptyMessage = 'Aucune réservation terminée';
+                        break;
+                      case 'cancelled':
+                        emptyMessage = 'Aucune réservation annulée';
+                        break;
+                    }
+
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Icône centrale stylisée gris clair
+                          Icon(
+                            Icons.calendar_today_outlined,
+                            size: 90,
+                            color: Colors.grey[350],
+                          ),
+                          const SizedBox(height: 24),
+                          // Titre principal de l'état vide
+                          Text(
+                            emptyMessage,
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          // Sous-titre d'invitation à l'action
+                          Text(
+                            'Créez votre première réservation !',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[400],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
                   }
 
                   return ListView.builder(
                     itemCount: list.length,
                     itemBuilder: (context, index) {
-                      //TODO :
-                      /*
-                        name restaurant
-                        city (from restaurants)
-                        datetime
-                        number of guests
-                     */
-
                       final reservation = list[index];
                       // 1. DYNAMIC STATUS MAPPER (Switch Case)
                       IconData? statusIcon;
                       Color? statusColor;
                       String? statusTooltip;
 
-                      switch (reservation['status']) {
+                      switch (reservation.status) {
                         case 'pending':
                           statusIcon = Icons.pending;
                           statusColor = Colors.orange;
@@ -158,7 +203,7 @@ class ListReservationsClient extends ConsumerWidget {
                       }
 
                       // 2. DATETIME FORMATTING
-                      final DateTime parsedDate = DateTime.parse(reservation['datetime']);
+                      final DateTime parsedDate = reservation.datetime;
                       final String formattedDate = "${parsedDate.day.toString().padLeft(2, '0')}/"
                           "${parsedDate.month.toString().padLeft(2, '0')}/"
                           "${parsedDate.year} à "
@@ -166,12 +211,12 @@ class ListReservationsClient extends ConsumerWidget {
                           "${parsedDate.minute.toString().padLeft(2, '0')}";
 
                       // 3. PLURAL GUESTS HANDLING
-                      final int guestCount = reservation['number_of_guests'] ?? 0;
+                      final int guestCount = reservation.numberOfGuests ?? 0;
                       final String guestsText = "$guestCount convive${guestCount > 1 ? 's' : ''}";
 
                       // 4. RESTAURANT DATA FALLBACKS
-                      final String restaurantName = reservation['restaurant_name'] ?? "Restaurant N° ${reservation['restaurant']}";
-                      final String restaurantCity = reservation['restaurant_city'] ?? "Ville inconnue";
+                      final String restaurantName = reservation.restaurantName;
+                      final String restaurantCity = reservation.restaurantCity;
 
                       return Card(
                         margin: const EdgeInsets.only(bottom: 16),
