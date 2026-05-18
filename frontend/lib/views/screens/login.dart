@@ -188,7 +188,7 @@ class _LoginState extends ConsumerState<Login> {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () => _showResetDatabaseModal(context, ref),
                       icon: const Icon(Icons.refresh),
                       label: const Text('Réinitialiser la base de données'),
                       style: OutlinedButton.styleFrom(
@@ -256,5 +256,49 @@ class _LoginState extends ConsumerState<Login> {
       },
       loading: () {},
     );
+  }
+
+  void _showResetDatabaseModal(BuildContext context, WidgetRef ref) async {
+    // on affiche la modal et on attend le résultat true ou false
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Réinitialiser la base de données"),
+          content: const Text(
+            'Êtes-vous sûr de vouloir réinitialiser la base de données ? Cette action supprimera toutes les données et les restaurera aux valeurs par défaut.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false), // annuler renvoie false
+              child: const Text('Annuler'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Réinitialiser', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return; // différent de true car l'utilisateur peut cliquer à coté
+
+    try {
+      await ref.read(currentUserProvider.notifier).resetDatabase();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Base de données réinitialisée avec succès.'), backgroundColor: Colors.green),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erreur lors de la réinitialisation de la DB.'), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
 }

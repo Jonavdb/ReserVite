@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../../app/params.dart';
@@ -38,7 +36,19 @@ class CurrentUserNotifier extends AsyncNotifier<String?> {
       Params.setValue('token', token);
       state = AsyncData(token);
     } catch (e) {
-      state = AsyncError("Something went wrong!\nPlease try again later.", StackTrace.current);
+      state = AsyncError("Login failed.", StackTrace.current);
+    }
+  }
+
+  Future<void> resetDatabase() async {
+    state = const AsyncLoading();
+    try {
+      await Security.resetDatabase();
+      Params.setValue('token', null); //reset des tokens
+
+      state = const AsyncValue.data(null); // réinitialise l'état du provider à "vide"
+    } catch (e) {
+      state = AsyncError("Reset database failed : $e", StackTrace.current);
     }
   }
 
