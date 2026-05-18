@@ -101,6 +101,7 @@ begin
                  join users on reserv.client = users.id
                  join restaurants resto on resto.id = reserv.restaurant
         where (status_filter is null or reserv.status = status_filter)
+        and users.id = uid
         order by reserv.datetime desc, reserv.id desc;
 end;
 $$;

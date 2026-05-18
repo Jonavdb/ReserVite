@@ -1,18 +1,20 @@
 import 'dart:convert';
 
+import 'package:prbd_2526_f03/models/reservation_client.dart';
+
 import '../core/services/api_client.dart';
 
 class ClientState {
   final String currentFilter;
-  final List<dynamic> reservations;
+  final List<ReservationClient> reservations;
 
   ClientState({
       required this.currentFilter,
       required this.reservations
   });
 
-  static Future<List<dynamic>> fetchReservations(String? status) async {
-    final Map<String, dynamic> params = {};
+  static Future<List<ReservationClient>> fetchReservations(String? status) async {
+    final Map<String, String?> params = {};
     if (status != null) {
       params['status_filter'] = status;
     }
@@ -28,7 +30,12 @@ class ClientState {
     }
 
     final dynamic body = json.decode(response.body);
-    return body as List<dynamic>;
+    List<ReservationClient> reservations = [];
+    for (var res in body) {
+      var myRes = ReservationClient.fromJson(res);
+      reservations.add(myRes);
+    }
+    return reservations;
   }
 
 
