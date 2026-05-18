@@ -41,4 +41,13 @@ class ReservationDetail {
     }
   }
 
+  static Future<List<ReservationDetail>> getReservations(int restaurantId) async {
+    final response = await ApiClient.post('get_reservations_manager', body: json.encode({'restaurant_id' : restaurantId}));
+    if (response.statusCode == 200){
+      final List<dynamic> body = jsonDecode(response.body);
+      return body.map((dynamic item) => ReservationDetail.fromJson(item)).toList();
+    } else {
+      throw Exception('Status: ${response.statusCode} - ${response.body}');    }
+  }
+
 }

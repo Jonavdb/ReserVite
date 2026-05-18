@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:prbd_2526_f03/core/services/api_client.dart';
+import 'package:prbd_2526_f03/models/reservation_detail.dart';
 
 class Reservation {
   final int id;
