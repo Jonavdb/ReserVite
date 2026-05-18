@@ -1,3 +1,5 @@
+
+-- Jo
 drop type if exists reservation_info cascade;
 create type reservation_info as (
     id int,
@@ -10,6 +12,7 @@ create type reservation_info as (
     client_name varchar
 );
 
+-- Jo
 drop type if exists reservation_details cascade;
 create type reservation_details as (
     id int,
