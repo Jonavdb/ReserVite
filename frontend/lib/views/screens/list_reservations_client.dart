@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:prbd_2526_f03/providers/client_state_provider.dart';
 import '../../providers/current_user_provider.dart';
 
 class ListReservationsClient extends ConsumerWidget {
@@ -10,7 +11,7 @@ class ListReservationsClient extends ConsumerWidget {
     final notifier = ref.read(currentUserProvider.notifier);
     final userName = notifier.loggedUserName;
 
-
+    final clientStateAsync = ref.watch(clientStateProvider);
 
     final theme = Theme.of(context);
 
@@ -60,7 +61,7 @@ class ListReservationsClient extends ConsumerWidget {
                 segments: const [
                   ButtonSegment(
                     // point d'entrée : affichage de toutes les réservations
-                    value: 'all',
+                    value: '',
                     icon: Icon(Icons.list, size: 24),
                     tooltip: 'Toutes',
                   ),
@@ -89,230 +90,156 @@ class ListReservationsClient extends ConsumerWidget {
                     tooltip: 'Annulées',
                   ),
                 ],
-                selected: const {'pending'},
-                onSelectionChanged: (_) {
-                  // TODO : ajouter code pour afficher les réservations du client connecté
+
+                // on récupère le filtre selectionné
+                selected: {
+                  clientStateAsync.maybeWhen(
+                    data: (data) => data.currentFilter,
+                    orElse: () => 'pending',
+                  )
+                },
+                onSelectionChanged: (Set<String> newSelection) {
+                  ref.read(clientStateProvider.notifier).changeFilter(newSelection.first);
                 },
               ),
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(16.0),
-                children: [
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: InkWell(
-                      onTap: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            Tooltip(
-                              message: 'En attente',
-                              child: const Icon(Icons.pending, size: 32, color: Colors.orange),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Bistrot du port',
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
+              child: clientStateAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, stack) => Center(child: Text(err.toString())),
+                data: (clientState) {
+                  final list = clientState.reservations;
+
+                  if (list.isEmpty) {
+                    return const Center(child: Text('Aucune réservation trouvée.'));
+                  }
+
+                  return ListView.builder(
+                    itemCount: list.length,
+                    itemBuilder: (context, index) {
+                      //TODO :
+                      /*
+                        name restaurant
+                        city (from restaurants)
+                        datetime
+                        number of guests
+                     */
+
+                      final reservation = list[index];
+                      // 1. DYNAMIC STATUS MAPPER (Switch Case)
+                      IconData? statusIcon;
+                      Color? statusColor;
+                      String? statusTooltip;
+
+                      switch (reservation['status']) {
+                        case 'pending':
+                          statusIcon = Icons.pending;
+                          statusColor = Colors.orange;
+                          statusTooltip = 'En attente';
+                          break;
+                        case 'confirmed':
+                          statusIcon = Icons.check_circle;
+                          statusColor = Colors.green;
+                          statusTooltip = 'Confirmée';
+                          break;
+                        case 'completed':
+                          statusIcon = Icons.event_available;
+                          statusColor = Colors.blue;
+                          statusTooltip = 'Terminée';
+                          break;
+                        case 'cancelled':
+                          statusIcon = Icons.cancel;
+                          statusColor = Colors.red;
+                          statusTooltip = 'Annulée';
+                          break;
+                        default:
+                          break;
+                      }
+
+                      // 2. DATETIME FORMATTING
+                      final DateTime parsedDate = DateTime.parse(reservation['datetime']);
+                      final String formattedDate = "${parsedDate.day.toString().padLeft(2, '0')}/"
+                          "${parsedDate.month.toString().padLeft(2, '0')}/"
+                          "${parsedDate.year} à "
+                          "${parsedDate.hour.toString().padLeft(2, '0')}:"
+                          "${parsedDate.minute.toString().padLeft(2, '0')}";
+
+                      // 3. PLURAL GUESTS HANDLING
+                      final int guestCount = reservation['number_of_guests'] ?? 0;
+                      final String guestsText = "$guestCount convive${guestCount > 1 ? 's' : ''}";
+
+                      // 4. RESTAURANT DATA FALLBACKS
+                      final String restaurantName = reservation['restaurant_name'] ?? "Restaurant N° ${reservation['restaurant']}";
+                      final String restaurantCity = reservation['restaurant_city'] ?? "Ville inconnue";
+
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        child: InkWell(
+                          onTap: () {
+                            // Action when clicking a specific reservation card
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              children: [
+                                // Dynamic Tooltip and Icon Status
+                                Tooltip(
+                                  message: statusTooltip,
+                                  child: Icon(statusIcon, size: 32, color: statusColor),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Icon(Icons.location_on, size: 14),
-                                      const SizedBox(width: 4),
-                                      Text('Anvers', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.access_time, size: 16),
-                                      const SizedBox(width: 4),
+                                      // Dynamic Restaurant Title
                                       Text(
-                                        'sam. 06/12/2024 à 19:00',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                                        restaurantName,
+                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                       ),
-                                      const SizedBox(width: 12),
-                                      const Icon(Icons.people, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text('2 convives', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(Icons.chevron_right),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: InkWell(
-                      onTap: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            Tooltip(
-                              message: 'En attente',
-                              child: const Icon(Icons.pending, size: 32, color: Colors.orange),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'La Trattoria',
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.location_on, size: 14),
-                                      const SizedBox(width: 4),
-                                      Text('Bruxelles', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.access_time, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'ven. 05/12/2024 à 20:00',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                                      const SizedBox(height: 4),
+                                      // Dynamic Location Subtitle
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.location_on, size: 14),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            restaurantCity,
+                                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                          ),
+                                        ],
                                       ),
-                                      const SizedBox(width: 12),
-                                      const Icon(Icons.people, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text('4 convives', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(Icons.chevron_right),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: InkWell(
-                      onTap: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            Tooltip(
-                              message: 'Confirmée',
-                              child: const Icon(Icons.check_circle, size: 32, color: Colors.green),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'La Table du Chef',
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.location_on, size: 14),
-                                      const SizedBox(width: 4),
-                                      Text('Liège', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.access_time, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'dim. 01/12/2024 à 13:00',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                                      const SizedBox(height: 8),
+                                      // Dynamic Info Footer (Time + Guests)
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.access_time, size: 16),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            formattedDate,
+                                            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          const Icon(Icons.people, size: 16),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            guestsText,
+                                            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                                          ),
+                                        ],
                                       ),
-                                      const SizedBox(width: 12),
-                                      const Icon(Icons.people, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text('4 convives', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
                                     ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                            const Icon(Icons.chevron_right),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: InkWell(
-                      onTap: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            Tooltip(
-                              message: 'Terminée',
-                              child: const Icon(Icons.event_available, size: 32, color: Colors.blue),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Sushi House',
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.location_on, size: 14),
-                                      const SizedBox(width: 4),
-                                      Text('Bruxelles', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.access_time, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'mar. 26/11/2024 à 19:30',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      const Icon(Icons.people, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text('2 convives', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(Icons.chevron_right),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ],

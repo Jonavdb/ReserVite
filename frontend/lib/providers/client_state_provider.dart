@@ -31,7 +31,8 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
     state = const AsyncLoading();
 
     try {
-      final updateReservations = await ClientState.fetchReservations(newFilter);
+      final String? filterSanitized = (newFilter == 'all' || newFilter.isEmpty) ? null : newFilter;
+      final updateReservations = await ClientState.fetchReservations(filterSanitized);
       state = AsyncData(ClientState(
         currentFilter: newFilter,
         reservations: updateReservations,

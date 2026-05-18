@@ -18,7 +18,7 @@ class ClientState {
     }
 
     final response = await ApiClient.post(
-      'get_user_reservations',
+      'get_client_reservations',
       body: params.isNotEmpty ? json.encode(params) : null,
       anonymous: false,
     );
