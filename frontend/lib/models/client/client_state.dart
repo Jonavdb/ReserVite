@@ -5,20 +5,20 @@ import 'package:prbd_2526_f03/models/client/reservation_client.dart';
 import '../../core/services/api_client.dart';
 
 /*
-      Cette classe contient les données d'un client (ex : list de ses réservations 'en attente')
+      Cette classe contient les données d'un client connecté (ex : list de ses réservations 'en attente')
       Ces données sont observées par les vues qui affichent les données de la classe
       Exemple :
-      > list_reservations_client.dart regarde client_state_provider.dart..
-      > lorsque le notifier du provider effectue des modifications sur le clientState..
-      > list_reservations_client.dart affiche les nouvelles données retournées après modifications
+      > 1. list_reservations_client.dart regarde client_state_provider.dart..
+      > 2. lorsque le notifier du provider modifie les données du client connecté (state) ..
+      > 3? list_reservations_client.dart affiche les nouvelles données d'état après les modifications
  */
 class ClientState {
   final String currentFilter;
   final List<ReservationClient> reservations;
 
   ClientState({
-      required this.currentFilter, // filtre d'affichage des réservations ('pending', 'confirmed' etc)
-      required this.reservations // liste des réservations du clients
+      required this.currentFilter, // filtre d'affichage des réservations du client connecté ('pending', 'confirmed' etc)
+      required this.reservations // liste des réservations du client connecté
   });
 
   /*
