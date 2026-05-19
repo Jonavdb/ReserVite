@@ -22,7 +22,6 @@ Content-Type: application/json
 }
 
 ### Test 1 JO : connexion d'un manager
-
 POST http://localhost:3000/rpc/login
 Content-Type: application/json
 
@@ -39,7 +38,6 @@ Context-Type: application/json
 {
   "reservation_id": 7
 }
-
 
 ### Test 2 MANU : connexion d'un client
 POST http://localhost:3000/rpc/login
@@ -59,7 +57,9 @@ Content-Type: application/json
   "status_filter": "pending"
 }
 
+### Test 1 ALI : récupération des restaurants pour le manager
+POST http://localhost:3000/rpc/get_restaurants_manager
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoibWFuYWdlciIsInN1YiI6ImJlcGVuZWxsZUBlcGZjLmV1IiwibmFtZSI6IkJlbm_DrnQiLCJ1c2VyX2lkIjoyLCJleHAiOjE3NzkzMDcyNTB9.kZt8LIxH9l6d70Fy677ekqRoK-5u5Vnt5YtlPmSCZdQ
+Content-Type: application/json
 
-
-
-
+{}

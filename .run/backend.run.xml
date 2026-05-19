@@ -6,6 +6,7 @@
     <script-file value="$PROJECT_DIR$/backend/scripts/04_checks_constraints.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05_reservations.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05.01_authentication.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05.02_restaurants.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/BR_01_trigger_reservation_for_clients_users.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/BR_02_trigger_reservation_respect_total_capacity.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/BR_03_trigger_reservation_table_restaurant_match.sql" />

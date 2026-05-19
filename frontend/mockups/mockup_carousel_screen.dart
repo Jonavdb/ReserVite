@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:prbd_2526_f03/views/screens/list_reservations_client.dart';
 import 'package:prbd_2526_f03/views/screens/login.dart';
-import 'package:prbd_2526_f03/views/screens/my_restaurants.dart';
+import 'package:prbd_2526_f03/views/screens/list_restaurants_manager.dart';
 import 'assign_tables_mockup.dart';
 import 'edit_service_mockup.dart';
 import 'edit_table_mockup.dart';
@@ -37,7 +37,7 @@ class _MockupCarouselScreenState extends State<MockupCarouselScreen> {
     (label: 'Détails restaurant', screen: const RestaurantDetailsMockupScreen()),
     (label: 'Formulaire réservation', screen: const ReservationFormMockupScreen()),
     (label: 'Détails réservation', screen: const ReservationDetailsMockupScreen()),
-    (label: 'Mes restaurants', screen: const MyRestaurants()),
+    (label: 'Mes restaurants', screen: const ListRestaurantsManager()),
     (label: 'Gestion restaurant - Réservations', screen: const RestaurantManagementReservationsMockupScreen()),
     (label: 'Gestion restaurant - Services', screen: const RestaurantManagementServicesMockupScreen()),
     (label: 'Gestion restaurant - Tables', screen: const RestaurantManagementTablesMockupScreen()),

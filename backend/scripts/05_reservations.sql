@@ -41,8 +41,6 @@ create type client_reservation_info as (
     number_of_guests int
 );
 
-
-
 create or replace function get_reservations_manager(restaurant_id int)
     returns setof reservation_info as
 $$
@@ -107,7 +105,6 @@ end;
 $$;
 
 grant execute on function get_client_reservations(status_type) to authenticated;
-
 
 create or replace function get_reservation_manager(reservation_id int)
     returns setof reservation_details as
