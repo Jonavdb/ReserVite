@@ -52,7 +52,7 @@ Content-Type: application/json
 
 ### Test 2 MANU : récupération des réservations 'pending' du client connecté
 POST http://localhost:3000/rpc/get_client_reservations
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic3ViIjoieGFwaWdlb2xldEBlcGZjLmV1IiwibmFtZSI6IlhhdmllciIsInVzZXJfaWQiOjMsImV4cCI6MTc3OTE4NzY2NH0.vETJrl2v8QBht3bsYsJWIss3hPjLF6SWwAiWzRh3v_M
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic3ViIjoieGFwaWdlb2xldEBlcGZjLmV1IiwibmFtZSI6IlhhdmllciIsInVzZXJfaWQiOjMsImV4cCI6MTc3OTMwNTQ1MH0.JLZyzEivSm5CjQQXhzLE_l9z9xvkw0JjuLYeWikCTaI
 Content-Type: application/json
 
 {

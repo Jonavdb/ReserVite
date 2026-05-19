@@ -6,6 +6,14 @@ class ReservationClient {
   final DateTime datetime;
   final int numberOfGuests;
 
+  /*
+      Cette classe contient les données d'une réservation client
+      ex : list_reservations_client.dart affiche pour chaque réservation :
+      - son status sous forme d'icone
+      - le nom du restaurant
+      - la ville
+      - etc
+   */
   ReservationClient({
     required this.id,
     required this.status,
@@ -16,6 +24,7 @@ class ReservationClient {
   });
 
 
+  // Constructeur permettant de convertir des données json (récupérées via appel au backend) en instance de la classe
   factory ReservationClient.fromJson(Map<String, dynamic> json) {
     return ReservationClient(
       id: json['id'],
