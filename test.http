@@ -60,6 +60,15 @@ Content-Type: application/json
 }
 
 
+### Test 2 JO : confirmer une reservation
+POST http://localhost:3000/rpc/confirm_reservation_manager
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoibWFuYWdlciIsInN1YiI6ImJlcGVuZWxsZUBlcGZjLmV1IiwibmFtZSI6IkJlbm_DrnQiLCJ1c2VyX2lkIjoyLCJleHAiOjE3NzkzNzg3MjJ9.Kvrbv2sAYaxag2hoq_FKuxxLfxrDJJNIFfJpnY-tKdg
+Content-Type: application/json
+
+{
+  "reservation_id": 10,
+  "table_ids": [1, 2]
+}
 
 
 

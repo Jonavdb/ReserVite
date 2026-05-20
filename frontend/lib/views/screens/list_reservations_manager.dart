@@ -58,7 +58,7 @@ class _ListReservationsManagerScreenState
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {},
+          onPressed: () { Navigator.pop(context);},
         ),
         title: Text(widget.restaurantName),
         automaticallyImplyLeading: false,

@@ -264,7 +264,13 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
                   const SizedBox(height: 24),
                   if (reservationDetail.status == 'pending')
                     ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/assign_tables', arguments: {
+                          'reservationId' : reservationDetail.id,
+                          'restaurantId' : reservationDetail.restaurant,
+                          'date' : reservationDetail.datetime,
+                        });
+                      },
                       icon: const Icon(Icons.check_circle),
                       label: const Text('Confirmer et assigner les tables'),
                     ),

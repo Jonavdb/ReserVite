@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:prbd_2526_f03/views/screens/assign_tables.dart';
 import 'package:prbd_2526_f03/views/screens/list_reservations_client.dart';
 import 'package:prbd_2526_f03/views/screens/list_reservations_manager.dart';
 import 'package:prbd_2526_f03/views/screens/my_restaurants.dart';
@@ -38,6 +39,16 @@ class App extends ConsumerWidget {
           return MaterialPageRoute(
               builder: (context) => ReservationDetailsManager(
                   reservationId: args['reservationId']
+              )
+          );
+        }
+        if (settings.name == '/assign_tables') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+              builder: (context) => AssignTables(
+                  reservationId: args['reservationId'],
+                  restaurantId: args ['restaurantId'],
+                  date: args ['date']
               )
           );
         }
