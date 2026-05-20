@@ -29,11 +29,14 @@ begin
                        and exists(select 1
                                   from services s
                                   where s.restaurant = restaurant_id
-                                  and reservation_datetime between s.start_time and s.end_time
-                                  and r.datetime between s.start_time and s.end_time)
+                                  and reservation_datetime::time between s.start_time and s.end_time
+                                  and r.datetime::time between s.start_time and s.end_time)
                  )
                  from tables t
                  where t.restaurant = restaurant_id;
 end
 $$ language plpgsql security definer;
+
+grant execute on function get_availables_tables(int, timestamp) to authenticated;
+
 

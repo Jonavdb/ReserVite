@@ -50,4 +50,10 @@ class ReservationDetail {
       throw Exception('Status: ${response.statusCode} - ${response.body}');    }
   }
 
+  Future<void> confirmReservation(int reservationId, List<int> tableIds) async {
+    final response = await ApiClient.post('confirm_reservation_manager', body: jsonEncode({'reservation_id' : reservationId, 'table_ids' : tableIds}));
+    if (response.statusCode != 204){
+      throw Exception('Status: ${response.statusCode} - ${response.body}');
+    }
+  }
 }

@@ -20,7 +20,7 @@ begin
 
     return new;
 end;
-$$ language plpgsql;
+$$ language plpgsql SECURITY DEFINER ;
 
 drop trigger if exists reservation_table_restaurant_match on reservation_tables;
 

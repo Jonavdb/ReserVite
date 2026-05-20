@@ -48,7 +48,7 @@ BEGIN
 
     RETURN NEW; -- Important : autorise la modification
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql security definer ;
 
  -- check_rt_no_tables_on_pending_or_cancelled
  create or replace function check_rt_no_tables_on_pending_or_cancelled()
@@ -68,7 +68,7 @@ $$ LANGUAGE plpgsql;
 
      RETURN NEW; -- Important : autorise l'ajout de la ligne
  END;
- $$ LANGUAGE plpgsql;
+ $$ LANGUAGE plpgsql security definer ;
 
 
 /* --------------------------------------------------------------------------------------
