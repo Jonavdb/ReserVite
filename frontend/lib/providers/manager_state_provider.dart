@@ -1,8 +1,9 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../core/tools/abstract_async_notifier.dart';
-import '../models/reservation.dart';
-import '../models/reservation_detail.dart';
+import '../models/manager/reservation_detail.dart';
+import '../models/manager/reservation.dart';
+import '../models/manager/reservation_detail.dart';
 
 final managerStateProvider = AsyncNotifierProvider<ManagerStateNotifier, List<ReservationDetail>>(() => ManagerStateNotifier());
 

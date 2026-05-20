@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:prbd_2526_f03/providers/current_user_provider.dart';
+import 'package:prbd_2526_f03/providers/security/current_user_provider.dart';
 
-class MyRestaurantsScreen extends ConsumerWidget {
-  const MyRestaurantsScreen({super.key});
+class MyRestaurants extends ConsumerWidget {
+  const MyRestaurants({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

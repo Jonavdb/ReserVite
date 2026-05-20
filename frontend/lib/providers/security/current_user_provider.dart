@@ -1,7 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import '../app/params.dart';
-import '../models/security.dart';
+import '../../app/params.dart';
+import '../../models/security/security.dart';
 
 final currentUserProvider = AsyncNotifierProvider<CurrentUserNotifier, String?>(() => CurrentUserNotifier());
 
@@ -13,6 +13,22 @@ class CurrentUserNotifier extends AsyncNotifier<String?> {
     return state.value;
   }
 
+  Future<void> signup({
+    required String fullname,
+    required String email,
+    required String password,
+    String? phone,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      await Security.signup(fullname: fullname, email: email, password: password, phone: phone);
+      await login(email, password);
+      state = AsyncValue.data(Params.getValue('token'));
+    } catch (e) {
+      state = AsyncValue.error("Signup failed", StackTrace.current);
+    }
+  }
+
   Future<void> login(String email, String password) async {
     state = const AsyncLoading();
     try {
@@ -20,7 +36,19 @@ class CurrentUserNotifier extends AsyncNotifier<String?> {
       Params.setValue('token', token);
       state = AsyncData(token);
     } catch (e) {
-      state = AsyncError("Something went wrong!\nPlease try again later.", StackTrace.current);
+      state = AsyncError("Login failed.", StackTrace.current);
+    }
+  }
+
+  Future<void> resetDatabase() async {
+    state = const AsyncLoading();
+    try {
+      await Security.resetDatabase();
+      Params.setValue('token', null); //reset des tokens
+
+      state = const AsyncValue.data(null); // réinitialise l'état du provider à "vide"
+    } catch (e) {
+      state = AsyncError("Reset database failed : $e", StackTrace.current);
     }
   }
 

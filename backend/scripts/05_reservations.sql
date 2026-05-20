@@ -1,3 +1,5 @@
+
+-- Jo
 drop type if exists reservation_info cascade;
 create type reservation_info as (
     id int,
@@ -10,6 +12,7 @@ create type reservation_info as (
     client_name varchar
 );
 
+-- Jo
 drop type if exists reservation_details cascade;
 create type reservation_details as (
     id int,
@@ -26,6 +29,18 @@ create type reservation_details as (
     table_numbers int[],
     table_capacities int[]
 );
+
+-- Manu
+drop type if exists client_reservation_info cascade;
+create type client_reservation_info as (
+    id int,
+    status status_type,
+    restaurant_name varchar,
+    restaurant_city varchar,
+    datetime timestamp,
+    number_of_guests int
+);
+
 
 
 create or replace function get_reservations_manager(restaurant_id int)
@@ -66,12 +81,12 @@ $$ language plpgsql security definer;
 
 grant execute on function get_reservations_manager(int) to authenticated;
 
-create or replace function get_user_reservations(
-    status_filter status_type default null -- paramètre optionnel
+create or replace function get_client_reservations(
+    status_filter status_type default null
 )
-returns setof reservation_info
-language plpgsql
-security definer
+    returns setof client_reservation_info
+    language plpgsql
+    security definer
 as $$
 declare
     uid int := auth.id();
@@ -84,23 +99,24 @@ begin
     if user_role != 'client' then
         raise exception 'Vous n''êtes pas autorisé. Rôle détecté: [%], ID détecté: [%]', user_role, uid;
     end if;
+
     return query
-        select reservations.id,
-            reservations.client,
-            reservations.restaurant,
-            reservations.datetime,
-            reservations.number_of_guests,
-            reservations.status,
-            reservations.special_requests,
-            users.full_name
-        from reservations join users on reservations.client = users.id
-            and reservations.client = uid
-            and (status_filter is null or status = status_filter)
-        order by reservations.datetime DESC, reservations.id DESC;
+        select reserv.id,
+               reserv.status,
+               resto.name,
+               resto.city,
+               reserv.datetime,
+               reserv.number_of_guests
+        from reservations reserv
+                 join users on reserv.client = users.id
+                 join restaurants resto on resto.id = reserv.restaurant
+        where (status_filter is null or reserv.status = status_filter)
+        and users.id = uid
+        order by reserv.datetime desc, reserv.id desc;
 end;
 $$;
 
-grant execute on function get_user_reservations(status_type) to authenticated;
+grant execute on function get_client_reservations(status_type) to authenticated;
 
 
 create or replace function get_reservation_manager(reservation_id int)

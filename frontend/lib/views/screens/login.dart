@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_f03/core/tools/validating_text_editing_controller.dart';
-import '../../models/user.dart';
-import '../../providers/current_user_provider.dart';
+import '../../models/security/user.dart';
+import '../../providers/security/current_user_provider.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
+class Login extends ConsumerStatefulWidget {
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<Login> createState() => _LoginState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _LoginState extends ConsumerState<Login> {
   final _emailController = ValidatingTextEditingController(validator: User.validateEmail, initialValue: '');
   final _passwordController = ValidatingTextEditingController(validator: User.validatePassword, initialValue: '');
 
@@ -109,7 +109,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: const Text('Se connecter'),
                       ),
                       const SizedBox(height: 6),
-                      TextButton(onPressed: () {}, child: const Text('Pas encore de compte ? S\'inscrire')),
+                      TextButton(
+                        onPressed: () => {Navigator.pushReplacementNamed(context, '/signup')},
+                        child: const Text('Pas encore de compte ? S\'inscrire'),
+                      ),
                     ],
                   ),
                 ),
@@ -185,7 +188,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () => _showResetDatabaseModal(context, ref),
                       icon: const Icon(Icons.refresh),
                       label: const Text('Réinitialiser la base de données'),
                       style: OutlinedButton.styleFrom(
@@ -253,5 +256,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       },
       loading: () {},
     );
+  }
+
+  void _showResetDatabaseModal(BuildContext context, WidgetRef ref) async {
+    // on affiche la modal et on attend le résultat true ou false
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Réinitialiser la base de données"),
+          content: const Text(
+            'Êtes-vous sûr de vouloir réinitialiser la base de données ? Cette action supprimera toutes les données et les restaurera aux valeurs par défaut.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false), // annuler renvoie false
+              child: const Text('Annuler'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Réinitialiser', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return; // différent de true car l'utilisateur peut cliquer à coté
+
+    try {
+      await ref.read(currentUserProvider.notifier).resetDatabase();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Base de données réinitialisée avec succès.'), backgroundColor: Colors.green),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erreur lors de la réinitialisation de la DB.'), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
 }
