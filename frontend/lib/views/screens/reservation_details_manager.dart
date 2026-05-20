@@ -105,6 +105,7 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
             if (reservationDetail == null) {
               return const Center(child: Text('Aucune informations concernant cette reservation'));
             }
+            bool isPast = reservationDetail.datetime.isAfter(simulatedTime);
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -277,10 +278,32 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
 
                   if (reservationDetail.status == 'confirmed')
                     ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: isPast ? null :  () {
+                        showDialog(context: context, builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Terminer la réservation'),
+                            content: const Text ('Voulez-vous marquer cette réservation comme terminée ?'),
+                            actions : [
+                              TextButton(onPressed: () => Navigator.pop(context),
+                                child: const Text('Non'),
+                              ),
+                              TextButton(onPressed: () => _complete(context, reservationDetail, simulatedTime) ,
+                                  child: const Text('Oui', style: TextStyle(color: Colors.red),)
+                              ),
+                            ],
+                          );
+                        },
+                        );
+                      },
                       icon: const Icon(Icons.check_circle),
                       label: const Text('Marquer comme terminée'),
                     ),
+                    if (isPast) ... [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: const Text('La réservation ne peut être terminée que durant son service ou après celui-ci', style: TextStyle(color: Colors.red), textAlign: TextAlign.center,),
+                      ),
+                    ],
                   if (reservationDetail.status != 'cancelled' && reservationDetail.status != 'completed') ...[
                     const SizedBox(height: 8),
                     OutlinedButton.icon(onPressed: () {
@@ -312,6 +335,15 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
   _cancel(BuildContext context, ReservationDetail res) async {
     final notifier = ref.read(managerStateProvider.notifier);
     notifier.cancelledReservation(res);
+    if (context.mounted) {
+      ref.read(managerStateProvider.notifier).getReservation(widget.reservationId);
+      Navigator.of(context).pop(null);
+    }
+  }
+
+  _complete(BuildContext context, ReservationDetail res, DateTime simulatedTime) async {
+    final notifier = ref.read(managerStateProvider.notifier);
+    notifier.completeReservation(res, simulatedTime);
     if (context.mounted) {
       ref.read(managerStateProvider.notifier).getReservation(widget.reservationId);
       Navigator.of(context).pop(null);

@@ -64,6 +64,20 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<List<ReservationDetail>
     }
   }
 
+  Future<void> completeReservation(ReservationDetail res, DateTime simulatedTime) async {
+    state = const AsyncValue.loading();
+    try {
+      await res.completeReservation(res.id, simulatedTime);
+      final List<ReservationDetail> list = await ReservationDetail.getReservations(_restaurantId!);
+      state = AsyncData(list);
+    } catch (e) {
+      state = AsyncValue.error(
+        e.toString(),
+        StackTrace.current,
+      );
+    }
+  }
+
   Future<void> getReservations(int restaurantId) async {
     _restaurantId = restaurantId;
     state = const AsyncValue.loading();

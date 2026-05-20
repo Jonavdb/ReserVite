@@ -200,3 +200,27 @@ $$ language plpgsql security definer;
 
 grant execute on function confirm_reservation_manager(int, int[]) to authenticated;
 
+create or replace function complete_reservation_manager(reservation_id int, date_simulated timestamp) returns void as
+$$
+declare
+    reservation_date timestamp;
+begin
+    perform auth.check_logged();
+    if (auth.role() != 'manager') then
+        raise exception 'Vousn''êtes pas autorisé à compléter cette réservation';
+    end if;
+
+    if not exists(select 1 from restaurant_managers join reservations on reservations.restaurant = restaurant_managers.restaurant where reservations.id = reservation_id and restaurant_managers.manager = auth.id()) then
+        raise exception 'Vous n''êtes pas manager de ce restaurant';
+    end if;
+    select datetime from reservations where id = reservation_id into reservation_date;
+    if date_simulated < reservation_date then
+        raise exception 'La date doit être postérieure à la date de la réservation';
+    end if;
+    update reservations set status = 'completed' where reservations.id = reservation_id;
+end;
+$$ language plpgsql security definer;
+
+grant execute on function complete_reservation_manager(int, timestamp) to authenticated;
+
+insert into reservations(client, restaurant, datetime, number_of_guests, status, special_requests) values ('3', '1', '2024-12-24 20:00:00', 4, 'pending', 'Table près de la fenêtre');
