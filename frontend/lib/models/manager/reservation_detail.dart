@@ -34,5 +34,20 @@ class ReservationDetail {
     } else {
       throw Exception('Status: ${response.statusCode} - ${response.body}');    }
   }
+  Future<void> cancelReservation(int reservationId) async {
+    final response = await ApiClient.post('cancel_reservation_manager', body: jsonEncode({'reservation_id' : reservationId}));
+    if (response.statusCode != 204) {
+      throw Exception('Status: ${response.statusCode} - ${response.body}');
+    }
+  }
+
+  static Future<List<ReservationDetail>> getReservations(int restaurantId) async {
+    final response = await ApiClient.post('get_reservations_manager', body: json.encode({'restaurant_id' : restaurantId}));
+    if (response.statusCode == 200){
+      final List<dynamic> body = jsonDecode(response.body);
+      return body.map((dynamic item) => ReservationDetail.fromJson(item)).toList();
+    } else {
+      throw Exception('Status: ${response.statusCode} - ${response.body}');    }
+  }
 
 }

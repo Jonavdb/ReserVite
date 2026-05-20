@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:prbd_2526_f03/core/services/api_client.dart';
+import 'package:prbd_2526_f03/models/manager/reservation_detail.dart';
 
 class Reservation {
   final int id;
@@ -36,6 +37,13 @@ class Reservation {
       return Reservation.fromJson(body.first);
     } else {
       throw Exception('Failed to get reservation');
+    }
+  }
+
+  Future<void> cancelReservation(int reservationId) async {
+    final response = await ApiClient.post('cancel_reservation_manager', body: jsonEncode({'reservation_id' : reservationId}));
+    if (response.statusCode != 204) {
+        throw Exception('failed to cancel the reservation');
     }
   }
 

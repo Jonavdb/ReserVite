@@ -44,7 +44,7 @@ create type client_reservation_info as (
 
 
 create or replace function get_reservations_manager(restaurant_id int)
-    returns setof reservation_info as
+    returns setof reservation_details as
 $$
 begin
     perform auth.check_logged();
@@ -58,13 +58,23 @@ begin
     return query select reservations.id,
                         reservations.client,
                         reservations.restaurant,
+                        restaurants.name,
                         reservations.datetime,
                         reservations.number_of_guests,
                         reservations.status,
                         reservations.special_requests,
-                        users.full_name
-                 from reservations join users on reservations.client = users.id
-                 where restaurant = restaurant_id
+                        users.full_name,
+                        users.email,
+                        users.phone,
+                        array_agg(tables.table_number order by tables.table_number) filter (where tables.id is not null),
+                        array_agg(tables.capacity order by tables.table_number) filter (where tables.id is not null)
+                         from reservations
+                          join users on reservations.client = users.id
+                          join restaurants on reservations.restaurant = restaurants.id
+                          left join reservation_tables on reservation_tables.reservation = reservations.id
+                          left join tables on tables.id = reservation_tables."table"
+                 where reservations.restaurant = restaurant_id
+                 group by reservations.id, users.full_name, users.email, users.phone, restaurants.name, reservations.datetime
                  order by reservations.datetime DESC, reservations.id DESC;
 end;
 $$ language plpgsql security definer;
@@ -149,3 +159,23 @@ $$ language plpgsql security definer;
 --                      array_agg afin de retourner un tableau de numéros de tables et un tableau de capacité de tables
 
 grant execute on function get_reservation_manager(int) to authenticated;
+
+
+
+create or replace function cancel_reservation_manager(reservation_id int) returns void as
+$$
+begin
+    perform auth.check_logged();
+    if (auth.role() != 'manager') then
+        raise exception 'Vous n''êtes pas autorisé à annuler cette réservation';
+    end if;
+
+    if not exists(select 1 from restaurant_managers join reservations on reservations.restaurant = restaurant_managers.restaurant where reservations.id = reservation_id and restaurant_managers.manager = auth.id()) then
+        raise exception 'Vous n''êtes pas manager de ce restaurant';
+    end if;
+    delete from reservation_tables where reservation = reservation_id;
+    update reservations set status = 'cancelled' where id = reservation_id;
+end;
+$$ language plpgsql security definer;
+
+grant execute on function cancel_reservation_manager(int) to authenticated;
