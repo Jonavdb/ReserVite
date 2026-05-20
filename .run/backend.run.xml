@@ -4,7 +4,7 @@
     <script-file value="$PROJECT_DIR$/backend/scripts/02_security.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/03_tables_and_data.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04_checks_constraints.sql" />
-    <script-file value="$PROJECT_DIR$/backend/scripts/05_reservations.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05.03_reservations.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05.01_authentication.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05.02_restaurants.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/BR_01_trigger_reservation_for_clients_users.sql" />

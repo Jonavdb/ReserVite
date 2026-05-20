@@ -4,12 +4,14 @@ import 'package:prbd_2526_f03/models/manager/reservation_detail.dart';
 import '../../core/tools/abstract_async_notifier.dart';
 import '../../models/manager/reservation.dart';
 
-final reservationDetailProvider = AsyncNotifierProvider<ReservationDetailNotifier, ReservationDetail?>(() => ReservationDetailNotifier());
+final reservationDetailProvider = AsyncNotifierProvider<ReservationDetailNotifier, ReservationDetail?>(
+  () => ReservationDetailNotifier(),
+);
 
 class ReservationDetailNotifier extends AbstractAsyncNotifier<ReservationDetail?> {
   int? _reservationId;
   @override
-  Future<ReservationDetail?> build () async {
+  Future<ReservationDetail?> build() async {
     return null;
   }
 
@@ -24,11 +26,10 @@ class ReservationDetailNotifier extends AbstractAsyncNotifier<ReservationDetail?
     try {
       final reservation = await ReservationDetail.getReservation(reservationId);
       state = AsyncData(reservation);
-    } catch(e) {
+    } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
   }
-
 
   Future<void> cancelledReservation(ReservationDetail res) async {
     state = const AsyncValue.loading();
@@ -36,10 +37,7 @@ class ReservationDetailNotifier extends AbstractAsyncNotifier<ReservationDetail?
       await res.cancelReservation(res.id);
       state = AsyncData(res);
     } catch (e) {
-      state = AsyncValue.error(
-        e.toString(),
-        StackTrace.current,
-      );
+      state = AsyncValue.error(e.toString(), StackTrace.current);
     }
   }
 }

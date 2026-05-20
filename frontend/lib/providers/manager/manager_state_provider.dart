@@ -1,17 +1,19 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../core/tools/abstract_async_notifier.dart';
-import '../models/manager/reservation_detail.dart';
-import '../models/manager/reservation.dart';
-import '../models/manager/reservation_detail.dart';
+import '../../core/tools/abstract_async_notifier.dart';
+import '../../models/manager/reservation_detail.dart';
+import '../../models/manager/reservation.dart';
+import '../../models/manager/reservation_detail.dart';
 
-final managerStateProvider = AsyncNotifierProvider<ManagerStateNotifier, List<ReservationDetail>>(() => ManagerStateNotifier());
+final managerStateProvider = AsyncNotifierProvider<ManagerStateNotifier, List<ReservationDetail>>(
+  () => ManagerStateNotifier(),
+);
 
 class ManagerStateNotifier extends AbstractAsyncNotifier<List<ReservationDetail>> {
   int? _restaurantId;
 
   @override
-  Future<List<ReservationDetail>> build () async {
+  Future<List<ReservationDetail>> build() async {
     return [];
   }
 
@@ -24,28 +26,27 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<List<ReservationDetail>
     final currentList = state.value ?? [];
     state = const AsyncValue.loading();
     try {
-      final updatedRes =  await ReservationDetail.getReservation(reservationId);
+      final updatedRes = await ReservationDetail.getReservation(reservationId);
 
       bool found = false;
       final newList = currentList.map((res) {
-        if (res.id == reservationId){
+        if (res.id == reservationId) {
           found = true;
           return updatedRes;
         }
         return res;
       }).toList();
 
-      if (!found){
+      if (!found) {
         newList.add(updatedRes);
       }
 
-      // 3. On renvoie la liste complète
+      // on renvoie la liste complète
       state = AsyncData(newList);
-    } catch(e) {
+    } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
   }
-
 
   Future<void> cancelledReservation(ReservationDetail res) async {
     state = const AsyncValue.loading();
@@ -54,10 +55,7 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<List<ReservationDetail>
       final List<ReservationDetail> list = await ReservationDetail.getReservations(_restaurantId!);
       state = AsyncData(list);
     } catch (e) {
-      state = AsyncValue.error(
-        e.toString(),
-        StackTrace.current,
-      );
+      state = AsyncValue.error(e.toString(), StackTrace.current);
     }
   }
 
@@ -67,7 +65,7 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<List<ReservationDetail>
     try {
       final reservations = await ReservationDetail.getReservations(restaurantId);
       state = AsyncData(reservations);
-    } catch(e) {
+    } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
   }
