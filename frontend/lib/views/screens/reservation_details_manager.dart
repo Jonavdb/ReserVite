@@ -286,14 +286,14 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
                     OutlinedButton.icon(onPressed: () {
                       showDialog(context: context, builder: (BuildContext context) {
                         return AlertDialog(
-                          title: const Text('test Modale'),
-                          content: const Text ('supprimer ?'),
+                          title: const Text('Annuler la réservation'),
+                          content: const Text ('Êtes-vous sûr de vouloir annuler cette réservation ?'),
                           actions : [
                             TextButton(onPressed: () => Navigator.pop(context),
-                            child: const Text('Annuler'),
+                            child: const Text('Non'),
                             ),
                             TextButton(onPressed: () => _cancel(context, reservationDetail) ,
-                            child: const Text('Confirmer')
+                            child: const Text('Oui', style: TextStyle(color: Colors.red),)
                             ),
                           ],
                         );
