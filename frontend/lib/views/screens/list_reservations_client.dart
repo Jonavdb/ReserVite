@@ -8,17 +8,22 @@ class ListReservationsClient extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(currentUserProvider.notifier);
-    final userName = notifier.loggedUserName;
+    // notifier de l'utilisateur connecté (pour interagir avec l'état de ses données)
+    final userNotifier = ref.read(currentUserProvider.notifier);
+    final userName = userNotifier.loggedUserName;  // nom d'utilisateur
 
+    // on stock l'état courant des données du client connecté
     final clientStateAsync = ref.watch(clientStateProvider);
 
+    // theme de la page
     final theme = Theme.of(context);
 
     return Scaffold(
+      // HEADER (titre, date simulée, boutons)
       appBar: AppBar(
         title: const Text('Mes réservations'),
         automaticallyImplyLeading: false,
+        // Liste boutons (recherche, rafraichir les données, deconnexion)
         actions: [
           IconButton(icon: const Icon(Icons.search), onPressed: () {}),
           IconButton(icon: const Icon(Icons.refresh), tooltip: 'Rafraîchir les données', onPressed: () {}),
@@ -35,6 +40,7 @@ class ListReservationsClient extends ConsumerWidget {
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
         surfaceTintColor: Colors.transparent,
+        // Date simulée
         flexibleSpace: Align(
           alignment: Alignment.topCenter,
           child: SafeArea(
@@ -51,6 +57,8 @@ class ListReservationsClient extends ConsumerWidget {
           ),
         ),
       ),
+
+      // CONTENU (liste des réservations du client connecté)
       body: SafeArea(
         child: Column(
           children: [
@@ -58,6 +66,8 @@ class ListReservationsClient extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
               child: SegmentedButton<String>(
                 showSelectedIcon: false,
+                // Barre horizontale des icones de filtre de réservation
+                // ('all', 'en attente', 'confirmées', 'terminées', 'annulées'
                 segments: const [
                   ButtonSegment(
                     // point d'entrée : affichage de toutes les réservations
@@ -95,22 +105,34 @@ class ListReservationsClient extends ConsumerWidget {
                 selected: {
                   clientStateAsync.maybeWhen(
                     data: (data) => data.currentFilter,
-                    orElse: () => 'pending',
+                    orElse: () => 'pending', // pending par défaut
+                                            // première ouverture de la page
                   )
                 },
+                // quand on clique sur un filtre, ça appelle la fonction 'changeFilter' du notifier
                 onSelectionChanged: (Set<String> newSelection) {
+                  // appel au notifier du client connecté
                   ref.read(clientStateProvider.notifier).changeFilter(newSelection.first);
                 },
               ),
             ),
             const SizedBox(height: 8),
+
             Expanded(
+              // on indique ce qui s'affiche en fonction de l'état du client connecté
               child: clientStateAsync.when(
+                // l'état charge -> affichage icone de chargement circulaire
                 loading: () => const Center(child: CircularProgressIndicator()),
+
+                // erreur dans la récupération des réservations -> affichage message d'erreur
                 error: (err, stack) => Center(child: Text(err.toString())),
+
+                // récupération effectuée  -> affichage de chaque réservation du client connecté
                 data: (clientState) {
+                  // liste de ses réservations récupérées via l'état courant initialisée au debut de la page
                   final list = clientState.reservations;
 
+                  // Cas : liste vide
                   if (list.isEmpty) {
                     // Détermine le texte en fonction du filtre actif pour correspondre parfaitement à l'écran
                     String emptyMessage = 'Aucune réservation trouvée.';
@@ -168,15 +190,18 @@ class ListReservationsClient extends ConsumerWidget {
                     );
                   }
 
+                  // Cas : liste non vide
+                  // Modèle d'affichage de chaque réservation client
                   return ListView.builder(
                     itemCount: list.length,
                     itemBuilder: (context, index) {
                       final reservation = list[index];
-                      // 1. DYNAMIC STATUS MAPPER (Switch Case)
-                      IconData? statusIcon;
-                      Color? statusColor;
-                      String? statusTooltip;
 
+                      IconData? statusIcon; // icone status
+                      Color? statusColor; // couleur icone
+                      String? statusTooltip; // message quand la souris passe par-dessus
+
+                      // mise en place des données de l'icone correspondante au status de la réservation
                       switch (reservation.status) {
                         case 'pending':
                           statusIcon = Icons.pending;
@@ -202,7 +227,7 @@ class ListReservationsClient extends ConsumerWidget {
                           break;
                       }
 
-                      // 2. DATETIME FORMATTING
+                      // récupération et formattage de la date de réservation
                       final DateTime parsedDate = reservation.datetime;
                       final String formattedDate = "${parsedDate.day.toString().padLeft(2, '0')}/"
                           "${parsedDate.month.toString().padLeft(2, '0')}/"
@@ -210,25 +235,28 @@ class ListReservationsClient extends ConsumerWidget {
                           "${parsedDate.hour.toString().padLeft(2, '0')}:"
                           "${parsedDate.minute.toString().padLeft(2, '0')}";
 
-                      // 3. PLURAL GUESTS HANDLING
+                      // récupération  du texte du nombre de convives
                       final int guestCount = reservation.numberOfGuests ?? 0;
                       final String guestsText = "$guestCount convive${guestCount > 1 ? 's' : ''}";
 
-                      // 4. RESTAURANT DATA FALLBACKS
+                      // récupération du texte nom du restaurant
                       final String restaurantName = reservation.restaurantName;
+
+                      // récupération  du texte ville du restaurant
                       final String restaurantCity = reservation.restaurantCity;
 
+                      // affichage de toutes les données précécentes dans un widget Card
                       return Card(
                         margin: const EdgeInsets.only(bottom: 16),
                         child: InkWell(
                           onTap: () {
-                            // Action when clicking a specific reservation card
+                            // Action quand on clique sur le carte
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: Row(
                               children: [
-                                // Dynamic Tooltip and Icon Status
+                                // Icone status
                                 Tooltip(
                                   message: statusTooltip,
                                   child: Icon(statusIcon, size: 32, color: statusColor),
@@ -238,17 +266,19 @@ class ListReservationsClient extends ConsumerWidget {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      // Dynamic Restaurant Title
+                                      // Texte titre restaurant
                                       Text(
                                         restaurantName,
                                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(height: 4),
-                                      // Dynamic Location Subtitle
+                                      // Icone localisation + Texte ville restaurant
                                       Row(
                                         children: [
+                                          // Icone localisation
                                           const Icon(Icons.location_on, size: 14),
                                           const SizedBox(width: 4),
+                                          // Texte ville restaurant
                                           Text(
                                             restaurantCity,
                                             style: TextStyle(fontSize: 12, color: Colors.grey[600]),
@@ -256,17 +286,23 @@ class ListReservationsClient extends ConsumerWidget {
                                         ],
                                       ),
                                       const SizedBox(height: 8),
-                                      // Dynamic Info Footer (Time + Guests)
+                                      // Icone temps + texte date + icone convives + texte nombre de convives
                                       Row(
                                         children: [
+                                          // Icone temp
                                           const Icon(Icons.access_time, size: 16),
+                                          // Espace
                                           const SizedBox(width: 4),
+                                          // texte date
                                           Text(
                                             formattedDate,
                                             style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                                           ),
+                                          // Espace
                                           const SizedBox(width: 12),
+                                          // icone convives
                                           const Icon(Icons.people, size: 16),
+                                          // texte nombre de convives
                                           const SizedBox(width: 4),
                                           Text(
                                             guestsText,
@@ -290,6 +326,8 @@ class ListReservationsClient extends ConsumerWidget {
           ],
         ),
       ),
+
+      // FOOTER (bouton 'nouvelle réservation')
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {},
         icon: const Icon(Icons.add),

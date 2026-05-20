@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_f03/providers/manager_state_provider.dart';
 import 'package:prbd_2526_f03/providers/manager/reservations_provider.dart';
 
 class ListReservationsManager extends ConsumerStatefulWidget {
@@ -28,7 +29,7 @@ class _ListReservationsManagerScreenState
     // charger les réservations au démarrage
     // ref n'est pas encore disponible dans InitState donc on utilise Future.microTask
     Future.microtask(() => ref
-        .read(reservationProvider.notifier)
+        .read(managerStateProvider.notifier)
         .getReservations(widget.restaurantId));
   }
 
@@ -51,7 +52,7 @@ class _ListReservationsManagerScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
-    final reservationsState = ref.watch(reservationProvider);
+    final reservationsState = ref.watch(managerStateProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -65,7 +66,7 @@ class _ListReservationsManagerScreenState
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Rafraîchir les données',
-            onPressed: () => ref.read(reservationProvider.notifier).getReservations(widget.restaurantId),
+            onPressed: () => ref.read(managerStateProvider.notifier).getReservations(widget.restaurantId),
           ),
         ],
         elevation: 2,
