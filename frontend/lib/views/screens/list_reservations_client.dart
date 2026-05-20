@@ -10,7 +10,7 @@ class ListReservationsClient extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // notifier de l'utilisateur connecté (pour interagir avec l'état de ses données)
     final userNotifier = ref.read(currentUserProvider.notifier);
-    final userName = userNotifier.loggedUserName;  // nom d'utilisateur
+    final userName = userNotifier.loggedUserName; // nom d'utilisateur
 
     // on stock l'état courant des données du client connecté
     final clientStateAsync = ref.watch(clientStateProvider);
@@ -106,8 +106,8 @@ class ListReservationsClient extends ConsumerWidget {
                   clientStateAsync.maybeWhen(
                     data: (data) => data.currentFilter,
                     orElse: () => 'pending', // pending par défaut
-                                            // première ouverture de la page
-                  )
+                    // première ouverture de la page
+                  ),
                 },
                 // quand on clique sur un filtre, ça appelle la fonction 'changeFilter' du notifier
                 onSelectionChanged: (Set<String> newSelection) {
@@ -159,30 +159,19 @@ class ListReservationsClient extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // Icône centrale stylisée gris clair
-                          Icon(
-                            Icons.calendar_today_outlined,
-                            size: 90,
-                            color: Colors.grey[350],
-                          ),
+                          Icon(Icons.calendar_today_outlined, size: 90, color: Colors.grey[350]),
                           const SizedBox(height: 24),
                           // Titre principal de l'état vide
                           Text(
                             emptyMessage,
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: TextStyle(fontSize: 18, color: Colors.grey[700], fontWeight: FontWeight.w500),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 8),
                           // Sous-titre d'invitation à l'action
                           Text(
                             'Créez votre première réservation !',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[400],
-                            ),
+                            style: TextStyle(fontSize: 14, color: Colors.grey[400]),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -229,14 +218,15 @@ class ListReservationsClient extends ConsumerWidget {
 
                       // récupération et formattage de la date de réservation
                       final DateTime parsedDate = reservation.datetime;
-                      final String formattedDate = "${parsedDate.day.toString().padLeft(2, '0')}/"
+                      final String formattedDate =
+                          "${parsedDate.day.toString().padLeft(2, '0')}/"
                           "${parsedDate.month.toString().padLeft(2, '0')}/"
                           "${parsedDate.year} à "
                           "${parsedDate.hour.toString().padLeft(2, '0')}:"
                           "${parsedDate.minute.toString().padLeft(2, '0')}";
 
                       // récupération  du texte du nombre de convives
-                      final int guestCount = reservation.numberOfGuests ?? 0;
+                      final int guestCount = reservation.numberOfGuests;
                       final String guestsText = "$guestCount convive${guestCount > 1 ? 's' : ''}";
 
                       // récupération du texte nom du restaurant
@@ -279,10 +269,7 @@ class ListReservationsClient extends ConsumerWidget {
                                           const Icon(Icons.location_on, size: 14),
                                           const SizedBox(width: 4),
                                           // Texte ville restaurant
-                                          Text(
-                                            restaurantCity,
-                                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                          ),
+                                          Text(restaurantCity, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                                         ],
                                       ),
                                       const SizedBox(height: 8),
@@ -294,20 +281,14 @@ class ListReservationsClient extends ConsumerWidget {
                                           // Espace
                                           const SizedBox(width: 4),
                                           // texte date
-                                          Text(
-                                            formattedDate,
-                                            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                          ),
+                                          Text(formattedDate, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
                                           // Espace
                                           const SizedBox(width: 12),
                                           // icone convives
                                           const Icon(Icons.people, size: 16),
                                           // texte nombre de convives
                                           const SizedBox(width: 4),
-                                          Text(
-                                            guestsText,
-                                            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                          ),
+                                          Text(guestsText, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
                                         ],
                                       ),
                                     ],

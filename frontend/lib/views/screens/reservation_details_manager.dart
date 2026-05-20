@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_f03/models/manager/reservation_detail.dart';
 import 'package:prbd_2526_f03/providers/manager/manager_state_provider.dart';
-import 'package:prbd_2526_f03/providers/manager/reservation_detail_provider.dart';
-import 'package:prbd_2526_f03/providers/manager/reservation_detail_provider.dart';
 
 class ReservationDetailsManager extends ConsumerStatefulWidget {
   final int reservationId;
@@ -29,7 +26,6 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
     switch (status) {
       case 'pending':
         return const Color(0xFFFF9800);
-        ;
       case 'confirmed':
         return const Color(0xFF4CAF50);
       case 'completed':
@@ -98,11 +94,10 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
         child: reservationDetailState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(child: Text('Erreur: $error')),
-          data: (reservation) {
-            final reservationDetail = reservation.cast<ReservationDetail?>().firstWhere(
-              (res) => res?.id == widget.reservationId,
-              orElse: () => null,
-            );
+          data: (managerState) {
+            final reservations = managerState.reservations;
+            final reservationDetail = reservations.where((res) => res.id == widget.reservationId).firstOrNull;
+
             if (reservationDetail == null) {
               return const Center(child: Text('Aucune informations concernant cette reservation'));
             }
@@ -316,7 +311,7 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
     );
   }
 
-  _cancel(BuildContext context, ReservationDetail res) async {
+  void _cancel(BuildContext context, ReservationDetail res) async {
     final notifier = ref.read(managerStateProvider.notifier);
     notifier.cancelledReservation(res);
     if (context.mounted) {

@@ -1,14 +1,15 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:prbd_2526_f03/core/tools/abstract_async_notifier.dart';
 import 'package:prbd_2526_f03/models/manager/reservation.dart';
-import 'package:prbd_2526_f03/providers/manager/reservation_detail_provider.dart';
 
-final reservationProvider = AsyncNotifierProvider<ReservationsNotifier, List<Reservation>>(() => ReservationsNotifier());
+final reservationProvider = AsyncNotifierProvider<ReservationsNotifier, List<Reservation>>(
+  () => ReservationsNotifier(),
+);
 
 class ReservationsNotifier extends AbstractAsyncNotifier<List<Reservation>> {
-    int? _restaurantId;
+  int? _restaurantId;
   @override
-  Future<List<Reservation>> build () async {
+  Future<List<Reservation>> build() async {
     return [];
   }
 
@@ -22,7 +23,7 @@ class ReservationsNotifier extends AbstractAsyncNotifier<List<Reservation>> {
     try {
       final reservations = await Reservation.getReservations(restaurantId);
       state = AsyncData(reservations);
-    } catch(e) {
+    } catch (e) {
       state = AsyncValue.error("Something went wrong", StackTrace.current);
     }
   }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_f03/providers/manager/manager_state_provider.dart';
-import 'package:prbd_2526_f03/providers/manager/reservations_provider.dart';
 
 class ListReservationsManager extends ConsumerStatefulWidget {
   final int restaurantId;
@@ -121,7 +120,8 @@ class _ListReservationsManagerScreenState extends ConsumerState<ListReservations
               child: reservationsState.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, _) => Center(child: Text('Erreur: $error')),
-                data: (reservations) {
+                data: (managerState) {
+                  final reservations = managerState.reservations;
                   final filteredReservations = _selectedFilter == 'all'
                       ? reservations
                       : reservations.where((r) => r.status == _selectedFilter).toList();
