@@ -5,7 +5,6 @@ import 'package:prbd_2526_f03/core/services/api_client.dart';
 class Restaurant {
   final int id;
   final String name;
-  final String address;
   final String city;
   final double? rating; // optionnel
   final int? priceRange; // optionnel
@@ -15,7 +14,6 @@ class Restaurant {
   Restaurant({
     required this.id,
     required this.name,
-    required this.address,
     required this.city,
     this.rating,
     this.priceRange,
@@ -28,7 +26,6 @@ class Restaurant {
     return Restaurant(
       id: json['id'],
       name: json['name'],
-      address: json['address'],
       city: json['city'],
       rating: json['rating'] != null
           ? (json['rating'])
@@ -36,8 +33,14 @@ class Restaurant {
           : null,
       priceRange: json['price_range'],
       lastReservationDate: json['last_reservation_date'] != null ? DateTime.parse(json['last_reservation_date']) : null,
-      pendingReservationsCount: json['pending_reservations_count'] ?? 0,
+      pendingReservationsCount: json['pending_reservation_count'] ?? 0,
     );
+  }
+
+  // Helper pour transformer le prix entier en symboles €
+  String get priceSymbol {
+    if (priceRange == null) return '';
+    return '€' * priceRange!;
   }
 
   static Future<List<Restaurant>> getManagerRestaurants() async {
@@ -45,12 +48,8 @@ class Restaurant {
 
     if (response.statusCode == 200) {
       final List<dynamic> body = json.decode(response.body);
-
-      print('=== JSON REÇU : $body ===');
-
       return body.map((dynamic item) => Restaurant.fromJson(item)).toList();
     } else {
-      print('🚨 MESSAGE DU BACKEND : ${response.body}');
       throw Exception(
         'Failed to get manager'
         's restaurants',
