@@ -20,7 +20,7 @@ Content-Type: application/json
   "password": "Password1,"
 }
 
-### Test 1 MANU : récupération des réservations 'pending' du client connecté
+### Test récupération des réservations 'pending' du client connecté
 POST http://localhost:3000/rpc/get_user_reservations
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic3ViIjoieGFwaWdlb2xldEBlcGZjLmV1IiwibmFtZSI6IlhhdmllciIsInVzZXJfaWQiOjMsImV4cCI6MTc3OTA5NTIzOH0.fC_jcug69XL5tbEy7OhEhJDwD4JvxMGc6-YQxTMb7wo
 Content-Type: application/json
@@ -29,7 +29,7 @@ Content-Type: application/json
   "status_filter": "pending"
 }
 
-### Test 1 JO : récupération de toutes les informations liées à une reservation
+### Test récupération de toutes les informations liées à une reservation
 POST http://localhost:3000/rpc/get_reservation_manager
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoibWFuYWdlciIsInN1YiI6ImJlcGVuZWxsZUBlcGZjLmV1IiwibmFtZSI6IkJlbm_DrnQiLCJ1c2VyX2lkIjoyLCJleHAiOjE3NzkxMjA1NDd9.svVzgch3J0KXlwLEBIMbdi9f1X1L2nmP9cTo3rguY0I
 Context-Type: application/json
@@ -38,7 +38,7 @@ Context-Type: application/json
   "reservation_id": 7
 }
 
-### Test 2 MANU : récupération des réservations 'pending' du client connecté
+### Test récupération des réservations 'pending' du client connecté
 POST http://localhost:3000/rpc/get_client_reservations
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic3ViIjoieGFwaWdlb2xldEBlcGZjLmV1IiwibmFtZSI6IlhhdmllciIsInVzZXJfaWQiOjMsImV4cCI6MTc3OTMwNTQ1MH0.JLZyzEivSm5CjQQXhzLE_l9z9xvkw0JjuLYeWikCTaI
 Content-Type: application/json
@@ -47,12 +47,12 @@ Content-Type: application/json
   "status_filter": "pending"
 }
 
-### Test 1 ALI : récupération des restaurants pour le manager
+### Test récupération des restaurants pour le manager
 POST http://localhost:3000/rpc/get_restaurants_manager
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoibWFuYWdlciIsInN1YiI6ImJlcGVuZWxsZUBlcGZjLmV1IiwibmFtZSI6IkJlbm_DrnQiLCJ1c2VyX2lkIjoyLCJleHAiOjE3NzkzODY4OTN9.dAebgk_UxUlCw1Qa7Xe3Lbz2Ylu_F917f7wMIz_nXoI
 Content-Type: application/json
 
-### Test 2 JO : confirmer une reservation
+### Test confirmer une reservation
 POST http://localhost:3000/rpc/confirm_reservation_manager
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoibWFuYWdlciIsInN1YiI6ImJlcGVuZWxsZUBlcGZjLmV1IiwibmFtZSI6IkJlbm_DrnQiLCJ1c2VyX2lkIjoyLCJleHAiOjE3NzkzNzg3MjJ9.Kvrbv2sAYaxag2hoq_FKuxxLfxrDJJNIFfJpnY-tKdg
 Content-Type: application/json
@@ -62,5 +62,11 @@ Content-Type: application/json
   "table_ids": [1, 2]
 }
 
+### Test du search filter
+POST http://localhost:3000/rpc/find_restaurants_client
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoibWFuYWdlciIsInN1YiI6ImJlcGVuZWxsZUBlcGZjLmV1IiwibmFtZSI6IkJlbm_DrnQiLCJ1c2VyX2lkIjoyLCJleHAiOjE3Nzk0NTYwODB9.JEUajGIaxgYhlYFZ5Ls4ryRJN3PsxQkB93i8sY66yRY
+Content-Type: application/json
 
-
+{
+  "search_term": "   ga"
+}
