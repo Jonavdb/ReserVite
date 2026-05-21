@@ -7,14 +7,14 @@ class RestaurantTable {
   final int number;
   final int restaurant;
   final int capacity;
-  final bool? is_available;
+  final bool? isAvailable;
 
   RestaurantTable({
-    required this.id, required this.number, required this.restaurant, required this.capacity, this.is_available
+    required this.id, required this.number, required this.restaurant, required this.capacity, this.isAvailable
   });
 
   factory RestaurantTable.fromJson(Map<String, dynamic> json){
-    return RestaurantTable(id: json['table_id'], number: json['table_number'], restaurant: json['table_restaurant'], capacity: json['table_capacity'], is_available: json['table_is_available']);
+    return RestaurantTable(id: json['table_id'], number: json['table_number'], restaurant: json['table_restaurant'], capacity: json['table_capacity'], isAvailable: json['table_is_available']);
   }
 
   static Future<List<RestaurantTable>> getAvailableTables(int restaurantId, DateTime date) async {

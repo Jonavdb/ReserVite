@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_f03/models/manager/table.dart';
-import 'package:prbd_2526_f03/providers/manager_state_provider.dart';
-
 import '../../models/manager/reservation_detail.dart';
+import '../../providers/manager/manager_state_provider.dart';
 
 class AssignTables extends ConsumerStatefulWidget {
   final int reservationId;
@@ -15,7 +14,6 @@ class AssignTables extends ConsumerStatefulWidget {
   @override
   ConsumerState<AssignTables> createState() => _AssignTablesScreen();
 }
-
 
 class _AssignTablesScreen extends ConsumerState<AssignTables> {
   final Set<int> _selectedTableIds = {};
@@ -85,13 +83,13 @@ class _AssignTablesScreen extends ConsumerState<AssignTables> {
         child : assignTablesState.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => Center(child: Text('Erreur: $error')),
-            data: (reservation) {
+            data: (managerState) {
+              final reservation = managerState.reservations;
               final reservationDetail = reservation.cast<ReservationDetail?>().firstWhere((res) =>
               res?.id == widget.reservationId, orElse: () => null,);
               final tables = ref
-                  .read(managerStateProvider.notifier)
-                  .availableTables;
-              bool _isenough = _get_totalCapacity(tables) >= reservationDetail!.number_of_guests;
+                  .read(managerStateProvider).value?.availableTables ?? [];
+              bool _isenough = _get_totalCapacity(tables) >= reservationDetail!.numberOfGuests;
               return Column(
                 children: [
                   Padding(
@@ -110,7 +108,7 @@ class _AssignTablesScreen extends ConsumerState<AssignTables> {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Text('${reservationDetail.number_of_guests} convives'),
+                            Text('${reservationDetail.numberOfGuests} convives'),
                             Text(DateFormat('EEE dd/MM/yyyy HH:mm', 'fr_FR').format(reservationDetail.datetime)),
                           ],
                         ),
@@ -145,9 +143,9 @@ class _AssignTablesScreen extends ConsumerState<AssignTables> {
                                     const SizedBox(height: 4),
                                     Text(
                                       _isenough ?
-                                      ' V Capacité suffisante pour ${reservationDetail.number_of_guests} convives'
+                                      ' V Capacité suffisante pour ${reservationDetail.numberOfGuests} convives'
                                           : 'X Capacité insuffisante pour ${reservationDetail
-                                          .number_of_guests} convives',
+                                          .numberOfGuests} convives',
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: _isenough ? Colors.green.shade700 : Colors.yellow.shade700,
@@ -182,7 +180,7 @@ class _AssignTablesScreen extends ConsumerState<AssignTables> {
                       itemBuilder: (context, index) {
                         final table = tables[index];
                         final isSelected = _selectedTableIds.contains(table.id);
-                        final isAvailable = table.is_available ?? true;
+                        final isAvailable = table.isAvailable ?? true;
 
                         return Card(
                           margin: const EdgeInsets.only(bottom: 8),
