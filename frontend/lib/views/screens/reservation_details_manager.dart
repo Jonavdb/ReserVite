@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_f03/models/manager/reservation_detail.dart';
-import 'package:prbd_2526_f03/providers/manager_state_provider.dart';
-import 'package:prbd_2526_f03/providers/manager/reservation_detail_provider.dart';
-import 'package:prbd_2526_f03/providers/manager/reservation_detail_provider.dart';
+import 'package:prbd_2526_f03/providers/manager/manager_state_provider.dart';
 
 class ReservationDetailsManager extends ConsumerStatefulWidget {
   final int reservationId;
@@ -29,7 +26,6 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
     switch (status) {
       case 'pending':
         return const Color(0xFFFF9800);
-        ;
       case 'confirmed':
         return const Color(0xFF4CAF50);
       case 'completed':
@@ -40,7 +36,7 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
         return Colors.grey;
     }
   }
-  
+
   String _statusInFrench(String status) {
     switch (status) {
       case 'pending':
@@ -55,7 +51,6 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
         return "";
     }
   }
-  
 
   @override
   Widget build(BuildContext context) {
@@ -99,9 +94,10 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
         child: reservationDetailState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(child: Text('Erreur: $error')),
-          data: (reservation) {
-            final reservationDetail = reservation.cast<ReservationDetail?>().firstWhere((res) => res?.id == widget.reservationId, orElse: () => null,
-            );
+          data: (managerState) {
+            final reservations = managerState.reservations;
+            final reservationDetail = reservations.where((res) => res.id == widget.reservationId).firstOrNull;
+
             if (reservationDetail == null) {
               return const Center(child: Text('Aucune informations concernant cette reservation'));
             }
@@ -199,8 +195,8 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
                               const Icon(Icons.people, size: 20),
                               const SizedBox(width: 8),
                               Text(
-                                reservationDetail.number_of_guests > 1
-                                    ? 'Nombre de convives: ${reservationDetail.number_of_guests}'
+                                reservationDetail.numberOfGuests > 1
+                                    ? 'Nombre de convives: ${reservationDetail.numberOfGuests}'
                                     : 'Pas de convives',
                               ),
                             ],
@@ -212,7 +208,10 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
                               const SizedBox(width: 8),
                               const Text('Statut: '),
                               Chip(
-                                label: Text(_statusInFrench(reservationDetail.status), style: TextStyle(fontSize: 12, color: Colors.white)),
+                                label: Text(
+                                  _statusInFrench(reservationDetail.status),
+                                  style: TextStyle(fontSize: 12, color: Colors.white),
+                                ),
                                 backgroundColor: _colorStatus(reservationDetail.status),
                                 padding: EdgeInsets.zero,
                               ),
@@ -224,8 +223,8 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
                           const Text('Demandes spéciales', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 4),
                           Text(
-                            reservationDetail.special_requests?.isNotEmpty == true
-                                ? reservationDetail.special_requests!
+                            reservationDetail.specialRequests?.isNotEmpty == true
+                                ? reservationDetail.specialRequests!
                                 : 'Aucune requêtes spéciales',
                             style: TextStyle(color: Colors.grey[700]),
                           ),
@@ -239,26 +238,29 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child : reservationDetail.tableNumbers == null || reservationDetail.tableNumbers!.isEmpty
+                      child: reservationDetail.tableNumbers == null || reservationDetail.tableNumbers!.isEmpty
                           ? Text('Aucune table assignée')
-                       : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: List.generate(reservationDetail.tableNumbers!.length,
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: List.generate(
+                                reservationDetail.tableNumbers!.length,
                                 (index) => Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.table_restaurant, size: 20),
-                                const SizedBox(width: 8),
-                                Text('Table ${reservationDetail.tableNumbers![index]}'),
-                                const SizedBox(width: 16),
-                                Text('${reservationDetail.tableCapacities![index]} places', style: TextStyle(color: Colors.grey[600])
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.table_restaurant, size: 20),
+                                      const SizedBox(width: 8),
+                                      Text('Table ${reservationDetail.tableNumbers![index]}'),
+                                      const SizedBox(width: 16),
+                                      Text(
+                                        '${reservationDetail.tableCapacities![index]} places',
+                                        style: TextStyle(color: Colors.grey[600]),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ),
-                      ),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -277,23 +279,28 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
                     ),
                   if (reservationDetail.status != 'cancelled' && reservationDetail.status != 'completed') ...[
                     const SizedBox(height: 8),
-                    OutlinedButton.icon(onPressed: () {
-                      showDialog(context: context, builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('test Modale'),
-                          content: const Text ('supprimer ?'),
-                          actions : [
-                            TextButton(onPressed: () => Navigator.pop(context),
-                            child: const Text('Annuler'),
-                            ),
-                            TextButton(onPressed: () => _cancel(context, reservationDetail) ,
-                            child: const Text('Confirmer')
-                            ),
-                          ],
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('test Modale'),
+                              content: const Text('supprimer ?'),
+                              actions: [
+                                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler')),
+                                TextButton(
+                                  onPressed: () => _cancel(context, reservationDetail),
+                                  child: const Text('Confirmer'),
+                                ),
+                              ],
+                            );
+                          },
                         );
                       },
-                      );
-                    }, icon: const Icon(Icons.cancel), label: const Text('Annuler')),
+                      icon: const Icon(Icons.cancel),
+                      label: const Text('Annuler'),
+                    ),
                   ],
                 ],
               ),
@@ -303,7 +310,8 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
       ),
     );
   }
-  _cancel(BuildContext context, ReservationDetail res) async {
+
+  void _cancel(BuildContext context, ReservationDetail res) async {
     final notifier = ref.read(managerStateProvider.notifier);
     notifier.cancelledReservation(res);
     if (context.mounted) {

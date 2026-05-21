@@ -243,7 +243,7 @@ class _LoginState extends ConsumerState<Login> {
           final notifier = ref.read(currentUserProvider.notifier);
 
           if (notifier.isManager) {
-            Navigator.pushReplacementNamed(context, '/my_restaurants');
+            Navigator.pushReplacementNamed(context, '/list_restaurants_manager');
           } else {
             Navigator.pushReplacementNamed(context, '/list_reservation_client');
           }
