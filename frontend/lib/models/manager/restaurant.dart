@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:prbd_2526_f03/core/services/api_client.dart';
 
 class Restaurant {

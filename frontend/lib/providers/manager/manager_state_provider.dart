@@ -3,6 +3,7 @@ import 'package:prbd_2526_f03/models/manager/manager_state.dart';
 import 'package:prbd_2526_f03/models/manager/restaurant.dart';
 import '../../core/tools/abstract_async_notifier.dart';
 import '../../models/manager/reservation_detail.dart';
+import '../../models/manager/table.dart';
 
 final managerStateProvider = AsyncNotifierProvider<ManagerStateNotifier, ManagerState>(() => ManagerStateNotifier());
 
@@ -85,6 +86,44 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
       final List<ReservationDetail> reservationDetails = await ReservationDetail.getReservations(currentId);
       state = AsyncData(currentState.copyWith(reservations: reservationDetails));
     } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
+  Future<void> confirmReservation(ReservationDetail res, List<int> tableIds) async {
+
+    state = const AsyncValue.loading();
+    try {
+      await res.confirmReservation(res.id, tableIds);
+      await getReservation(res.id);
+    } catch(e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
+  Future<void> completeReservation(ReservationDetail res, DateTime simulatedTime) async {
+    final currentState = state.value ?? ManagerState();
+    state = const AsyncValue.loading();
+    final currentId = state.value?.currentRestaurantId;
+    try {
+      await res.completeReservation(res.id, simulatedTime);
+      final List<ReservationDetail> reservationList = await ReservationDetail.getReservations(currentId!);
+      state = AsyncData(currentState.copyWith(reservations: reservationList));
+    } catch (e) {
+      state = AsyncValue.error(
+        e.toString(),
+        StackTrace.current,
+      );
+    }
+  }
+
+  Future<void> loadAvailableTables(int restaurantId, DateTime date) async {
+    state = const AsyncValue.loading();
+    try {
+      final availableTables = await RestaurantTable.getAvailableTables(restaurantId, date);
+      final currentState = state.value ?? ManagerState();
+      state = AsyncData(currentState.copyWith(restaurantTables: availableTables));
+    } catch(e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
   }

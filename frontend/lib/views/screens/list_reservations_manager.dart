@@ -41,13 +41,17 @@ class _ListReservationsManagerScreenState extends ConsumerState<ListReservations
 
   @override
   Widget build(BuildContext context) {
+
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
     final reservationsState = ref.watch(managerStateProvider);
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () {}),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () { Navigator.pop(context);},
+        ),
         title: Text(widget.restaurantName),
         automaticallyImplyLeading: false,
         actions: [

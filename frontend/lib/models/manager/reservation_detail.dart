@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:prbd_2526_f03/core/services/api_client.dart';
 
 class ReservationDetail {
@@ -46,8 +45,10 @@ class ReservationDetail {
       restaurantName: json['restaurant_name'],
       clientEmail: json['client_email'],
       clientPhone: json['client_phone'],
-      tableCapacities: json['table_capacities'] != null ? List<int>.from(json['table_capacities']) : null,
-      tableNumbers: json['table_numbers'] != null ? List<int>.from(json['table_numbers']) : null,
+      tableCapacities: json['table_capacities'] != null ? List<int>.from(
+          json['table_capacities']) : null,
+      tableNumbers: json['table_numbers'] != null ? List<int>.from(
+          json['table_numbers']) : null,
     );
   }
 
@@ -75,15 +76,38 @@ class ReservationDetail {
     }
   }
 
-  static Future<List<ReservationDetail>> getReservations(int restaurantId) async {
+  static Future<List<ReservationDetail>> getReservations(
+      int restaurantId) async {
     final response = await ApiClient.post(
       'get_reservations_manager',
       body: json.encode({'restaurant_id': restaurantId}),
     );
     if (response.statusCode == 200) {
       final List<dynamic> body = jsonDecode(response.body);
-      return body.map((dynamic item) => ReservationDetail.fromJson(item)).toList();
+      return body
+          .map((dynamic item) => ReservationDetail.fromJson(item))
+          .toList();
     } else {
+      throw Exception('Status: ${response.statusCode} - ${response.body}');
+    }
+  }
+
+  Future<void> confirmReservation(int reservationId, List<int> tableIds) async {
+    final response = await ApiClient.post('confirm_reservation_manager',
+        body: jsonEncode(
+            {'reservation_id': reservationId, 'table_ids': tableIds}));
+    if (response.statusCode != 204) {
+      throw Exception('Status: ${response.statusCode} - ${response.body}');
+    }
+  }
+
+  Future<void> completeReservation(int reservationId, DateTime date) async {
+    final response = await ApiClient.post('complete_reservation_manager',
+        body: jsonEncode({
+          'reservation_id': reservationId,
+          'date_simulated': date.toIso8601String()
+        }));
+    if (response.statusCode != 204) {
       throw Exception('Status: ${response.statusCode} - ${response.body}');
     }
   }
