@@ -22,7 +22,9 @@ class TimeOnly implements Comparable<TimeOnly> {
   String toString(){
     return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
   }
-
+  String toFullString(){
+    return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}:${second.toString().padLeft(2, '0')}';
+  }
   int toMinutes(){
     return hour * 60 + minute;
   }

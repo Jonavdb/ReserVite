@@ -221,3 +221,23 @@ $$ language plpgsql security definer;
 grant execute on function complete_reservation_manager(int, timestamp) to authenticated;
 
 insert into reservations(client, restaurant, datetime, number_of_guests, status, special_requests) values ('3', '1', '2024-12-24 20:00:00', 4, 'pending', 'Table près de la fenêtre');
+
+create or replace function count_reservations_outside_new_slot(restaurant_id int, new_day_of_week int, new_start_time time, new_end_time time, service_id int)
+    returns int as
+$$
+declare
+    count int;
+begin
+    select count(*) into count
+    from reservations r join services s on s.id = service_id
+    where r.restaurant = restaurant_id
+    and extract(isodow from r.datetime) = s.day_of_week
+    and r.datetime::time between s.start_time and s.end_time
+    and r.status not in('cancelled'::status_type)
+    and (extract(isodow from r.datetime) != new_day_of_week or r.datetime::time not between new_start_time and new_end_time);
+    return count;
+
+end;
+$$  language plpgsql security definer;
+
+grant execute on function count_reservations_outside_new_slot(int, int, time, time, int) to authenticated;

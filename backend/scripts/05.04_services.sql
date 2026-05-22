@@ -53,4 +53,33 @@ $$ language plpgsql security definer;
 
 grant execute on function delete_service(int) to authenticated;
 
+create or replace function get_specific_service(service_id int, restaurant_id int)
+    returns deletable_services as
+$$
+declare
+    result deletable_services;
+begin
+    perform auth.check_logged();
+    if (auth.role() != 'manager') then
+        raise exception 'Vous n''etes pas autorise à accéder à ces tables';
+    end if;
+    select s.id, s.restaurant, s.day_of_week, s.start_time, s.end_time,
+           not exists(select 1
+                      from reservations r
+                      where r.restaurant = restaurant_id
+                        and extract(isodow from r.datetime) = s.day_of_week
+                        and r.datetime::time between s.start_time and s.end_time
+                        and r.status not in ('cancelled'::status_type)
+                      )
+    into result
+    from services s
+    where s.id = service_id;
+    return result;
+end;
+$$ language plpgsql security definer;
+
+grant execute on function  get_specific_service(int, int) to authenticated;
+
+
+
 
