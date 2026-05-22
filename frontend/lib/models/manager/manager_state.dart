@@ -11,9 +11,10 @@ class ManagerState {
   final List<RestaurantTable> restaurantTables;
   final List<Service> services;
   final int impactedReservations;
+  final int impactedServices;
   List<RestaurantTable> get availableTables => restaurantTables;
 
-  ManagerState({this.currentRestaurantId, this.restaurants = const [], this.reservations = const [], this.restaurantTables = const [], this.services = const[], this.impactedReservations = 0});
+  ManagerState({this.currentRestaurantId, this.restaurants = const [], this.reservations = const [], this.restaurantTables = const [], this.services = const[], this.impactedReservations = 0, this.impactedServices = 0});
 
   ManagerState copyWith({
     int? currentRestaurantId,
@@ -22,6 +23,7 @@ class ManagerState {
     List<RestaurantTable>? restaurantTables,
     List<Service>? services,
     int? impactedReservations,
+    int? impactedServices,
   }) {
     return ManagerState(
       currentRestaurantId: currentRestaurantId ?? this.currentRestaurantId,
@@ -30,6 +32,7 @@ class ManagerState {
       restaurantTables: restaurantTables ?? this.restaurantTables,
       services: services ?? this.services,
       impactedReservations: impactedReservations ?? this.impactedReservations,
+      impactedServices: impactedServices ?? this.impactedServices
     );
   }
 }

@@ -134,6 +134,20 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
     }
   }
 
+  Future<void> updateService(Service service, int dayOfWeek, TimeOnly newStartTime, TimeOnly newEndTime) async {
+    final currentState = state.value ?? ManagerState();
+    final currentId = state.value?.currentRestaurantId;
+
+    state = const AsyncValue.loading();
+    try {
+      await service.updateService(service.id, dayOfWeek, newStartTime, newEndTime);
+      final List<Service> listOfServices = await Service.getServiceForResturant(currentId!);
+      state = AsyncData(currentState.copyWith(services: listOfServices, impactedReservations: 0));
+    } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
   Future<void> confirmReservation(ReservationDetail res, List<int> tableIds) async {
 
     state = const AsyncValue.loading();
@@ -200,6 +214,17 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
       final impactedReservations = await Service.countReservationsOutsideNewSlot(
           restaurantId, dayOfWeek, newStartTime, newEndTime, serviceId);
       state = AsyncData(currentState.copyWith(impactedReservations: impactedReservations));
+    } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
+  Future<void> countImpactedServices(int restaurantId, int dayOfWeek, TimeOnly newStartTime, TimeOnly newEndTime, int serviceId) async {
+    final currentState = state.value ?? ManagerState();
+    try {
+      final impactedServices = await Service.countImpactedServices(
+          restaurantId, dayOfWeek, newStartTime, newEndTime, serviceId);
+      state = AsyncData(currentState.copyWith(impactedServices: impactedServices));
     } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }

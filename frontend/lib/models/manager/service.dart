@@ -10,14 +10,15 @@ class Service {
   final TimeOnly startTime;
   final TimeOnly endTime;
   final String day;
+  final int gap;
   bool isDeletable;
 
   Service({
-    required this.id, required this.dayOfWeek, required this.restaurant, required this.startTime, required this.endTime, required this.day, required this.isDeletable
+    required this.id, required this.dayOfWeek, required this.restaurant, required this.startTime, required this.endTime, required this.day, required this.gap,required this.isDeletable
   });
 
   factory Service.fromJson(Map<String, dynamic> json){
-    return Service(id: json['id'], dayOfWeek: json['day_of_week'], restaurant: json['restaurant'], startTime: TimeOnly.fromString(json['start_time']), endTime: TimeOnly.fromString(json['end_time']), day: getDayOfWeek(json['day_of_week']), isDeletable: (json['can_be_deleted']));
+    return Service(id: json['id'], dayOfWeek: json['day_of_week'], restaurant: json['restaurant'], startTime: TimeOnly.fromString(json['start_time']), endTime: TimeOnly.fromString(json['end_time']), day: getDayOfWeek(json['day_of_week']), gap: (json['gap']), isDeletable: (json['can_be_deleted']));
   }
 
   static Future<List<Service>> getServiceForResturant(int restaurantId) async {
@@ -63,6 +64,37 @@ class Service {
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as int;
     } else {
+      throw Exception('Status: ${response.statusCode} - ${response.body}');
+    }
+  }
+
+  static Future<int> countImpactedServices(int restaurantId, int dayOfWeek, TimeOnly newStartTime, TimeOnly newEndTime, int serviceId) async {
+    final response = await ApiClient.post('count_impacted_services',
+        body: jsonEncode(
+            {'restaurant_id': restaurantId,
+              'new_day_of_week': dayOfWeek,
+              'new_start_time': newStartTime.toFullString(),
+              'new_end_time': newEndTime.toFullString(),
+              'service_id': serviceId,
+            })
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as int;
+    } else {
+      throw Exception('Status: ${response.statusCode} - ${response.body}');
+    }
+  }
+
+  Future<void> updateService(int serviceId, int dayOfWeek, TimeOnly newStartTime, TimeOnly newEndTime) async {
+    final response = await ApiClient.post('update_service',
+        body: jsonEncode(
+                {'service_id': serviceId,
+                 'new_day_of_week': dayOfWeek,
+                 'new_start_time': newStartTime.toFullString(),
+                 'new_end_time': newEndTime.toFullString(),
+                })
+        );
+    if (response.statusCode != 204) {
       throw Exception('Status: ${response.statusCode} - ${response.body}');
     }
   }
