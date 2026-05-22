@@ -236,14 +236,14 @@ class ListReservationsClient extends ConsumerWidget {
                           "${parsedDate.minute.toString().padLeft(2, '0')}";
 
                       // récupération  du texte du nombre de convives
-                      final int guestCount = reservation.numberOfGuests ?? 0;
+                      final int guestCount = reservation.numberOfGuests;
                       final String guestsText = "$guestCount convive${guestCount > 1 ? 's' : ''}";
 
                       // récupération du texte nom du restaurant
-                      final String restaurantName = reservation.restaurantName;
+                      final String restaurantName = reservation.restaurant.name;
 
                       // récupération  du texte ville du restaurant
-                      final String restaurantCity = reservation.restaurantCity;
+                      final String restaurantCity = reservation.restaurant.city;
 
                       // affichage de toutes les données précécentes dans un widget Card
                       return Card(
