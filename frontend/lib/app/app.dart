@@ -5,6 +5,7 @@ import 'package:prbd_2526_f03/views/screens/list_reservations_client.dart';
 import 'package:prbd_2526_f03/views/screens/list_reservations_manager.dart';
 import 'package:prbd_2526_f03/views/screens/list_restaurants_manager.dart';
 import 'package:prbd_2526_f03/views/screens/reservation_details_manager.dart';
+import 'package:prbd_2526_f03/views/screens/restaurant_management_services.dart';
 import '../views/screens/login.dart';
 import '../views/screens/signup.dart';
 
@@ -45,6 +46,15 @@ class App extends ConsumerWidget {
                   reservationId: args['reservationId'],
                   restaurantId: args ['restaurantId'],
                   date: args ['date']
+              )
+          );
+        }
+        if (settings.name == '/restaurant_management_services') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+              builder: (context) => RestaurantManagementServices(
+                  restaurantId: args['restaurantId'],
+                  restaurantName: args['restaurantName'],
               )
           );
         }

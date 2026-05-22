@@ -210,7 +210,11 @@ class _ListReservationsManagerScreenState extends ConsumerState<ListReservations
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: 0,
-        onTap: (_) {},
+        onTap: (index) {
+          if (index == 1){
+            Navigator.pushNamed(context, '/restaurant_management_services', arguments: {'restaurantId' : widget.restaurantId, 'restaurantName' : widget.restaurantName});
+          }
+        },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Réservations'),
           BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Services'),

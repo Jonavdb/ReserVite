@@ -1,9 +1,11 @@
+
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:prbd_2526_f03/models/manager/manager_state.dart';
 import 'package:prbd_2526_f03/models/manager/restaurant.dart';
 import '../../core/tools/abstract_async_notifier.dart';
 import '../../models/manager/reservation_detail.dart';
 import '../../models/manager/table.dart';
+import '../../models/manager/service.dart';
 
 final managerStateProvider = AsyncNotifierProvider<ManagerStateNotifier, ManagerState>(() => ManagerStateNotifier());
 
@@ -124,6 +126,17 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
       final currentState = state.value ?? ManagerState();
       state = AsyncData(currentState.copyWith(restaurantTables: availableTables));
     } catch(e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
+  Future<void> loadServices(int restaurantId) async {
+    state = const AsyncValue.loading();
+    try {
+      final service = await Service.getServiceForResturant(restaurantId);
+      final currentState = state.value ?? ManagerState();
+      state = AsyncData(currentState.copyWith(services: service));
+    } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
   }
