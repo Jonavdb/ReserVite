@@ -127,7 +127,12 @@ class _RestaurantManagementServicesState extends ConsumerState<RestaurantManagem
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.edit),
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, '/edit_service', arguments: {
+                                      'serviceId' : dayServices[0].id,
+                                      'restaurantId' : widget.restaurantId
+                                    });
+                                  },
                                 ),
                                 IconButton(
                                   icon: Icon(Icons.delete, color: dayServices[0].isDeletable ? Colors.red : null),
@@ -172,7 +177,12 @@ class _RestaurantManagementServicesState extends ConsumerState<RestaurantManagem
                                   children: [
                                     IconButton(
                                       icon: const Icon(Icons.edit),
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        Navigator.pushNamed(context, '/edit_service', arguments: {
+                                          'serviceId' : service.id,
+                                          'restaurantId' : widget.restaurantId
+                                        });
+                                      },
                                     ),
                                     IconButton(
                                       icon: Icon(Icons.delete, color: service.isDeletable ? Colors.red : null),
