@@ -28,6 +28,16 @@ class Service {
     } else {
       throw Exception('Status: ${response.statusCode} - ${response.body}');    }
   }
+
+  Future<void> deleteService(int serviceId) async {
+    final response = await ApiClient.post('delete_service',
+        body: jsonEncode(
+            {'service_id': serviceId}));
+    if (response.statusCode != 204) {
+      throw Exception('Status: ${response.statusCode} - ${response.body}');
+    }
+  }
+
   static String getDayOfWeek(int dayOfWeek){
     switch(dayOfWeek){
       case 1: return 'Lundi';

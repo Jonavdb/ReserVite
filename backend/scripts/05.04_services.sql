@@ -38,4 +38,19 @@ $$ language plpgsql security definer;
 
 grant execute on function get_services_for_restaurant(int) to authenticated;
 
+create or replace function delete_service(service_id int)
+    returns void as
+$$
+begin
+    perform auth.check_logged();
+    if (auth.role() != 'manager') then
+        raise exception 'Vous n''etes pas autorise à accéder à ces tables';
+    end if;
+    delete from services s where s.id = service_id;
+end;
+
+$$ language plpgsql security definer;
+
+grant execute on function delete_service(int) to authenticated;
+
 

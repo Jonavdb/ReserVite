@@ -92,6 +92,20 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
     }
   }
 
+  Future<void> deleteService(Service service) async {
+    final currentState = state.value ?? ManagerState();
+    final currentId = state.value?.currentRestaurantId;
+
+    state = const AsyncValue.loading();
+    try {
+      await service.deleteService(service.id);
+      final List<Service> listOfServices = await Service.getServiceForResturant(currentId!);
+      state = AsyncData(currentState.copyWith(services: listOfServices));
+    } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
   Future<void> confirmReservation(ReservationDetail res, List<int> tableIds) async {
 
     state = const AsyncValue.loading();

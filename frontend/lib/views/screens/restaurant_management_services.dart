@@ -131,7 +131,23 @@ class _RestaurantManagementServicesState extends ConsumerState<RestaurantManagem
                                 ),
                                 IconButton(
                                   icon: Icon(Icons.delete, color: dayServices[0].isDeletable ? Colors.red : null),
-                                  onPressed: dayServices[0].isDeletable ? () {} : null,
+                                  onPressed: dayServices[0].isDeletable ? () {
+                                    showDialog(context: context, builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text('Supprimer le service'),
+                                        content: Text ('Êtes-vous sûr de vouloir supprimer le service du ${dayName} (${dayServices[0].startTime} - ${dayServices[0].endTime})?'),
+                                        actions : [
+                                          TextButton(onPressed: () => Navigator.pop(context),
+                                            child: const Text('Non'),
+                                          ),
+                                          TextButton(onPressed: () => _delete(context, dayServices[0]) ,
+                                              child: const Text('Oui', style: TextStyle(color: Colors.red),)
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                    );
+                                  } : null,
                                   tooltip: dayServices[0].isDeletable ? 'Supprimer le service' : 'Impossible de supprimer : des réservations non annulées utilisent ce service',
                                 ),
                               ],
@@ -160,7 +176,23 @@ class _RestaurantManagementServicesState extends ConsumerState<RestaurantManagem
                                     ),
                                     IconButton(
                                       icon: Icon(Icons.delete, color: service.isDeletable ? Colors.red : null),
-                                      onPressed: service.isDeletable ?  () {} : null,
+                                      onPressed: service.isDeletable ?  () {
+                                        showDialog(context: context, builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Text('Supprimer le service'),
+                                            content: Text ('Êtes-vous sûr de vouloir supprimer le service du ${dayName} (${service.startTime} - ${service.endTime})?'),
+                                            actions : [
+                                              TextButton(onPressed: () => Navigator.pop(context),
+                                                child: const Text('Non'),
+                                              ),
+                                              TextButton(onPressed: () => _delete(context, service) ,
+                                                  child: const Text('Oui', style: TextStyle(color: Colors.red),)
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                        );
+                                      } : null,
                                       tooltip: service.isDeletable ? 'Supprimer le service' : 'Impossible de supprimer : des réservations non annulées utilisent ce service',
                                     ),
                                   ],
@@ -206,5 +238,14 @@ class _RestaurantManagementServicesState extends ConsumerState<RestaurantManagem
         ],
       ),
     );
+  }
+
+  void _delete(BuildContext context, Service service) async {
+    final notifier = ref.read(managerStateProvider.notifier);
+    notifier.deleteService(service);
+    if (context.mounted) {
+      ref.read(managerStateProvider.notifier).loadServices(widget.restaurantId);
+      Navigator.of(context).pop(null);
+    }
   }
 }
