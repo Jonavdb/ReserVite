@@ -250,7 +250,13 @@ class ListReservationsClient extends ConsumerWidget {
                         margin: const EdgeInsets.only(bottom: 16),
                         child: InkWell(
                           onTap: () {
-                            // Action quand on clique sur le carte
+                            // Redirection vers les détails de la réservation
+                            // pushNamed utilisé pour que le goBack nous ramène directement sur la page courante
+                            Navigator.pushNamed(
+                                context,
+                                '/view_reservation_client',
+                                arguments: reservation.id,
+                            );
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
