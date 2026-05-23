@@ -7,9 +7,9 @@ import 'package:prbd_2526_f03/providers/manager/manager_state_provider.dart';
 
 class EditService extends ConsumerStatefulWidget {
   final int restaurantId;
-  final int serviceId;
+  final int ?serviceId;
 
-  const EditService({super.key, required this.restaurantId, required this.serviceId});
+  const EditService({super.key, required this.restaurantId, this.serviceId});
 
   @override
   ConsumerState<EditService> createState() => _EditServiceState();
@@ -23,11 +23,15 @@ class _EditServiceState extends ConsumerState<EditService> {
   int? _endMinute;
   Service? _service;
   bool? _isSavable;
+  bool is_long_enough = true;
+  bool start_before_end = true;
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.read(managerStateProvider.notifier).getService(widget.serviceId));
+    if (widget.serviceId != null) {
+      Future.microtask(() => ref.read(managerStateProvider.notifier).getService(widget.serviceId!));
+    }
   }
 
   @override
@@ -37,7 +41,7 @@ class _EditServiceState extends ConsumerState<EditService> {
     final editServiceState = ref.watch(managerStateProvider);
 
     editServiceState.whenData((managerState) {
-      _isSavable = managerState.impactedReservations == 0 && managerState.impactedServices == 0;
+      _isSavable = managerState.impactedReservations == 0 && managerState.impactedServices == 0 && _validateTime();
     });
 
     return Scaffold(
@@ -53,7 +57,10 @@ class _EditServiceState extends ConsumerState<EditService> {
         actions: [
           IconButton(
             tooltip: 'Enregistrer',
-            onPressed: _isSavable == false ? null : () => _update(context, _service!),
+            onPressed: _isSavable == false ? null :
+                _service != null ?
+                    () => _update(context, _service!)
+                    : () => _insert(context),
             icon: const Icon(Icons.save),
           ),
         ],
@@ -88,14 +95,19 @@ class _EditServiceState extends ConsumerState<EditService> {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(child: Text('Erreur: $error') ),
           data : (managerState) {
-            final service = managerState.services.firstWhere((service) => service.id == widget.serviceId);
-            _service = service;
-            _isSavable = managerState.impactedReservations == 0;
-            _newDayOfWeek ??= service.dayOfWeek;
-            _startHour ??= service.startTime.hour;
-            _startMinute ??= service.startTime.minute;
-            _endHour ??= service.endTime.hour;
-            _endMinute ??= service.endTime.minute;
+            _isSavable = managerState.impactedReservations == 0 && managerState.impactedServices == 0 && _validateTime();
+            final int gapInterval = managerState.currentRestaurantGap!;
+
+            if (widget.serviceId != null) {
+              final service = managerState.services.firstWhere((service) => service.id == widget.serviceId);
+              _service = service;
+              _newDayOfWeek ??= service.dayOfWeek;
+              _startHour ??= service.startTime.hour;
+              _startMinute ??= service.startTime.minute;
+              _endHour ??= service.endTime.hour;
+              _endMinute ??= service.endTime.minute;
+            }
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Form(
@@ -103,7 +115,7 @@ class _EditServiceState extends ConsumerState<EditService> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 DropdownButtonFormField<String>(
-                  initialValue: service.day.toString(),
+                  initialValue: widget.serviceId == null ? null : _service!.day.toString(),
                   decoration: const InputDecoration(
                     labelText: 'Jour',
                     border: OutlineInputBorder(),
@@ -119,8 +131,7 @@ class _EditServiceState extends ConsumerState<EditService> {
                   ],
                   onChanged: (val) {
                     _newDayOfWeek = Service.getDayNumber(val!);
-                    ref.read(managerStateProvider.notifier).countImpactedReservations(widget.restaurantId, _newDayOfWeek!, TimeOnly(hour: _startHour!, minute: _startMinute!, second: 0), TimeOnly(hour: _endHour!, minute: _endMinute!, second: 0), widget.serviceId);
-                    ref.read(managerStateProvider.notifier).countImpactedServices(widget.restaurantId,  _newDayOfWeek!, TimeOnly(hour: _startHour!, minute: _startMinute!, second: 0), TimeOnly(hour: _endHour!, minute: _endMinute!, second: 0), widget.serviceId);
+                    _checkImpacted();
                   },
                 ),
                 if (managerState.impactedReservations > 0) ... [
@@ -154,7 +165,7 @@ class _EditServiceState extends ConsumerState<EditService> {
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<int?>(
-                        initialValue: _startHour,
+                        initialValue: widget.serviceId == null ? null :  _startHour,
                         decoration: const InputDecoration(
                           labelText: 'Heure de début (heure)',
                           border: OutlineInputBorder(),
@@ -168,8 +179,8 @@ class _EditServiceState extends ConsumerState<EditService> {
                         ],
                         onChanged: (val) {
                           _startHour = val;
-                          ref.read(managerStateProvider.notifier).countImpactedReservations(widget.restaurantId, _newDayOfWeek!, TimeOnly(hour: _startHour!, minute: _startMinute!, second: 0), TimeOnly(hour: _endHour!, minute: _endMinute!, second: 0), widget.serviceId);
-                          ref.read(managerStateProvider.notifier).countImpactedServices(widget.restaurantId,  _newDayOfWeek!, TimeOnly(hour: _startHour!, minute: _startMinute!, second: 0), TimeOnly(hour: _endHour!, minute: _endMinute!, second: 0), widget.serviceId);
+                          _checkImpacted();
+                          _validateTime();
                         },
                       ),
                       ),
@@ -177,13 +188,13 @@ class _EditServiceState extends ConsumerState<EditService> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: DropdownButtonFormField<int?>(
-                        initialValue : _startMinute,
+                        initialValue : widget.serviceId == null ? null : _startMinute,
                         decoration: InputDecoration(
                           labelText: "Minutes",
                           border: OutlineInputBorder(),
                         ),
                         items: [
-                          for (int h = 0; h < 60; h+= service.gap)
+                          for (int h = 0; h < 60; h+= gapInterval)
                             DropdownMenuItem<int?>(
                               value: h,
                               child: Text('${h.toString().padLeft(2, '0')} h'),
@@ -191,9 +202,8 @@ class _EditServiceState extends ConsumerState<EditService> {
                         ],
                         onChanged: (val) {
                           _startMinute = val;
-                          ref.read(managerStateProvider.notifier).countImpactedReservations(widget.restaurantId, _newDayOfWeek!, TimeOnly(hour: _startHour!, minute: _startMinute!, second: 0), TimeOnly(hour: _endHour!, minute: _endMinute!, second: 0), widget.serviceId);
-                          ref.read(managerStateProvider.notifier).countImpactedServices(widget.restaurantId,  _newDayOfWeek!, TimeOnly(hour: _startHour!, minute: _startMinute!, second: 0), TimeOnly(hour: _endHour!, minute: _endMinute!, second: 0), widget.serviceId);
-
+                          _checkImpacted();
+                          _validateTime();
                         },
                       ),
                     ),
@@ -205,7 +215,7 @@ class _EditServiceState extends ConsumerState<EditService> {
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<int?>(
-                        initialValue: _endHour,
+                        initialValue: widget.serviceId == null ? null : _endHour,
                         decoration: const InputDecoration(
                           labelText: 'Heure de fin (heure)',
                           border: OutlineInputBorder(),
@@ -219,21 +229,21 @@ class _EditServiceState extends ConsumerState<EditService> {
                         ],
                         onChanged: (val) {
                           _endHour = val;
-                          ref.read(managerStateProvider.notifier).countImpactedReservations(widget.restaurantId, _newDayOfWeek!, TimeOnly(hour: _startHour!, minute: _startMinute!, second: 0), TimeOnly(hour: _endHour!, minute: _endMinute!, second: 0), widget.serviceId);
-                          ref.read(managerStateProvider.notifier).countImpactedServices(widget.restaurantId,  _newDayOfWeek!, TimeOnly(hour: _startHour!, minute: _startMinute!, second: 0), TimeOnly(hour: _endHour!, minute: _endMinute!, second: 0), widget.serviceId);
+                          _checkImpacted();
+                          _validateTime();
                         },
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: DropdownButtonFormField<int?>(
-                        initialValue: _endMinute,
+                        initialValue: widget.serviceId == null ? null : _endMinute,
                         decoration: const InputDecoration(
                           labelText: 'Minutes',
                           border: OutlineInputBorder(),
                         ),
                         items: [
-                          for (int h = 0; h < 60; h+= service.gap)
+                          for (int h = 0; h < 60; h+= gapInterval)
                             DropdownMenuItem<int?>(
                               value: h,
                               child: Text('${h.toString().padLeft(2, '0')} h'),
@@ -241,13 +251,37 @@ class _EditServiceState extends ConsumerState<EditService> {
                         ],
                         onChanged: (val) {
                           _endMinute = val;
-                          ref.read(managerStateProvider.notifier).countImpactedReservations(widget.restaurantId, _newDayOfWeek!, TimeOnly(hour: _startHour!, minute: _startMinute!, second: 0), TimeOnly(hour: _endHour!, minute: _endMinute!, second: 0), widget.serviceId);
-                          ref.read(managerStateProvider.notifier).countImpactedServices(widget.restaurantId,  _newDayOfWeek!, TimeOnly(hour: _startHour!, minute: _startMinute!, second: 0), TimeOnly(hour: _endHour!, minute: _endMinute!, second: 0), widget.serviceId);
+                          _checkImpacted();
+                          _validateTime();
                         },
                       ),
                     ),
                   ],
                 ),
+                if (!start_before_end) ... [
+                  Card (
+                      color: null,
+                      child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text(
+                            'L\'heure de début doit être avant l\'heure de fin',
+                            style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                          )
+                      )
+                  ),
+                ]
+                else if (!is_long_enough) ... [
+                  Card (
+                      color: null,
+                      child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text(
+                            'La durée du service doit être d\'au moins 1 heure',
+                            style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                          )
+                      )
+                  ),
+                ]
               ],
             ),
           ),
@@ -264,6 +298,42 @@ class _EditServiceState extends ConsumerState<EditService> {
     if (context.mounted) {
       ref.read(managerStateProvider.notifier).loadServices(widget.restaurantId);
       Navigator.of(context).pop(null);
+    }
+  }
+
+  void _insert(BuildContext context) async {
+    final notifier = ref.read(managerStateProvider.notifier);
+    await notifier.createService(widget.restaurantId, _newDayOfWeek!,TimeOnly(hour: _startHour!, minute: _startMinute!, second: 0), TimeOnly(hour: _endHour!, minute: _endMinute!, second: 0));
+    if (context.mounted) {
+      ref.read(managerStateProvider.notifier).loadServices(widget.restaurantId);
+      Navigator.of(context).pop(null);
+    }
+  }
+
+  bool _validateTime() {
+    if (_startHour == null || _startMinute == null || _endHour == null || _endMinute == null){
+      return false;
+    }
+    final startTime = TimeOnly(hour: _startHour!, minute: _startMinute!, second: 0);
+    final endTime = TimeOnly(hour: _endHour!, minute: _endMinute!, second: 0);
+    int duration = endTime.toMinutes() - startTime.toMinutes();
+    is_long_enough = duration >= 60;
+    start_before_end = startTime.isBefore(endTime);
+    return is_long_enough && start_before_end;
+  }
+
+  void _checkImpacted() {
+    if (_newDayOfWeek == null || _startHour == null || _startMinute == null || _endHour == null || _endMinute == null) {
+      return;
+    }
+    final startTime = TimeOnly(hour: _startHour!, minute: _startMinute!, second: 0);
+    final endTime = TimeOnly(hour: _endHour!, minute: _endMinute!, second: 0);
+    if (widget.serviceId != null){
+      ref.read(managerStateProvider.notifier).countImpactedReservations(widget.restaurantId, _newDayOfWeek!, startTime, endTime, widget.serviceId!);
+      ref.read(managerStateProvider.notifier).countImpactedServices(widget.restaurantId,  _newDayOfWeek!, startTime, endTime, widget.serviceId!);
+
+    } else {
+      ref.read(managerStateProvider.notifier).countImpactedServices(widget.restaurantId,  _newDayOfWeek!, startTime, endTime, -1);
     }
   }
 }

@@ -18,7 +18,7 @@ $$
 begin
     perform auth.check_logged();
     if (auth.role() != 'manager') then
-        raise exception 'Vous n''etes pas autorise à accéder à ces tables';
+        raise exception 'Vous n''etes pas autorise à accéder à ces services';
 end if;
     if not exists(select 1 from restaurant_managers where restaurant_managers.restaurant = restaurant_id and restaurant_managers.manager = auth.id()) then
         raise exception 'Vous n''êtes pas manager de ce restaurant';
@@ -45,7 +45,7 @@ $$
 begin
     perform auth.check_logged();
     if (auth.role() != 'manager') then
-        raise exception 'Vous n''etes pas autorise à accéder à ces tables';
+        raise exception 'Vous n''etes pas autorise à accéder à ces services';
     end if;
     delete from services s where s.id = service_id;
 end;
@@ -62,7 +62,7 @@ declare
 begin
     perform auth.check_logged();
     if (auth.role() != 'manager') then
-        raise exception 'Vous n''etes pas autorise à accéder à ces tables';
+        raise exception 'Vous n''etes pas autorise à accéder à ces services';
     end if;
     select s.id, s.restaurant, s.day_of_week, s.start_time, s.end_time, rest.slot_duration,
            not exists(select 1
@@ -88,7 +88,7 @@ $$
 begin
     perform auth.check_logged();
     if (auth.role() != 'manager') then
-        raise exception 'Vous n''etes pas autorise à accéder à ces tables';
+        raise exception 'Vous n''etes pas autorise à accéder à ces services';
     end if;
     update services
     set day_of_week = new_day_of_week,
@@ -113,7 +113,7 @@ begin
       and s.day_of_week = new_day_of_week
       and start_time < new_end_time
       and end_time > new_start_time
-      and s.id != service_id;
+      and (s.id != service_id or service_id = -1);
     return count;
 
 end;
@@ -121,4 +121,17 @@ $$  language plpgsql security definer;
 
 grant execute on function count_impacted_services(int, int, time, time, int) to authenticated;
 
+create or replace function create_service(restaurant_id int, new_day_of_week int, new_start_time time, new_end_time time)
+    returns void as
+$$
+begin
+    perform auth.check_logged();
+    if (auth.role() != 'manager') then
+        raise exception 'Vous n''etes pas autorise à accéder à ces services';
+    end if;
+    insert into services (restaurant, day_of_week, start_time, end_time) values (restaurant_id, new_day_of_week, new_start_time, new_end_time);
+end;
+$$ language plpgsql security definer;
+
+grant execute on function create_service(int, int, time, time) to authenticated;
 

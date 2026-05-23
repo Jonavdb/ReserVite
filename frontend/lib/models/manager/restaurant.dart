@@ -42,6 +42,17 @@ class Restaurant {
     return '€' * priceRange!;
   }
 
+  static Future<int> getRestaurantGap(int restaurant_id) async {
+    final response = await ApiClient.post('get_restaurant_gap', body: json.encode ({'restaurant_id': restaurant_id}));
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as int;
+    } else {
+      throw Exception(
+        'Failed to get restaurant gap',
+      );
+    }
+  }
+
   static Future<List<Restaurant>> getManagerRestaurants() async {
     final response = await ApiClient.post('get_restaurants_manager', body: json.encode({}));
 

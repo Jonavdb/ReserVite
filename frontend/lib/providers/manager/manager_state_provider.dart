@@ -148,6 +148,20 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
     }
   }
 
+  Future<void> createService(int restaurantId, int dayOfWeek, TimeOnly startTime, TimeOnly endTime) async {
+    final currentState = state.value ?? ManagerState();
+    final currentId = state.value?.currentRestaurantId;
+
+    state = const AsyncValue.loading();
+    try {
+      await Service.createService(restaurantId, dayOfWeek, startTime, endTime);
+      final List<Service> listOfServices = await Service.getServiceForResturant(currentId!);
+      state = AsyncData(currentState.copyWith(services: listOfServices, impactedReservations: 0));
+    } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
   Future<void> confirmReservation(ReservationDetail res, List<int> tableIds) async {
 
     state = const AsyncValue.loading();
@@ -190,8 +204,9 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
     state = const AsyncValue.loading();
     try {
       final service = await Service.getServiceForResturant(restaurantId);
+      final gap = await Restaurant.getRestaurantGap(restaurantId);
       final currentState = state.value ?? ManagerState();
-      state = AsyncData(currentState.copyWith(services: service, impactedReservations: 0));
+      state = AsyncData(currentState.copyWith(services: service, currentRestaurantGap : gap, impactedReservations: 0));
     } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
@@ -225,6 +240,17 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
       final impactedServices = await Service.countImpactedServices(
           restaurantId, dayOfWeek, newStartTime, newEndTime, serviceId);
       state = AsyncData(currentState.copyWith(impactedServices: impactedServices));
+    } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
+  Future<void> getRestaurantGap(int restaurantId) async {
+    final currentState = state.value ?? ManagerState();
+    state = const AsyncValue.loading();
+    try {
+      final gap = await Restaurant.getRestaurantGap(restaurantId);
+      state = AsyncData(currentState.copyWith(currentRestaurantGap: gap));
     } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }

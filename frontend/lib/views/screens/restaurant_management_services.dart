@@ -219,7 +219,11 @@ class _RestaurantManagementServicesState extends ConsumerState<RestaurantManagem
                     right: 16,
                     child: FloatingActionButton(
                       heroTag: 'services_fab',
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/edit_service', arguments: {
+                          'restaurantId' : widget.restaurantId
+                        });
+                      },
                       child: const Icon(Icons.add),
                     ),
                   ),

@@ -99,6 +99,20 @@ class Service {
     }
   }
 
+  static Future<void> createService(int restaurantId, int dayOfWeek, TimeOnly newStartTime, TimeOnly newEndTime) async {
+    final response = await ApiClient.post('create_service',
+        body : jsonEncode(
+                {'restaurant_id': restaurantId,
+                  'new_day_of_week': dayOfWeek,
+                  'new_start_time': newStartTime.toFullString(),
+                  'new_end_time': newEndTime.toFullString(),
+                })
+        );
+    if (response.statusCode != 201) {
+      throw Exception('Status: ${response.statusCode} - ${response.body}');
+    }
+  }
+
   static String getDayOfWeek(int dayOfWeek){
     switch(dayOfWeek){
       case 1: return 'Lundi';

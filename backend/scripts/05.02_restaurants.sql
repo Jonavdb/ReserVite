@@ -59,3 +59,19 @@ end;
 $$ language plpgsql security definer;
 
 grant execute on function get_restaurants_manager() to authenticated;
+
+create or replace function get_restaurant_gap(restaurant_id int) returns int as
+$$
+declare
+    gap  int;
+begin
+    perform auth.check_logged();
+    if (auth.role() != 'manager') then
+        raise exception 'Vous n''êtes pas autorisé à accéder à la liste des restaurants!';
+    end if;
+    select restaurants.slot_duration into gap from restaurants where id = restaurant_id;
+    return gap;
+end;
+$$ language plpgsql security definer;
+
+grant execute on function get_restaurant_gap(int) to authenticated;
