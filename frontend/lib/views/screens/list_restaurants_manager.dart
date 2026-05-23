@@ -185,8 +185,6 @@ class ListRestaurantsManager extends ConsumerWidget {
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
-                      ref.read(managerStateProvider.notifier).getReservations(restaurant.id);
-
                       Navigator.pushNamed(
                         context,
                         '/list_reservations_manager',

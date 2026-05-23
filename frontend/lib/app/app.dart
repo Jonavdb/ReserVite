@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:prbd_2526_f03/views/screens/assign_tables.dart';
+import 'package:prbd_2526_f03/views/screens/edit_service.dart';
 import 'package:prbd_2526_f03/views/screens/list_reservations_client.dart';
 import 'package:prbd_2526_f03/views/screens/list_reservations_manager.dart';
 import 'package:prbd_2526_f03/views/screens/list_restaurants_manager.dart';
 import 'package:prbd_2526_f03/views/screens/reservation_details_manager.dart';
+import 'package:prbd_2526_f03/views/screens/restaurant_management_services.dart';
 import '../views/screens/login.dart';
 import '../views/screens/signup.dart';
 
@@ -46,6 +48,23 @@ class App extends ConsumerWidget {
                   restaurantId: args ['restaurantId'],
                   date: args ['date']
               )
+          );
+        }
+        if (settings.name == '/restaurant_management_services') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+              builder: (context) => RestaurantManagementServices(
+                  restaurantId: args['restaurantId'],
+                  restaurantName: args['restaurantName'],
+              )
+          );
+        }
+        if (settings.name == '/edit_service') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+              builder: (context) => EditService(
+                  restaurantId: args['restaurantId'],
+                  serviceId: args['serviceId'])
           );
         }
         return null;

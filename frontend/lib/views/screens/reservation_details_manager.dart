@@ -278,7 +278,7 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
                       label: const Text('Confirmer et assigner les tables'),
                     ),
 
-                  if (reservationDetail.status == 'confirmed')
+                  if (reservationDetail.status == 'confirmed') ... [
                     ElevatedButton.icon(
                       onPressed: isPast ? null :  () {
                         showDialog(context: context, builder: (BuildContext context) {
@@ -306,6 +306,7 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
                         child: const Text('La réservation ne peut être terminée que durant son service ou après celui-ci', style: TextStyle(color: Colors.red), textAlign: TextAlign.center,),
                       ),
                     ],
+                  ],
                   if (reservationDetail.status != 'cancelled' && reservationDetail.status != 'completed') ...[
                     const SizedBox(height: 8),
                     OutlinedButton.icon(onPressed: () {
