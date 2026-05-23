@@ -4,13 +4,8 @@ create type deletable_services as (
     day_of_week int,
     start_time time,
     end_time time,
-    gap int,
     can_be_deleted boolean
 );
-
-
-
-
 
 create or replace function get_services_for_restaurant(restaurant_id int)
     returns setof deletable_services as
@@ -23,7 +18,7 @@ end if;
     if not exists(select 1 from restaurant_managers where restaurant_managers.restaurant = restaurant_id and restaurant_managers.manager = auth.id()) then
         raise exception 'Vous n''êtes pas manager de ce restaurant';
 end if;
-return query select s.id, s.restaurant, s.day_of_week, s.start_time, s.end_time, rest.slot_duration,
+return query select s.id, s.restaurant, s.day_of_week, s.start_time, s.end_time,
              not exists(
                 select 1
                 from reservations r
@@ -33,7 +28,8 @@ return query select s.id, s.restaurant, s.day_of_week, s.start_time, s.end_time,
                 and r.status not in ('cancelled'::status_type)
              ) as can_be_deleted
              from services s join restaurants rest on s.restaurant = rest.id
-             where s.restaurant = restaurant_id;
+             where s.restaurant = restaurant_id
+             order by s.day_of_week, s.start_time;
 end
 $$ language plpgsql security definer;
 
@@ -64,7 +60,7 @@ begin
     if (auth.role() != 'manager') then
         raise exception 'Vous n''etes pas autorise à accéder à ces services';
     end if;
-    select s.id, s.restaurant, s.day_of_week, s.start_time, s.end_time, rest.slot_duration,
+    select s.id, s.restaurant, s.day_of_week, s.start_time, s.end_time,
            not exists(select 1
                       from reservations r
                       where r.restaurant = restaurant_id

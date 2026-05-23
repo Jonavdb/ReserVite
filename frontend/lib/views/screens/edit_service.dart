@@ -32,6 +32,7 @@ class _EditServiceState extends ConsumerState<EditService> {
     if (widget.serviceId != null) {
       Future.microtask(() => ref.read(managerStateProvider.notifier).getService(widget.serviceId!));
     }
+    Future.microtask(() => ref.read(managerStateProvider.notifier).resetImpacts());
   }
 
   @override
@@ -52,7 +53,7 @@ class _EditServiceState extends ConsumerState<EditService> {
             Navigator.pop(context);
           },
         ),
-        title: const Text('Modifier le service'),
+        title: Text(widget.serviceId != null ? 'Modifier le service' : 'Ajouter un service'),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
@@ -152,7 +153,7 @@ class _EditServiceState extends ConsumerState<EditService> {
                       child: Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: Text(
-                            '${managerState.impactedServices} services seraient impactée(s) par ce changement',
+                            'Ce service chevauche avec un service existant le ${Service.getDayOfWeek(_newDayOfWeek!)}',
                             style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                           )
                       )
@@ -197,7 +198,7 @@ class _EditServiceState extends ConsumerState<EditService> {
                           for (int h = 0; h < 60; h+= gapInterval)
                             DropdownMenuItem<int?>(
                               value: h,
-                              child: Text('${h.toString().padLeft(2, '0')} h'),
+                              child: Text('${h.toString().padLeft(2, '0')} min'),
                             ),
                         ],
                         onChanged: (val) {
@@ -246,7 +247,7 @@ class _EditServiceState extends ConsumerState<EditService> {
                           for (int h = 0; h < 60; h+= gapInterval)
                             DropdownMenuItem<int?>(
                               value: h,
-                              child: Text('${h.toString().padLeft(2, '0')} h'),
+                              child: Text('${h.toString().padLeft(2, '0')} min'),
                             ),
                         ],
                         onChanged: (val) {
@@ -296,6 +297,9 @@ class _EditServiceState extends ConsumerState<EditService> {
     final notifier = ref.read(managerStateProvider.notifier);
     await notifier.updateService(service, _newDayOfWeek!, TimeOnly(hour: _startHour!, minute: _startMinute!, second: 0), TimeOnly(hour: _endHour!, minute: _endMinute!, second: 0));
     if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Service mis à jour avec succès')),
+      );
       ref.read(managerStateProvider.notifier).loadServices(widget.restaurantId);
       Navigator.of(context).pop(null);
     }
@@ -305,6 +309,9 @@ class _EditServiceState extends ConsumerState<EditService> {
     final notifier = ref.read(managerStateProvider.notifier);
     await notifier.createService(widget.restaurantId, _newDayOfWeek!,TimeOnly(hour: _startHour!, minute: _startMinute!, second: 0), TimeOnly(hour: _endHour!, minute: _endMinute!, second: 0));
     if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Service créé avec succès')),
+      );
       ref.read(managerStateProvider.notifier).loadServices(widget.restaurantId);
       Navigator.of(context).pop(null);
     }
@@ -322,18 +329,18 @@ class _EditServiceState extends ConsumerState<EditService> {
     return is_long_enough && start_before_end;
   }
 
-  void _checkImpacted() {
+  void _checkImpacted() async {
     if (_newDayOfWeek == null || _startHour == null || _startMinute == null || _endHour == null || _endMinute == null) {
       return;
     }
     final startTime = TimeOnly(hour: _startHour!, minute: _startMinute!, second: 0);
     final endTime = TimeOnly(hour: _endHour!, minute: _endMinute!, second: 0);
     if (widget.serviceId != null){
-      ref.read(managerStateProvider.notifier).countImpactedReservations(widget.restaurantId, _newDayOfWeek!, startTime, endTime, widget.serviceId!);
-      ref.read(managerStateProvider.notifier).countImpactedServices(widget.restaurantId,  _newDayOfWeek!, startTime, endTime, widget.serviceId!);
+      await ref.read(managerStateProvider.notifier).countImpactedReservations(widget.restaurantId, _newDayOfWeek!, startTime, endTime, widget.serviceId!);
+      await ref.read(managerStateProvider.notifier).countImpactedServices(widget.restaurantId,  _newDayOfWeek!, startTime, endTime, widget.serviceId!);
 
     } else {
-      ref.read(managerStateProvider.notifier).countImpactedServices(widget.restaurantId,  _newDayOfWeek!, startTime, endTime, -1);
+      await ref.read(managerStateProvider.notifier).countImpactedServices(widget.restaurantId,  _newDayOfWeek!, startTime, endTime, -1);
     }
   }
 }

@@ -255,4 +255,9 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
   }
+
+  Future<void> resetImpacts() async {
+    final currentState = state.value ?? ManagerState();
+    state = AsyncData(currentState.copyWith(impactedReservations: 0, impactedServices: 0));
+  }
 }

@@ -258,6 +258,9 @@ class _RestaurantManagementServicesState extends ConsumerState<RestaurantManagem
     final notifier = ref.read(managerStateProvider.notifier);
     notifier.deleteService(service);
     if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Service supprimé avec succès')),
+      );
       ref.read(managerStateProvider.notifier).loadServices(widget.restaurantId);
       Navigator.of(context).pop(null);
     }

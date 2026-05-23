@@ -10,15 +10,14 @@ class Service {
   final TimeOnly startTime;
   final TimeOnly endTime;
   final String day;
-  final int gap;
   bool isDeletable;
 
   Service({
-    required this.id, required this.dayOfWeek, required this.restaurant, required this.startTime, required this.endTime, required this.day, required this.gap,required this.isDeletable
+    required this.id, required this.dayOfWeek, required this.restaurant, required this.startTime, required this.endTime, required this.day,required this.isDeletable
   });
 
   factory Service.fromJson(Map<String, dynamic> json){
-    return Service(id: json['id'], dayOfWeek: json['day_of_week'], restaurant: json['restaurant'], startTime: TimeOnly.fromString(json['start_time']), endTime: TimeOnly.fromString(json['end_time']), day: getDayOfWeek(json['day_of_week']), gap: (json['gap']), isDeletable: (json['can_be_deleted']));
+    return Service(id: json['id'], dayOfWeek: json['day_of_week'], restaurant: json['restaurant'], startTime: TimeOnly.fromString(json['start_time']), endTime: TimeOnly.fromString(json['end_time']), day: getDayOfWeek(json['day_of_week']), isDeletable: (json['can_be_deleted']));
   }
 
   static Future<List<Service>> getServiceForResturant(int restaurantId) async {
