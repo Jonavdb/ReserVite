@@ -55,4 +55,15 @@ class Restaurant {
       );
     }
   }
+
+  static Future<List<Restaurant>> getFilteredRestaurants(String searchTerm) async {
+    final response = await ApiClient.post('find_restaurants_client', body: json.encode({'search_term': searchTerm}));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> body = json.decode(response.body);
+      return body.map((dynamic item) => Restaurant.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to filtered restaurants');
+    }
+  }
 }

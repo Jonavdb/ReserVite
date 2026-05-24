@@ -50,13 +50,13 @@ begin
             resto.id, resto.name, resto.city, resto.rating, resto.price_range,
             v.max_res_date, v.pending_count
         from restaurants resto
-                 join restaurant_managers rm on rm.restaurant = resto.id
-                 join v_restaurant_stats v on v.restaurant_id = resto.id    -- on réutilise la vue ici
+            join restaurant_managers rm on rm.restaurant = resto.id
+            join v_restaurant_stats v on v.restaurant_id = resto.id    -- on réutilise la vue ici
         where rm.manager = auth.id()
-
-        order by (rlr.max_res_date is null) asc, -- les restaurants SANS résa apparaîssent après
-        rlr.max_res_date desc,                   -- tri par date de réservation la plus récente (décroissant)
-        resto.name asc;                          -- en cas d'égalité, ordre alpha du nom
+        order by
+            (v.max_res_date is null) asc, -- les restaurants SANS résa apparaîssent après
+            v.max_res_date desc,                   -- tri par date de réservation la plus récente (décroissant)
+            resto.name asc;                        -- en cas d'égalité, ordre alpha du nom
 end;
 $$ language plpgsql security definer;
 

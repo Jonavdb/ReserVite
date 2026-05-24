@@ -91,12 +91,11 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
   }
 
   Future<void> confirmReservation(ReservationDetail res, List<int> tableIds) async {
-
     state = const AsyncValue.loading();
     try {
       await res.confirmReservation(res.id, tableIds);
       await getReservation(res.id);
-    } catch(e) {
+    } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
   }
@@ -110,10 +109,7 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
       final List<ReservationDetail> reservationList = await ReservationDetail.getReservations(currentId!);
       state = AsyncData(currentState.copyWith(reservations: reservationList));
     } catch (e) {
-      state = AsyncValue.error(
-        e.toString(),
-        StackTrace.current,
-      );
+      state = AsyncValue.error(e.toString(), StackTrace.current);
     }
   }
 
@@ -123,7 +119,7 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
       final availableTables = await RestaurantTable.getAvailableTables(restaurantId, date);
       final currentState = state.value ?? ManagerState();
       state = AsyncData(currentState.copyWith(restaurantTables: availableTables));
-    } catch(e) {
+    } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
   }
