@@ -32,6 +32,18 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
     );
   }
 
+  Future<void> refreshRestaurants() async {
+    final currentState = state.value ?? ClientState(currentFilter: '', reservations: [], restaurants: []);
+
+    state = AsyncValue.loading();
+    try {
+      final restaurants = await Restaurant.getRestaurants();
+      state = AsyncData(currentState.copyWith(restaurants: restaurants, searchedInput: ''));
+    } catch (e) {
+      state = AsyncValue.error("Failed to refresh manger's restaurants", StackTrace.current);
+    }
+  }
+
   // Fonction qui permet de récupérer les  réservations du client connecté..
   // selon un filtre choisis (si aucun filtre, on récupère tout)
   Future<void> changeFilter(String newFilter) async {

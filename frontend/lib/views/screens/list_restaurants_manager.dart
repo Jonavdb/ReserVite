@@ -4,27 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:prbd_2526_f03/providers/manager/manager_state_provider.dart';
 import 'package:prbd_2526_f03/providers/security/current_user_provider.dart';
 
+import '../../core/tools/date_utils.dart';
+
 class ListRestaurantsManager extends ConsumerWidget {
   const ListRestaurantsManager({super.key});
-
-  // permet d'avoir "aujourd'hui / hier / date complète"
-  String _formatRelativeDate(DateTime? date, DateTime simulatedNow) {
-    if (date == null) return '';
-
-    // on efface les heures/minutes pour comparer uniquement les jours
-    final justDate = DateTime(date.year, date.month, date.day);
-    final justNow = DateTime(simulatedNow.year, simulatedNow.month, simulatedNow.day);
-    final differenceInDays = justNow.difference(justDate).inDays;
-
-    if (differenceInDays == 0) {
-      return "aujourd'hui";
-    } else if (differenceInDays == 1) {
-      return "hier";
-    } else {
-      // Format : mer. 04/12/2024
-      return DateFormat('EEE dd/MM/yyyy', 'fr_FR').format(date);
-    }
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -119,7 +102,7 @@ class ListRestaurantsManager extends ConsumerWidget {
                 final hasRating = restaurant.rating != null;
                 final hasPrice = restaurant.priceRange != null;
                 final hasLastReservation = restaurant.lastReservationDate != null;
-                final relativeDate = _formatRelativeDate(restaurant.lastReservationDate, simulatedTime);
+                final relativeDate = formatRelativeDate(restaurant.lastReservationDate, simulatedTime);
                 final pendingCount = restaurant.pendingReservationsCount;
 
                 return Card(

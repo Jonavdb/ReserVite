@@ -34,6 +34,24 @@ from restaurants resto
 left join restaurant_last_res rlr on resto.id = rlr.restaurant
 left join restaurant_pending rp on resto.id = rp.restaurant;
 
+-- Get all restaurants
+drop function if exists get_restaurants;
+create or replace function get_restaurants() returns setof restaurant_card_info as
+$$
+begin
+    perform auth.check_logged();
+
+    return query
+        select
+            resto.id, resto.name, resto.city, resto.rating, resto.price_range,
+            v.max_res_date, v.pending_count
+        from restaurants resto
+            join v_restaurant_stats v on v.restaurant_id = resto.id;    -- on réutilise la vue ici
+end;
+$$ language plpgsql security definer;
+
+grant execute on function get_restaurants() to authenticated;
+
 ---- Get manager's restaurants ----
 drop function if exists get_restaurants_manager;
 create or replace function get_restaurants_manager() returns setof restaurant_card_info as
@@ -63,24 +81,36 @@ $$ language plpgsql security definer;
 grant execute on function get_restaurants_manager() to authenticated;
 
 ---- Search filter restaurant ----
-drop function if exists find_restaurants_client(text);
+drop function if exists find_restaurants_client;
 create or replace function find_restaurants_client(search_term text default '') returns setof restaurant_card_info as
 $$
 begin
     perform auth.check_logged();
 
     return query
+        -- calcule les stats uniquement pour le client connecté
+        with client_stats as (
+            select r.restaurant,
+                   max(r.datetime) as max_res_date,
+                   count(r.id) filter (where r.status = 'pending') as pending_count
+            from reservations r
+            where r.client = auth.id()
+            group by r.restaurant
+        )
         select
             resto.id, resto.name, resto.city, resto.rating, resto.price_range,
-            v.max_res_date, v.pending_count
+            c.max_res_date,
+            coalesce(c.pending_count, 0)::bigint
         from restaurants resto
-        left join v_restaurant_stats v on v.restaurant_id = resto.id    -- on réutilise la vue ici
+                 left join client_stats c on c.restaurant = resto.id
 
         where search_term is null
-        or trim(search_term) = ''
-        or lower(concat(resto.name, ' ', resto.address, ' ', resto.city, ' ', resto.description)) like concat('%', lower(trim(search_term)), '%')
+           or trim(search_term) = ''
+           or lower(concat(resto.name, ' ', resto.address, ' ', resto.city, ' ', resto.description))
+            like concat('%', lower(trim(search_term)), '%')
 
         order by resto.name asc;
+    -- (Plus de LIMIT ici !)
 end;
 $$ language plpgsql security definer;
 

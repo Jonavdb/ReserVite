@@ -6,14 +6,14 @@ import '../manager/restaurant.dart';
 class ClientState {
   final String currentFilter;
   final List<ReservationClient> reservations;
-  final String? searchedInput;
   final List<Restaurant> restaurants;
+  final String? searchedInput;
 
   ClientState({
     required this.currentFilter, // filtre d'affichage des réservations du client connecté ('pending', 'confirmed' etc)
     required this.reservations, // liste des réservations du client connecté
+    required this.restaurants,
     this.searchedInput = '',
-    this.restaurants = const [],
   });
 
   ClientState copyWith({
@@ -29,6 +29,12 @@ class ClientState {
       restaurants: restaurants ?? this.restaurants,
     );
   }
+
+  static const maxRestaurants = 5;
+  late final bool hasMoreRestaurantsThanLimit = restaurants.length > maxRestaurants;
+
+  // liste coupée à la limite pour l'affichage
+  late final List<Restaurant> displayedRestaurants = restaurants.take(maxRestaurants).toList();
 
   static Future<List<ReservationClient>> fetchReservations(String? status) async {
     // on formatte le paramètre status pour l'appel au backend

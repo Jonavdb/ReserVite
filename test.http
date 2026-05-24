@@ -47,6 +47,11 @@ Content-Type: application/json
   "status_filter": "pending"
 }
 
+### Test récupération de tous les restaurants
+POST http://localhost:3000/rpc/get_restaurants
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic3ViIjoieGFwaWdlb2xldEBlcGZjLmV1IiwibmFtZSI6IlhhdmllciIsInVzZXJfaWQiOjMsImV4cCI6MTc3OTcxNjE4MX0.9X5q9ORBQJbNAzDuB6rvPh1ndGMIC7b8yMmydSxICdM
+Content-Type: application/json
+
 ### Test récupération des restaurants pour le manager
 POST http://localhost:3000/rpc/get_restaurants_manager
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoibWFuYWdlciIsInN1YiI6ImJlcGVuZWxsZUBlcGZjLmV1IiwibmFtZSI6IkJlbm_DrnQiLCJ1c2VyX2lkIjoyLCJleHAiOjE3NzkzODY4OTN9.dAebgk_UxUlCw1Qa7Xe3Lbz2Ylu_F917f7wMIz_nXoI
