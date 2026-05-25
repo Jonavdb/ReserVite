@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../models/restaurant/restaurant_services.dart';
 import '../../providers/client/client_state_provider.dart';
 
 class RestaurantDetailsScreen extends ConsumerStatefulWidget {
@@ -21,6 +22,7 @@ class _RestaurantDetailsScreenState extends ConsumerState<RestaurantDetailsScree
 
   @override
   Widget build(BuildContext context) {
+    final clientState = ref.watch(clientStateProvider);
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
 
@@ -52,195 +54,138 @@ class _RestaurantDetailsScreenState extends ConsumerState<RestaurantDetailsScree
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Le Gourmet', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.star, color: Colors.amber),
-                  const SizedBox(width: 4),
-                  Text(4.5.toStringAsFixed(1)),
-                  const SizedBox(width: 16),
-                  Text('€' * 3),
-                  const SizedBox(width: 16),
-                  const Icon(Icons.location_on, size: 16),
-                  const SizedBox(width: 4),
-                  const Text('Bruxelles'),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.place, size: 16, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text('Rue de la Paix 12', style: TextStyle(color: Colors.grey[600])),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              const Text('Description', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              const Text('Restaurant gastronomique français'),
-              const SizedBox(height: 24),
-              const Text('Horaires', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Row(
+        child: clientState.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(child: Text('Erreur : $error')),
+          data: (clientState) {
+            final restaurant = clientState.selectedRestaurant;
+            if (restaurant == null) return const Center(child: Text("Restaurant introuvable"));
+
+            final formattedServices = _formatServicesByDay(restaurant.services);
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                width: 90,
-                                child: Text('Lundi', style: TextStyle(fontWeight: FontWeight.w500)),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '12:00 - 14:00, 19:00 - 22:00',
-                                  style: const TextStyle(fontFamily: 'monospace'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                width: 90,
-                                child: Text('Mardi', style: TextStyle(fontWeight: FontWeight.w500)),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '12:00 - 14:00, 19:00 - 22:00',
-                                  style: const TextStyle(fontFamily: 'monospace'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                width: 90,
-                                child: Text('Mercredi', style: TextStyle(fontWeight: FontWeight.w500)),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '12:00 - 14:00, 19:00 - 22:00',
-                                  style: const TextStyle(fontFamily: 'monospace'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                width: 90,
-                                child: Text('Jeudi', style: TextStyle(fontWeight: FontWeight.w500)),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '12:00 - 14:00, 19:00 - 22:00',
-                                  style: const TextStyle(fontFamily: 'monospace'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                  Text(restaurant.name, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Colors.amber),
+                      const SizedBox(width: 4),
+                      Text(4.5.toStringAsFixed(1)),
+                      const SizedBox(width: 16),
+                      Text('€' * (restaurant.priceRange ?? 1)),
+                      const SizedBox(width: 16),
+                      const Icon(Icons.location_on, size: 16),
+                      const SizedBox(width: 4),
+                      Text(restaurant.city),
+                    ],
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                width: 90,
-                                child: Text('Vendredi', style: TextStyle(fontWeight: FontWeight.w500)),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '12:00 - 14:00, 19:00 - 23:00',
-                                  style: const TextStyle(fontFamily: 'monospace'),
-                                ),
-                              ),
-                            ],
-                          ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.place, size: 16, color: Colors.grey),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(restaurant.address, style: TextStyle(color: Colors.grey[600])),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Description', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Text(restaurant.description ?? "Aucune description."),
+                  const SizedBox(height: 24),
+                  const Text('Horaires', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // COLONNE DE GAUCHE (Lundi à Jeudi)
+                      Expanded(
+                        child: Column(
+                          children: [
+                            _DayScheduleRow(dayName: 'Lundi', schedule: formattedServices[1] ?? 'Fermé'),
+                            _DayScheduleRow(dayName: 'Mardi', schedule: formattedServices[2] ?? 'Fermé'),
+                            _DayScheduleRow(dayName: 'Mercredi', schedule: formattedServices[3] ?? 'Fermé'),
+                            _DayScheduleRow(dayName: 'Jeudi', schedule: formattedServices[4] ?? 'Fermé'),
+                          ],
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                width: 90,
-                                child: Text('Samedi', style: TextStyle(fontWeight: FontWeight.w500)),
-                              ),
-                              Expanded(
-                                child: Text('19:00 - 23:00', style: const TextStyle(fontFamily: 'monospace')),
-                              ),
-                            ],
-                          ),
+                      ),
+                      const SizedBox(width: 16),
+                      // COLONNE DE DROITE (Vendredi à Dimanche)
+                      Expanded(
+                        child: Column(
+                          children: [
+                            _DayScheduleRow(dayName: 'Vendredi', schedule: formattedServices[5] ?? 'Fermé'),
+                            _DayScheduleRow(dayName: 'Samedi', schedule: formattedServices[6] ?? 'Fermé'),
+                            _DayScheduleRow(dayName: 'Dimanche', schedule: formattedServices[7] ?? 'Fermé'),
+                          ],
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                width: 90,
-                                child: Text('Dimanche', style: TextStyle(fontWeight: FontWeight.w500)),
-                              ),
-                              Expanded(
-                                child: Text('12:00 - 14:00', style: const TextStyle(fontFamily: 'monospace')),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      // TODO : envoyer sur la page de Manu
+                      onPressed: () {},
+                      icon: const Icon(Icons.add),
+                      label: const Text('Réserver'),
+                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  // TODO : envoyer sur la page de Manu
-                  onPressed: () {},
-                  icon: const Icon(Icons.add),
-                  label: const Text('Réserver'),
-                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         ),
+      ),
+    );
+  }
+
+  // Cette fonction transforme la liste brute de services en un dictionnaire {1: "12:00 - 14:00, 19:00 - 22:00", 2: ...}
+  Map<int, String> _formatServicesByDay(List<RestaurantService> services) {
+    final Map<int, List<String>> grouped = {};
+
+    for (var service in services) {
+      grouped.putIfAbsent(service.dayOfWeek, () => []);
+      // nettoie les secondes (08:00:00 -> 08:00) si besoin
+      final start = service.startTime.substring(0, 5);
+      final end = service.endTime.substring(0, 5);
+      grouped[service.dayOfWeek]!.add('$start - $end');
+    }
+
+    // transforme la liste des horaires d'un jour en une seule string séparée par des virgules
+    return grouped.map((day, times) => MapEntry(day, times.join(',\n')));
+  }
+}
+
+// Widget pour les jours et les services de ces jours
+class _DayScheduleRow extends StatelessWidget {
+  final String dayName;
+  final String schedule;
+
+  const _DayScheduleRow({required this.dayName, required this.schedule});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 90,
+            child: Text(dayName, style: const TextStyle(fontWeight: FontWeight.w500)),
+          ),
+          Expanded(
+            child: Text(schedule, style: const TextStyle(fontFamily: 'monospace')),
+          ),
+        ],
       ),
     );
   }

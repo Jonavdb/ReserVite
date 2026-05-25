@@ -46,8 +46,7 @@ class RestaurantDetails {
     final response = await ApiClient.post('get_restaurant_details', body: json.encode({'restaurant_id': id}));
 
     if (response.statusCode == 200) {
-      final List<dynamic> restaurantDetails = jsonDecode(response.body);
-      return RestaurantDetails.fromJson(restaurantDetails as Map<String, dynamic>);
+      return RestaurantDetails.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to load restaurant details');
     }
