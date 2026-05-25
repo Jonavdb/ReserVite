@@ -1,6 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:prbd_2526_f03/models/manager/manager_state.dart';
-import 'package:prbd_2526_f03/models/manager/restaurant.dart';
+import 'package:prbd_2526_f03/models/restaurant/restaurant.dart';
 import '../../core/tools/abstract_async_notifier.dart';
 import '../../models/manager/reservation_detail.dart';
 import '../../models/manager/table.dart';

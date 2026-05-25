@@ -106,6 +106,7 @@ class _SearchRestaurantsState extends ConsumerState<SearchRestaurants> {
 
                   return Column(
                     children: [
+                      // "trop de résultats trouvés", si plus de 5 fetch
                       if (clientState.hasMoreRestaurantsThanLimit)
                         Container(
                           width: double.infinity,
@@ -128,6 +129,7 @@ class _SearchRestaurantsState extends ConsumerState<SearchRestaurants> {
                             ],
                           ),
                         ),
+                      // sinon, on affiche les restos filtrés
                       Expanded(
                         child: ListView.builder(
                           padding: const EdgeInsets.all(16.0),
@@ -208,8 +210,8 @@ class _SearchRestaurantsState extends ConsumerState<SearchRestaurants> {
                                 onTap: () {
                                   Navigator.pushNamed(
                                     context,
-                                    '/list_reservations_manager',
-                                    arguments: {'restaurantId': restaurant.id, 'restaurantName': restaurant.name},
+                                    '/restaurant_details',
+                                    arguments: {'restaurantId': restaurant.id},
                                   );
                                 },
                               ),

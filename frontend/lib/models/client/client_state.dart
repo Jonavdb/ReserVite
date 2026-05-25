@@ -1,32 +1,37 @@
 import 'dart:convert';
 import 'package:prbd_2526_f03/models/client/reservation_client.dart';
+import 'package:prbd_2526_f03/models/restaurant/restaurant_details.dart';
 import '../../core/services/api_client.dart';
-import '../manager/restaurant.dart';
+import '../restaurant/restaurant.dart';
 
 class ClientState {
   final String currentFilter;
   final List<ReservationClient> reservations;
   final List<Restaurant> restaurants;
   final String? searchedInput;
+  final RestaurantDetails? selectedRestaurant;
 
   ClientState({
     required this.currentFilter, // filtre d'affichage des réservations du client connecté ('pending', 'confirmed' etc)
     required this.reservations, // liste des réservations du client connecté
     required this.restaurants,
     this.searchedInput = '',
+    this.selectedRestaurant,
   });
 
   ClientState copyWith({
     String? currentFilter,
     List<ReservationClient>? reservations,
-    String? searchedInput,
     List<Restaurant>? restaurants,
+    String? searchedInput,
+    RestaurantDetails? selectedRestaurant,
   }) {
     return ClientState(
       currentFilter: currentFilter ?? this.currentFilter,
       reservations: reservations ?? this.reservations,
-      searchedInput: searchedInput ?? this.searchedInput,
       restaurants: restaurants ?? this.restaurants,
+      searchedInput: searchedInput ?? this.searchedInput,
+      selectedRestaurant: selectedRestaurant ?? this.selectedRestaurant,
     );
   }
 

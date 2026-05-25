@@ -10,10 +10,10 @@ class ReservationDetailsManager extends ConsumerStatefulWidget {
   const ReservationDetailsManager({super.key, required this.reservationId});
 
   @override
-  ConsumerState<ReservationDetailsManager> createState() => _ReservationDetailsManagerMockupScreenState();
+  ConsumerState<ReservationDetailsManager> createState() => _ReservationDetailsManagerState();
 }
 
-class _ReservationDetailsManagerMockupScreenState extends ConsumerState<ReservationDetailsManager> {
+class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsManager> {
   @override
   void initState() {
     super.initState();
@@ -268,11 +268,15 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
                   if (reservationDetail.status == 'pending')
                     ElevatedButton.icon(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/assign_tables', arguments: {
-                          'reservationId' : reservationDetail.id,
-                          'restaurantId' : reservationDetail.restaurant,
-                          'date' : reservationDetail.datetime,
-                        });
+                        Navigator.pushNamed(
+                          context,
+                          '/assign_tables',
+                          arguments: {
+                            'reservationId': reservationDetail.id,
+                            'restaurantId': reservationDetail.restaurant,
+                            'date': reservationDetail.datetime,
+                          },
+                        );
                       },
                       icon: const Icon(Icons.check_circle),
                       label: const Text('Confirmer et assigner les tables'),
@@ -280,51 +284,63 @@ class _ReservationDetailsManagerMockupScreenState extends ConsumerState<Reservat
 
                   if (reservationDetail.status == 'confirmed')
                     ElevatedButton.icon(
-                      onPressed: isPast ? null :  () {
-                        showDialog(context: context, builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text('Terminer la réservation'),
-                            content: const Text ('Voulez-vous marquer cette réservation comme terminée ?'),
-                            actions : [
-                              TextButton(onPressed: () => Navigator.pop(context),
-                                child: const Text('Non'),
-                              ),
-                              TextButton(onPressed: () => _complete(context, reservationDetail, simulatedTime) ,
-                                  child: const Text('Oui', style: TextStyle(color: Colors.red),)
-                              ),
-                            ],
-                          );
-                        },
-                        );
-                      },
+                      onPressed: isPast
+                          ? null
+                          : () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Terminer la réservation'),
+                                    content: const Text('Voulez-vous marquer cette réservation comme terminée ?'),
+                                    actions: [
+                                      TextButton(onPressed: () => Navigator.pop(context), child: const Text('Non')),
+                                      TextButton(
+                                        onPressed: () => _complete(context, reservationDetail, simulatedTime),
+                                        child: const Text('Oui', style: TextStyle(color: Colors.red)),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
                       icon: const Icon(Icons.check_circle),
                       label: const Text('Marquer comme terminée'),
                     ),
-                    if (isPast) ... [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: const Text('La réservation ne peut être terminée que durant son service ou après celui-ci', style: TextStyle(color: Colors.red), textAlign: TextAlign.center,),
+                  if (isPast) ...[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: const Text(
+                        'La réservation ne peut être terminée que durant son service ou après celui-ci',
+                        style: TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
                       ),
-                    ],
+                    ),
+                  ],
                   if (reservationDetail.status != 'cancelled' && reservationDetail.status != 'completed') ...[
                     const SizedBox(height: 8),
-                    OutlinedButton.icon(onPressed: () {
-                      showDialog(context: context, builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('Annuler la réservation'),
-                          content: const Text ('Êtes-vous sûr de vouloir annuler cette réservation ?'),
-                          actions : [
-                            TextButton(onPressed: () => Navigator.pop(context),
-                            child: const Text('Non'),
-                            ),
-                            TextButton(onPressed: () => _cancel(context, reservationDetail) ,
-                            child: const Text('Oui', style: TextStyle(color: Colors.red),)
-                            ),
-                          ],
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Annuler la réservation'),
+                              content: const Text('Êtes-vous sûr de vouloir annuler cette réservation ?'),
+                              actions: [
+                                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Non')),
+                                TextButton(
+                                  onPressed: () => _cancel(context, reservationDetail),
+                                  child: const Text('Oui', style: TextStyle(color: Colors.red)),
+                                ),
+                              ],
+                            );
+                          },
                         );
                       },
-                      );
-                    }, icon: const Icon(Icons.cancel), label: const Text('Annuler')),
+                      icon: const Icon(Icons.cancel),
+                      label: const Text('Annuler'),
+                    ),
                   ],
                 ],
               ),

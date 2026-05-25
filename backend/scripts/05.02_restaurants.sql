@@ -1,3 +1,4 @@
+-- Petite carte d'informations du restaurant
 drop type if exists restaurant_card_info cascade;
 create type restaurant_card_info as (
     id int,
@@ -9,7 +10,18 @@ create type restaurant_card_info as (
     pending_reservation_count bigint
 );
 
--- création de vues réutilisables pour les calculs de la dernière resa + nb de pendings
+-- Informations détaillées du restaurant
+drop type if exists restaurant_details cascade;
+create type restaurant_details as (
+    id int,
+    name varchar,
+    city varchar,
+    rating double precision,
+    description text,
+    services timestamp
+);
+
+-- Vues : création de vues réutilisables pour les calculs de la dernière resa + nb de pendings
 -- elle a 3 colonnes : restaurant_id, max_res_date et pending_count, qu'on pourra réutiliser plus bas
 drop view if exists v_restaurant_stats;
 create or replace view v_restaurant_stats as
@@ -115,3 +127,42 @@ end;
 $$ language plpgsql security definer;
 
 grant execute on function find_restaurants_client(text) to authenticated;
+
+---- Get Restaurant Details ----
+drop function if exists get_restaurant_details;
+create or replace function get_restaurant_details(restaurant_id int)
+    returns json as
+$$
+declare
+    result json;
+begin
+    perform auth.check_logged();
+
+    select json_build_object(
+        'id', resto.id,
+        'name', resto.name,
+        'address', resto.address,
+        'city', resto.city,
+        'rating', resto.rating,
+        'price_range', resto.price_range,
+        'description', resto.description,
+        'services', coalesce((
+            select json_agg(
+                           json_build_object(
+                                   'day_of_week', s.day_of_week,
+                                   'start_time', s.start_time,
+                                   'end_time', s.end_time
+                           ) order by s.day_of_week asc, s.start_time asc
+                   )
+            from services s
+            where s.restaurant = resto.id
+            ), '[]'::json)
+    ) into result
+    from restaurants resto
+    where resto.id = restaurant_id;
+
+    return result;
+end;
+$$ language plpgsql security definer;
+
+grant execute on function get_restaurant_details(int) to authenticated;

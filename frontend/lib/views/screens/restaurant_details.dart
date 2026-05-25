@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:intl/date_symbol_data_local.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../providers/client/client_state_provider.dart';
 
-void main() async {
-  await initializeDateFormatting('fr_FR', null);
-  runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      home: const RestaurantDetailsMockupScreen(),
-    ),
-  );
+class RestaurantDetailsScreen extends ConsumerStatefulWidget {
+  final int restaurantId;
+
+  const RestaurantDetailsScreen({super.key, required this.restaurantId});
+
+  @override
+  ConsumerState<RestaurantDetailsScreen> createState() => _RestaurantDetailsScreenState();
 }
 
-class RestaurantDetailsMockupScreen extends StatelessWidget {
-  const RestaurantDetailsMockupScreen({super.key});
+class _RestaurantDetailsScreenState extends ConsumerState<RestaurantDetailsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => ref.read(clientStateProvider.notifier).loadRestaurantDetails(widget.restaurantId));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,19 +26,11 @@ class RestaurantDetailsMockupScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {},
-        ),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.of(context).pop()),
         title: const Text('Détails du restaurant'),
         automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Rafraîchir les données',
-            onPressed: () {},
-          ),
-        ],
+        // TODO : btn refreshRestaurantDetails
+        actions: [IconButton(icon: const Icon(Icons.refresh), tooltip: 'Rafraîchir les données', onPressed: () {})],
         elevation: 2,
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
@@ -49,16 +41,10 @@ class RestaurantDetailsMockupScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
               child: Tooltip(
-                message:
-                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                message: 'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
                 child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
-                  ),
+                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR').format(simulatedTime),
+                  style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.normal),
                 ),
               ),
             ),
@@ -71,11 +57,7 @@ class RestaurantDetailsMockupScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Le Gourmet',
-                style: const TextStyle(
-                    fontSize: 24, fontWeight: FontWeight.bold),
-              ),
+              Text('Le Gourmet', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -96,25 +78,16 @@ class RestaurantDetailsMockupScreen extends StatelessWidget {
                   const Icon(Icons.place, size: 16, color: Colors.grey),
                   const SizedBox(width: 4),
                   Expanded(
-                    child: Text(
-                      'Rue de la Paix 12',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
+                    child: Text('Rue de la Paix 12', style: TextStyle(color: Colors.grey[600])),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Description',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              const Text('Description', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               const Text('Restaurant gastronomique français'),
               const SizedBox(height: 24),
-              const Text(
-                'Horaires',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              const Text('Horaires', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,17 +102,12 @@ class RestaurantDetailsMockupScreen extends StatelessWidget {
                             children: [
                               const SizedBox(
                                 width: 90,
-                                child: Text(
-                                  'Lundi',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.w500),
-                                ),
+                                child: Text('Lundi', style: TextStyle(fontWeight: FontWeight.w500)),
                               ),
                               Expanded(
                                 child: Text(
                                   '12:00 - 14:00, 19:00 - 22:00',
-                                  style: const TextStyle(
-                                      fontFamily: 'monospace'),
+                                  style: const TextStyle(fontFamily: 'monospace'),
                                 ),
                               ),
                             ],
@@ -152,17 +120,12 @@ class RestaurantDetailsMockupScreen extends StatelessWidget {
                             children: [
                               const SizedBox(
                                 width: 90,
-                                child: Text(
-                                  'Mardi',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.w500),
-                                ),
+                                child: Text('Mardi', style: TextStyle(fontWeight: FontWeight.w500)),
                               ),
                               Expanded(
                                 child: Text(
                                   '12:00 - 14:00, 19:00 - 22:00',
-                                  style: const TextStyle(
-                                      fontFamily: 'monospace'),
+                                  style: const TextStyle(fontFamily: 'monospace'),
                                 ),
                               ),
                             ],
@@ -175,17 +138,12 @@ class RestaurantDetailsMockupScreen extends StatelessWidget {
                             children: [
                               const SizedBox(
                                 width: 90,
-                                child: Text(
-                                  'Mercredi',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.w500),
-                                ),
+                                child: Text('Mercredi', style: TextStyle(fontWeight: FontWeight.w500)),
                               ),
                               Expanded(
                                 child: Text(
                                   '12:00 - 14:00, 19:00 - 22:00',
-                                  style: const TextStyle(
-                                      fontFamily: 'monospace'),
+                                  style: const TextStyle(fontFamily: 'monospace'),
                                 ),
                               ),
                             ],
@@ -198,17 +156,12 @@ class RestaurantDetailsMockupScreen extends StatelessWidget {
                             children: [
                               const SizedBox(
                                 width: 90,
-                                child: Text(
-                                  'Jeudi',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.w500),
-                                ),
+                                child: Text('Jeudi', style: TextStyle(fontWeight: FontWeight.w500)),
                               ),
                               Expanded(
                                 child: Text(
                                   '12:00 - 14:00, 19:00 - 22:00',
-                                  style: const TextStyle(
-                                      fontFamily: 'monospace'),
+                                  style: const TextStyle(fontFamily: 'monospace'),
                                 ),
                               ),
                             ],
@@ -228,17 +181,12 @@ class RestaurantDetailsMockupScreen extends StatelessWidget {
                             children: [
                               const SizedBox(
                                 width: 90,
-                                child: Text(
-                                  'Vendredi',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.w500),
-                                ),
+                                child: Text('Vendredi', style: TextStyle(fontWeight: FontWeight.w500)),
                               ),
                               Expanded(
                                 child: Text(
                                   '12:00 - 14:00, 19:00 - 23:00',
-                                  style: const TextStyle(
-                                      fontFamily: 'monospace'),
+                                  style: const TextStyle(fontFamily: 'monospace'),
                                 ),
                               ),
                             ],
@@ -251,18 +199,10 @@ class RestaurantDetailsMockupScreen extends StatelessWidget {
                             children: [
                               const SizedBox(
                                 width: 90,
-                                child: Text(
-                                  'Samedi',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.w500),
-                                ),
+                                child: Text('Samedi', style: TextStyle(fontWeight: FontWeight.w500)),
                               ),
                               Expanded(
-                                child: Text(
-                                  '19:00 - 23:00',
-                                  style: const TextStyle(
-                                      fontFamily: 'monospace'),
-                                ),
+                                child: Text('19:00 - 23:00', style: const TextStyle(fontFamily: 'monospace')),
                               ),
                             ],
                           ),
@@ -274,18 +214,10 @@ class RestaurantDetailsMockupScreen extends StatelessWidget {
                             children: [
                               const SizedBox(
                                 width: 90,
-                                child: Text(
-                                  'Dimanche',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.w500),
-                                ),
+                                child: Text('Dimanche', style: TextStyle(fontWeight: FontWeight.w500)),
                               ),
                               Expanded(
-                                child: Text(
-                                  '12:00 - 14:00',
-                                  style: const TextStyle(
-                                      fontFamily: 'monospace'),
-                                ),
+                                child: Text('12:00 - 14:00', style: const TextStyle(fontFamily: 'monospace')),
                               ),
                             ],
                           ),
@@ -299,12 +231,11 @@ class RestaurantDetailsMockupScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
+                  // TODO : envoyer sur la page de Manu
                   onPressed: () {},
                   icon: const Icon(Icons.add),
                   label: const Text('Réserver'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
+                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
                 ),
               ),
             ],

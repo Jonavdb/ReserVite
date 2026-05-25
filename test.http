@@ -75,3 +75,12 @@ Content-Type: application/json
 {
   "search_term": "   ga"
 }
+
+### Test restaurant details
+POST http://localhost:3000/rpc/get_restaurant_details
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic3ViIjoieGFwaWdlb2xldEBlcGZjLmV1IiwibmFtZSI6IlhhdmllciIsInVzZXJfaWQiOjMsImV4cCI6MTc3OTc5NTU4Nn0.QpIrfqcKRoxP31DUigFZwVauSFAGOkjzZf6NJB-hcoU
+Content-Type: application/json
+
+{
+  "restaurant_id": 3
+}

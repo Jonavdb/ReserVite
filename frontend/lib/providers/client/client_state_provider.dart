@@ -1,8 +1,9 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:prbd_2526_f03/models/client/client_state.dart';
 import 'package:prbd_2526_f03/models/client/reservation_client.dart';
+import 'package:prbd_2526_f03/models/restaurant/restaurant.dart';
+import 'package:prbd_2526_f03/models/restaurant/restaurant_details.dart';
 import 'package:prbd_2526_f03/providers/security/current_user_provider.dart';
-import '../../models/client/client_state.dart';
-import '../../models/manager/restaurant.dart';
 
 final clientStateProvider = AsyncNotifierProvider<ClientStateNotifier, ClientState>(() => ClientStateNotifier());
 
@@ -27,11 +28,14 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
     return ClientState(
       currentFilter: defaultFilter,
       reservations: results[0] as List<ReservationClient>,
-      searchedInput: '',
       restaurants: results[1] as List<Restaurant>,
+      searchedInput: '',
     );
   }
 
+  /*
+   * RESTAURANTS
+  */
   Future<void> refreshRestaurants() async {
     final currentState = state.value ?? ClientState(currentFilter: '', reservations: [], restaurants: []);
 
@@ -44,8 +48,33 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
     }
   }
 
-  // Fonction qui permet de récupérer les  réservations du client connecté..
-  // selon un filtre choisis (si aucun filtre, on récupère tout)
+  Future<void> searchRestaurants(String term) async {
+    final currentState = state.value!;
+
+    state = AsyncValue.loading();
+    try {
+      final filteredRestaurants = await Restaurant.getFilteredRestaurants(term);
+      state = AsyncData(currentState.copyWith(searchedInput: term, restaurants: filteredRestaurants));
+    } catch (e) {
+      state = AsyncValue.error("Failed to filter restaurants", StackTrace.current);
+    }
+  }
+
+  Future<void> loadRestaurantDetails(int id) async {
+    final currentState = state.value!;
+
+    try {
+      final restaurantDetails = await RestaurantDetails.getDetails(id);
+      state = AsyncData(currentState.copyWith(selectedRestaurant: restaurantDetails));
+    } catch (e) {
+      state = AsyncValue.error("Failed to get restaurant details", StackTrace.current);
+    }
+  }
+
+  /*
+   * RESERVATIONS
+   */
+  // Fonction qui permet de récupérer les  réservations du client connecté.. selon un filtre choisis (si aucun filtre, on récupère tout)
   Future<void> changeFilter(String newFilter) async {
     final currentState = state.value!; // sauvegarde l'état actuel des restaurants affichés
     state = const AsyncLoading();
@@ -63,15 +92,4 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
       state = AsyncError(e, stackTrace);
     }
   } // à chaque transition d'état tous les observateurs de l'état du client connecté sont notifiés et agissent en conséquence
-
-  Future<void> searchRestaurants(String term) async {
-    final currentState = state.value!;
-    state = AsyncValue.loading();
-    try {
-      final filteredRestaurants = await Restaurant.getFilteredRestaurants(term);
-      state = AsyncData(currentState.copyWith(searchedInput: term, restaurants: filteredRestaurants));
-    } catch (e) {
-      state = AsyncValue.error("Failed to filter restaurants", StackTrace.current);
-    }
-  }
 }
