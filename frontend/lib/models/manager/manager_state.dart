@@ -1,5 +1,5 @@
 import 'package:prbd_2526_f03/models/manager/reservation_detail.dart';
-import 'package:prbd_2526_f03/models/manager/restaurant.dart';
+import 'package:prbd_2526_f03/models/restaurant/restaurant.dart';
 import 'package:prbd_2526_f03/models/manager/table.dart';
 import 'package:prbd_2526_f03/models/manager/service.dart';
 

@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:prbd_2526_f03/views/screens/list_reservations_client.dart';
-import 'package:prbd_2526_f03/views/screens/login.dart';
 import 'package:prbd_2526_f03/views/screens/list_restaurants_manager.dart';
+import 'package:prbd_2526_f03/views/screens/login.dart';
+import 'package:prbd_2526_f03/views/screens/search_restaurants.dart';
+import 'package:prbd_2526_f03/views/screens/signup.dart';
 import 'assign_tables_mockup.dart';
 import 'edit_service_mockup.dart';
 import 'edit_table_mockup.dart';
 import 'reservation_details_manager_mockup.dart';
 import 'reservation_details_mockup.dart';
 import 'reservation_form_mockup.dart';
-import 'restaurant_details_mockup.dart';
+import '../lib/views/screens/restaurant_details.dart';
 import 'restaurant_management_reservations_mockup.dart';
 import 'restaurant_management_services_mockup.dart';
 import 'restaurant_management_tables_mockup.dart';
-import 'search_restaurants_mockup.dart';
-import '../lib/views/screens/signup.dart';
 
 /// Écran carousel qui affiche tous les mockups du projet.
 class MockupCarouselScreen extends StatefulWidget {
@@ -33,8 +33,8 @@ class _MockupCarouselScreenState extends State<MockupCarouselScreen> {
     (label: 'Connexion', screen: Login()),
     (label: 'Inscription', screen: Signup()),
     (label: 'Accueil client', screen: const ListReservationsClient()),
-    (label: 'Recherche restaurants', screen: const SearchRestaurantsMockupScreen()),
-    (label: 'Détails restaurant', screen: const RestaurantDetailsMockupScreen()),
+    (label: 'Recherche restaurants', screen: SearchRestaurants()),
+    (label: 'Détails restaurant', screen: RestaurantDetailsScreen(restaurantId: 1)),
     (label: 'Formulaire réservation', screen: const ReservationFormMockupScreen()),
     (label: 'Détails réservation', screen: const ReservationDetailsMockupScreen()),
     (label: 'Mes restaurants', screen: const ListRestaurantsManager()),

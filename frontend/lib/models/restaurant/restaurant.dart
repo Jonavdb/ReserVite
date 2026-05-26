@@ -42,17 +42,6 @@ class Restaurant {
     return '€' * priceRange!;
   }
 
-  static Future<int> getRestaurantGap(int restaurant_id) async {
-    final response = await ApiClient.post('get_restaurant_gap', body: json.encode ({'restaurant_id': restaurant_id}));
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body) as int;
-    } else {
-      throw Exception(
-        'Failed to get restaurant gap',
-      );
-    }
-  }
-
   static Future<List<Restaurant>> getManagerRestaurants() async {
     final response = await ApiClient.post('get_restaurants_manager', body: json.encode({}));
 
@@ -66,4 +55,38 @@ class Restaurant {
       );
     }
   }
+
+  static Future<List<Restaurant>> getRestaurants() async {
+    final response = await ApiClient.post('get_restaurants', body: json.encode({}));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> body = json.decode(response.body);
+      return body.map((dynamic item) => Restaurant.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to get all restaurants');
+    }
+  }
+
+  static Future<int> getRestaurantGap(int restaurant_id) async {
+    final response = await ApiClient.post('get_restaurant_gap', body: json.encode ({'restaurant_id': restaurant_id}));
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as int;
+    } else {
+      throw Exception(
+        'Failed to get restaurant gap',
+      );
+    }
+  }
+
+  static Future<List<Restaurant>> getFilteredRestaurants(String term) async {
+    final response = await ApiClient.post('find_restaurants_client', body: json.encode({'search_term': term}));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> body = json.decode(response.body);
+      return body.map((dynamic item) => Restaurant.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to filtered restaurants');
+    }
+  }
+
 }
