@@ -4,9 +4,11 @@
     <script-file value="$PROJECT_DIR$/backend/scripts/02_security.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/03_tables_and_data.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04_checks_constraints.sql" />
-    <script-file value="$PROJECT_DIR$/backend/scripts/05.03_reservations.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05.01_authentication.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05.02_restaurants.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05.03_reservations.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05.04_services.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05_tables.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/BR_01_trigger_reservation_for_clients_users.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/BR_02_trigger_reservation_respect_total_capacity.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/BR_03_trigger_reservation_table_restaurant_match.sql" />
@@ -21,11 +23,8 @@
     <script-file value="$PROJECT_DIR$/backend/scripts/BR_12_trigger_no_tables_on_pending_or_cancelled.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/BR_13_trigger_unique_client_reservation_on_same_service_date_excluding_cancelled.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/BR_14_trigger_prevent_create_reservation_in_the_past.sql" />
-    <script-file value="$PROJECT_DIR$/backend/scripts/RT_prevent_past_reservation_revert.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/PREVENT_UPDATE.sql" />
-    <script-file value="$PROJECT_DIR$/backend/scripts/05_tables.sql" />
-    <script-file value="$PROJECT_DIR$/backend/scripts/05.04_services.sql" />
-    <script-file value="$PROJECT_DIR$/backend/scripts/05_reservations.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/RT_prevent_past_reservation_revert.sql" />
     <script-mode>FILE</script-mode>
     <data-source id="6d275bb5-c69c-4f95-bc29-f6a29631655b" namespace="database/&quot;prbd-2526-f03&quot;" />
     <method v="2" />
