@@ -48,6 +48,7 @@ create type client_reservation_info as (
     status status_type,
     datetime timestamp,
     number_of_guests int,
+    special_requests text,
     restaurant restaurant_info
 );
 
@@ -105,6 +106,7 @@ begin
                reserv.status,
                reserv.datetime,
                reserv.number_of_guests,
+               reserv.special_requests,
                ROW(
                    resto.id,
                    resto.name,

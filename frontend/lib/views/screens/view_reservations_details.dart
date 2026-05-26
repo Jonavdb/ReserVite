@@ -1,22 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import '../../providers/client/client_state_provider.dart';
-
-/*void main() async {
-  await initializeDateFormatting('fr_FR', null);
-  runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      home: const ViewReservationClient(),
-    ),
-  );
-}*/
 
 class ViewReservationClient extends ConsumerWidget {
   const ViewReservationClient({super.key});
@@ -29,11 +14,42 @@ class ViewReservationClient extends ConsumerWidget {
     // theme de la page
     final theme = Theme.of(context);
 
-    // on récupère l'id de la réservation
-    final reservationId = ModalRoute.of(context)!.settings.arguments as int;
-
     // TODO : récupérer le temps simulé via provider
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
+
+    // on récupère l'id de la réservation selectionnée
+    final reservationId = ModalRoute.of(context)!.settings.arguments as int;
+
+    // on récupère toutes les réservations du client
+    final reservations = clientStateAsync.value?.reservations ?? [];
+
+    // on récupère la réservation du client dans la liste de toutes les réservations
+    final clientReservation = reservations.where((r) => r.id == reservationId).firstOrNull;
+
+    //
+    String statusLabel = '';
+    Color statusColor = Colors.grey;
+    if(clientReservation != null) {
+      switch (clientReservation.status) {
+        case 'pending':
+          statusLabel = 'En attente';
+          statusColor = Colors.orange;
+          break;
+        case 'confirmed':
+          statusLabel = 'Confirmée';
+          statusColor = Colors.green;
+          break;
+        case 'completed':
+          statusLabel = 'Terminée';
+          statusColor = Colors.blue;
+          break;
+        case 'cancelled':
+        default:
+          statusLabel = 'Annulée';
+          statusColor = Colors.red;
+          break;
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -80,7 +96,10 @@ class ViewReservationClient extends ConsumerWidget {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
+        // on indique ce qui s'affiche en fonction de l'état du client connecté
+        child: clientReservation == null
+          ? const Center(child: Text("Aucune réservation trouvée"))
+          : SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,9 +114,9 @@ class ViewReservationClient extends ConsumerWidget {
                         children: [
                           const Icon(Icons.restaurant),
                           const SizedBox(width: 8),
-                          const Expanded(
+                          Expanded(
                             child: Text(
-                              'La Trattoria',
+                              clientReservation.restaurant.name, // nom du resto
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -117,7 +136,7 @@ class ViewReservationClient extends ConsumerWidget {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              'Avenue Louise 45, Bruxelles',
+                              clientReservation.restaurant.address, // adresse du resto
                               style: TextStyle(color: Colors.grey[600]),
                             ),
                           ),
@@ -129,7 +148,7 @@ class ViewReservationClient extends ConsumerWidget {
                           const Icon(Icons.phone, size: 16, color: Colors.grey),
                           const SizedBox(width: 4),
                           Text(
-                            '+32 2 234 56 78',
+                            clientReservation.restaurant.phone, // numéro du resto
                             style: TextStyle(color: Colors.grey[600]),
                           ),
                         ],
@@ -141,8 +160,8 @@ class ViewReservationClient extends ConsumerWidget {
                         children: [
                           const Icon(Icons.calendar_today, size: 20),
                           const SizedBox(width: 8),
-                          Text(
-                            'Date: jeu. 05/12/2024',
+                          Text( // Format : Date: jour. 06/12/2024
+                            'Date: ${DateFormat('EEE dd/MM/yyyy', 'fr_FR').format(clientReservation.datetime)}',
                           ),
                         ],
                       ),
@@ -151,7 +170,10 @@ class ViewReservationClient extends ConsumerWidget {
                         children: [
                           const Icon(Icons.access_time, size: 20),
                           const SizedBox(width: 8),
-                          const Text('Heure: 20:00'),
+                           // format : Heure: 20:00
+                          Text(
+                            'Heure: ${DateFormat('HH:mm').format(clientReservation.datetime)}',
+                          ),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -159,7 +181,8 @@ class ViewReservationClient extends ConsumerWidget {
                         children: [
                           const Icon(Icons.people, size: 20),
                           const SizedBox(width: 8),
-                          const Text('Nombre de convives: 4'),
+                          // Format : 'Nombre de convives: 4'
+                          Text('Nombre de convives: ${clientReservation.numberOfGuests}'),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -169,11 +192,12 @@ class ViewReservationClient extends ConsumerWidget {
                           const SizedBox(width: 8),
                           const Text('Statut: '),
                           Chip(
-                            label: const Text(
-                              'En attente',
+                            // format : 'En attente','Confirmée', 'Complétée', 'Annulée'
+                            label: Text(
+                              statusLabel,
                               style: TextStyle(fontSize: 12, color: Colors.white),
                             ),
-                            backgroundColor: const Color(0xFFFF9800),
+                            backgroundColor: statusColor,
                             padding: EdgeInsets.zero,
                           ),
                         ],
@@ -190,7 +214,7 @@ class ViewReservationClient extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Anniversaire de mariage',
+                        clientReservation.specialRequests,
                         style: TextStyle(color: Colors.grey[700]),
                       ),
                     ],

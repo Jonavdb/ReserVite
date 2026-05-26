@@ -5,6 +5,7 @@ class ReservationClient {
   final String status;
   final DateTime datetime;
   final int numberOfGuests;
+  final String specialRequests;
   final Restaurant restaurant;
 
   /*
@@ -20,6 +21,7 @@ class ReservationClient {
     required this.status,
     required this.datetime,
     required this.numberOfGuests,
+    required this.specialRequests,
     required this.restaurant
   });
 
@@ -31,6 +33,7 @@ class ReservationClient {
       status: json['status'],
       datetime: DateTime.parse(json['datetime']),
       numberOfGuests: json['number_of_guests'],
+      specialRequests : json['special_requests'] ?? 'Aucune demande',
       restaurant: Restaurant.fromJson(json['restaurant'] as Map<String, dynamic>),
     );
   }
