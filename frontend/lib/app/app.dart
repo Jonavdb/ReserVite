@@ -6,9 +6,11 @@ import 'package:prbd_2526_f03/views/screens/list_reservations_client.dart';
 import 'package:prbd_2526_f03/views/screens/list_reservations_manager.dart';
 import 'package:prbd_2526_f03/views/screens/list_restaurants_manager.dart';
 import 'package:prbd_2526_f03/views/screens/reservation_details_manager.dart';
+import 'package:prbd_2526_f03/views/screens/restaurant_management_tables.dart';
 import 'package:prbd_2526_f03/views/screens/view_reservations_details.dart';
 import 'package:prbd_2526_f03/views/screens/restaurant_details.dart';
 import 'package:prbd_2526_f03/views/screens/restaurant_management_services.dart';
+import '../views/screens/edit_table.dart';
 import '../views/screens/login.dart';
 import '../views/screens/search_restaurants.dart';
 import '../views/screens/signup.dart';
@@ -62,18 +64,29 @@ class App extends ConsumerWidget {
         if (settings.name == '/restaurant_management_services') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-              builder: (context) => RestaurantManagementServices(
-                  restaurantId: args['restaurantId'],
-                  restaurantName: args['restaurantName'],
-              )
+            builder: (context) => RestaurantManagementServices(
+              restaurantId: args['restaurantId'],
+              restaurantName: args['restaurantName'],
+            ),
+          );
+        }
+        if (settings.name == '/restaurant_management_tables') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) =>
+                RestaurantManagementTables(restaurantId: args['restaurantId'], restaurantName: args['restaurantName']),
           );
         }
         if (settings.name == '/edit_service') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-              builder: (context) => EditService(
-                  restaurantId: args['restaurantId'],
-                  serviceId: args['serviceId'])
+            builder: (context) => EditService(restaurantId: args['restaurantId'], serviceId: args['serviceId']),
+          );
+        }
+        if (settings.name == '/edit_table') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => EditTable(restaurantId: args['restaurantId'], table: args['table']),
           );
         }
         return null;

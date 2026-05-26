@@ -8,14 +8,14 @@ import 'package:prbd_2526_f03/views/screens/search_restaurants.dart';
 import 'package:prbd_2526_f03/views/screens/signup.dart';
 import 'assign_tables_mockup.dart';
 import 'edit_service_mockup.dart';
-import 'edit_table_mockup.dart';
+import '../lib/views/screens/edit_table.dart';
 import 'reservation_details_manager_mockup.dart';
 import 'reservation_details_mockup.dart';
 import 'reservation_form_mockup.dart';
 import '../lib/views/screens/restaurant_details.dart';
 import 'restaurant_management_reservations_mockup.dart';
 import 'restaurant_management_services_mockup.dart';
-import 'restaurant_management_tables_mockup.dart';
+import '../lib/views/screens/restaurant_management_tables.dart';
 
 /// Écran carousel qui affiche tous les mockups du projet.
 class MockupCarouselScreen extends StatefulWidget {
@@ -40,11 +40,14 @@ class _MockupCarouselScreenState extends State<MockupCarouselScreen> {
     (label: 'Mes restaurants', screen: const ListRestaurantsManager()),
     (label: 'Gestion restaurant - Réservations', screen: const RestaurantManagementReservationsMockupScreen()),
     (label: 'Gestion restaurant - Services', screen: const RestaurantManagementServicesMockupScreen()),
-    (label: 'Gestion restaurant - Tables', screen: const RestaurantManagementTablesMockupScreen()),
+    (
+      label: 'Gestion restaurant - Tables',
+      screen: const RestaurantManagementTables(restaurantId: 1, restaurantName: ''),
+    ),
     (label: 'Détails réservation (manager)', screen: const ReservationDetailsManagerMockupScreen()),
     (label: 'Assigner des tables', screen: const AssignTablesMockupScreen()),
     (label: 'Modifier le service', screen: const EditServiceMockupScreen()),
-    (label: 'Modifier la table', screen: const EditTableMockupScreen()),
+    (label: 'Modifier la table', screen: EditTable(restaurantId: 1)),
   ];
 
   @override
