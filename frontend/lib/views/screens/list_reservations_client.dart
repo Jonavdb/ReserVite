@@ -10,7 +10,7 @@ class ListReservationsClient extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // notifier de l'utilisateur connecté (pour interagir avec l'état de ses données)
     final userNotifier = ref.read(currentUserProvider.notifier);
-    final userName = userNotifier.loggedUserName;  // nom d'utilisateur
+    final userName = userNotifier.loggedUserName; // nom d'utilisateur
 
     // on stock l'état courant des données du client connecté
     final clientStateAsync = ref.watch(clientStateProvider);
@@ -25,7 +25,12 @@ class ListReservationsClient extends ConsumerWidget {
         automaticallyImplyLeading: false,
         // Liste boutons (recherche, rafraichir les données, deconnexion)
         actions: [
-          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, '/search_restaurants');
+            },
+          ),
           IconButton(icon: const Icon(Icons.refresh), tooltip: 'Rafraîchir les données', onPressed: () {}),
           IconButton(
             icon: const Icon(Icons.logout),
@@ -106,8 +111,8 @@ class ListReservationsClient extends ConsumerWidget {
                   clientStateAsync.maybeWhen(
                     data: (data) => data.currentFilter,
                     orElse: () => 'pending', // pending par défaut
-                                            // première ouverture de la page
-                  )
+                    // première ouverture de la page
+                  ),
                 },
                 // quand on clique sur un filtre, ça appelle la fonction 'changeFilter' du notifier
                 onSelectionChanged: (Set<String> newSelection) {
@@ -158,31 +163,17 @@ class ListReservationsClient extends ConsumerWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Icône centrale stylisée gris clair
-                          Icon(
-                            Icons.calendar_today_outlined,
-                            size: 90,
-                            color: Colors.grey[350],
-                          ),
+                          Icon(Icons.calendar_today_outlined, size: 90, color: Colors.grey[350]),
                           const SizedBox(height: 24),
-                          // Titre principal de l'état vide
                           Text(
                             emptyMessage,
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: TextStyle(fontSize: 18, color: Colors.grey[700], fontWeight: FontWeight.w500),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 8),
-                          // Sous-titre d'invitation à l'action
                           Text(
                             'Créez votre première réservation !',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[400],
-                            ),
+                            style: TextStyle(fontSize: 14, color: Colors.grey[400]),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -197,9 +188,9 @@ class ListReservationsClient extends ConsumerWidget {
                     itemBuilder: (context, index) {
                       final reservation = list[index];
 
-                      IconData? statusIcon; // icone status
-                      Color? statusColor; // couleur icone
-                      String? statusTooltip; // message quand la souris passe par-dessus
+                      IconData? statusIcon;
+                      Color? statusColor;
+                      String? statusTooltip;
 
                       // mise en place des données de l'icone correspondante au status de la réservation
                       switch (reservation.status) {
@@ -229,7 +220,8 @@ class ListReservationsClient extends ConsumerWidget {
 
                       // récupération et formattage de la date de réservation
                       final DateTime parsedDate = reservation.datetime;
-                      final String formattedDate = "${parsedDate.day.toString().padLeft(2, '0')}/"
+                      final String formattedDate =
+                          "${parsedDate.day.toString().padLeft(2, '0')}/"
                           "${parsedDate.month.toString().padLeft(2, '0')}/"
                           "${parsedDate.year} à "
                           "${parsedDate.hour.toString().padLeft(2, '0')}:"
@@ -262,7 +254,6 @@ class ListReservationsClient extends ConsumerWidget {
                             padding: const EdgeInsets.all(16.0),
                             child: Row(
                               children: [
-                                // Icone status
                                 Tooltip(
                                   message: statusTooltip,
                                   child: Icon(statusIcon, size: 32, color: statusColor),
@@ -272,48 +263,29 @@ class ListReservationsClient extends ConsumerWidget {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      // Texte titre restaurant
                                       Text(
                                         restaurantName,
                                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(height: 4),
-                                      // Icone localisation + Texte ville restaurant
                                       Row(
                                         children: [
-                                          // Icone localisation
                                           const Icon(Icons.location_on, size: 14),
                                           const SizedBox(width: 4),
-                                          // Texte ville restaurant
-                                          Text(
-                                            restaurantCity,
-                                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                          ),
+                                          Text(restaurantCity, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                                         ],
                                       ),
                                       const SizedBox(height: 8),
                                       // Icone temps + texte date + icone convives + texte nombre de convives
                                       Row(
                                         children: [
-                                          // Icone temp
                                           const Icon(Icons.access_time, size: 16),
-                                          // Espace
                                           const SizedBox(width: 4),
-                                          // texte date
-                                          Text(
-                                            formattedDate,
-                                            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                          ),
-                                          // Espace
+                                          Text(formattedDate, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
                                           const SizedBox(width: 12),
-                                          // icone convives
                                           const Icon(Icons.people, size: 16),
-                                          // texte nombre de convives
                                           const SizedBox(width: 4),
-                                          Text(
-                                            guestsText,
-                                            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                          ),
+                                          Text(guestsText, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
                                         ],
                                       ),
                                     ],
