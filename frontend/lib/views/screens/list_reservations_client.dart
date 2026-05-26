@@ -232,17 +232,23 @@ class ListReservationsClient extends ConsumerWidget {
                       final String guestsText = "$guestCount convive${guestCount > 1 ? 's' : ''}";
 
                       // récupération du texte nom du restaurant
-                      final String restaurantName = reservation.restaurantName;
+                      final String restaurantName = reservation.restaurant.name;
 
                       // récupération  du texte ville du restaurant
-                      final String restaurantCity = reservation.restaurantCity;
+                      final String restaurantCity = reservation.restaurant.city;
 
                       // affichage de toutes les données précécentes dans un widget Card
                       return Card(
                         margin: const EdgeInsets.only(bottom: 16),
                         child: InkWell(
                           onTap: () {
-                            // Action quand on clique sur le carte
+                            // Redirection vers les détails de la réservation
+                            // pushNamed utilisé pour que le goBack nous ramène directement sur la page courante
+                            Navigator.pushNamed(
+                                context,
+                                '/view_reservation_client',
+                                arguments: reservation.id,
+                            );
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),

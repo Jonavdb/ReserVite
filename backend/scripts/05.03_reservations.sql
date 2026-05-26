@@ -30,15 +30,26 @@ create type reservation_details as (
     table_capacities int[]
 );
 
+
+-- Manu
+drop type if exists restaurant_info cascade;
+create type restaurant_info as (
+   id int,
+   _name varchar,
+   address varchar,
+   city varchar,
+   phone varchar
+);
+
 -- Manu
 drop type if exists client_reservation_info cascade;
 create type client_reservation_info as (
     id int,
     status status_type,
-    restaurant_name varchar,
-    restaurant_city varchar,
     datetime timestamp,
-    number_of_guests int
+    number_of_guests int,
+    special_requests text,
+    restaurant restaurant_info
 );
 
 create or replace function get_reservations_manager(restaurant_id int)
@@ -101,10 +112,16 @@ begin
     return query
         select reserv.id,
                reserv.status,
-               resto.name,
-               resto.city,
                reserv.datetime,
-               reserv.number_of_guests
+               reserv.number_of_guests,
+               reserv.special_requests,
+               ROW(
+                   resto.id,
+                   resto.name,
+                   resto.address,
+                   resto.city,
+                   resto.phone
+                   )::restaurant_info -- conversion du ROW en type restaurant_info
         from reservations reserv
                  join users on reserv.client = users.id
                  join restaurants resto on resto.id = reserv.restaurant

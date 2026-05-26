@@ -1,10 +1,12 @@
+import 'package:prbd_2526_f03/models/restaurant.dart';
+
 class ReservationClient {
   final int id;
   final String status;
-  final String restaurantName;
-  final String restaurantCity;
   final DateTime datetime;
   final int numberOfGuests;
+  final String specialRequests;
+  final Restaurant restaurant;
 
   /*
       Cette classe contient les données d'une réservation client
@@ -17,10 +19,10 @@ class ReservationClient {
   ReservationClient({
     required this.id,
     required this.status,
-    required this.restaurantName,
-    required this.restaurantCity,
     required this.datetime,
     required this.numberOfGuests,
+    required this.specialRequests,
+    required this.restaurant
   });
 
 
@@ -29,10 +31,10 @@ class ReservationClient {
     return ReservationClient(
       id: json['id'],
       status: json['status'],
-      restaurantName: json['restaurant_name'],
-      restaurantCity: json['restaurant_city'],
       datetime: DateTime.parse(json['datetime']),
       numberOfGuests: json['number_of_guests'],
+      specialRequests : json['special_requests'] ?? 'Aucune demande',
+      restaurant: Restaurant.fromJson(json['restaurant'] as Map<String, dynamic>),
     );
   }
 }

@@ -8,5 +8,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('fr_FR', null);
   await Params.init();
-  runApp(const ProviderScope(child: App()));
+  runApp(
+      const ProviderScope
+        (child: App(),
+      )
+  );
 }
