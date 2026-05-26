@@ -282,7 +282,7 @@ class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsMa
                       label: const Text('Confirmer et assigner les tables'),
                     ),
 
-                  if (reservationDetail.status == 'confirmed')
+                  if (reservationDetail.status == 'confirmed') ... [
                     ElevatedButton.icon(
                       onPressed: isPast
                           ? null
@@ -316,6 +316,7 @@ class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsMa
                         textAlign: TextAlign.center,
                       ),
                     ),
+                    ],
                   ],
                   if (reservationDetail.status != 'cancelled' && reservationDetail.status != 'completed') ...[
                     const SizedBox(height: 8),

@@ -84,3 +84,12 @@ Content-Type: application/json
 {
   "restaurant_id": 3
 }
+
+### Test JO : récupérer les services d'un restaurant
+POST http://localhost:3000/rpc/get_services_for_restaurant
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoibWFuYWdlciIsInN1YiI6ImJlcGVuZWxsZUBlcGZjLmV1IiwibmFtZSI6IkJlbm_DrnQiLCJ1c2VyX2lkIjoyLCJleHAiOjE3Nzk1NDIzNjF9.zAcc8dbTtP3DVQXGjNqW8qTaNnZcIGeYZn62BJu-a1Q
+Content-Type: application/json
+
+{
+  "restaurant_id" : 1
+}
