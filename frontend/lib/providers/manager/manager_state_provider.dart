@@ -1,15 +1,19 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:prbd_2526_f03/models/manager/manager_state.dart';
-import 'package:prbd_2526_f03/models/restaurant/restaurant.dart';
 import 'package:prbd_2526_f03/models/manager/time_only.dart';
+import 'package:prbd_2526_f03/models/restaurant/restaurant.dart';
 import '../../core/tools/abstract_async_notifier.dart';
 import '../../models/manager/reservation_detail.dart';
-import '../../models/manager/table.dart';
 import '../../models/manager/service.dart';
+import '../../models/manager/table.dart';
 
 final managerStateProvider = AsyncNotifierProvider<ManagerStateNotifier, ManagerState>(() => ManagerStateNotifier());
 
 class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
+  // ==========================================
+  // INITIALISATION & CORE (Restaurants)
+  // ==========================================
+
   @override
   Future<ManagerState> build() async {
     // on charge les restaurants au démarrage
@@ -37,6 +41,21 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
     }
   }
 
+  Future<void> getRestaurantGap(int restaurantId) async {
+    final currentState = state.value ?? ManagerState();
+    state = const AsyncValue.loading();
+    try {
+      final gap = await Restaurant.getRestaurantGap(restaurantId);
+      state = AsyncData(currentState.copyWith(currentRestaurantGap: gap));
+    } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
+  // ==========================================
+  // RÉSERVATIONS
+  // ==========================================
+
   Future<void> refreshReservations() async {
     final currentId = state.value?.currentRestaurantId;
     if (currentId == null) return;
@@ -46,6 +65,18 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
       await getReservations(currentId);
     } catch (e) {
       state = AsyncValue.error("Failed to refresh reservations", StackTrace.current);
+    }
+  }
+
+  Future<void> getReservations(int restaurantId) async {
+    final currentState = state.value ?? ManagerState();
+    state = const AsyncValue.loading();
+
+    try {
+      final reservations = await ReservationDetail.getReservations(restaurantId);
+      state = AsyncData(currentState.copyWith(currentRestaurantId: restaurantId, reservations: reservations));
+    } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
     }
   }
 
@@ -77,28 +108,24 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
     }
   }
 
-  Future<void> getService(int serviceId) async {
-    final currentState = state.value ?? ManagerState();
-    final currentList = state.value?.services ?? [];
-    final currentId = state.value?.currentRestaurantId;
-
+  Future<void> confirmReservation(ReservationDetail res, List<int> tableIds) async {
     state = const AsyncValue.loading();
     try {
-      final updatedService = await Service.getSpecificService(serviceId, currentId!);
-      bool found = false;
+      await res.confirmReservation(res.id, tableIds);
+      await getReservation(res.id);
+    } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
 
-      final newList = currentList.map((service) {
-        if (service.id == serviceId){
-          found = true;
-          return updatedService;
-        }
-        return service;
-      }).toList();
-
-      if (!found){
-        newList.add(updatedService);
-      }
-      state = AsyncData(currentState.copyWith(services: newList, impactedReservations: 0));
+  Future<void> completeReservation(ReservationDetail res, DateTime simulatedTime) async {
+    final currentState = state.value ?? ManagerState();
+    state = const AsyncValue.loading();
+    final currentId = state.value?.currentRestaurantId;
+    try {
+      await res.completeReservation(res.id, simulatedTime);
+      final List<ReservationDetail> reservationList = await ReservationDetail.getReservations(currentId!);
+      state = AsyncData(currentState.copyWith(reservations: reservationList));
     } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
@@ -119,84 +146,11 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
     }
   }
 
-  Future<void> confirmReservation(ReservationDetail res, List<int> tableIds) async {
+  // ==========================================
+  // SERVICES (CRUDLS)
+  // ==========================================
 
-    state = const AsyncValue.loading();
-    try {
-      await res.confirmReservation(res.id, tableIds);
-      await getReservation(res.id);
-    } catch (e) {
-      state = AsyncValue.error(e.toString(), StackTrace.current);
-    }
-  }
-
-  Future<void> completeReservation(ReservationDetail res, DateTime simulatedTime) async {
-    final currentState = state.value ?? ManagerState();
-    state = const AsyncValue.loading();
-    final currentId = state.value?.currentRestaurantId;
-    try {
-      await res.completeReservation(res.id, simulatedTime);
-      final List<ReservationDetail> reservationList = await ReservationDetail.getReservations(currentId!);
-      state = AsyncData(currentState.copyWith(reservations: reservationList));
-    } catch (e) {
-      state = AsyncValue.error(
-        e.toString(),
-        StackTrace.current,
-      );
-    }
-  }
-
-  Future<void> loadAvailableTables(int restaurantId, DateTime date) async {
-    state = const AsyncValue.loading();
-    try {
-      final availableTables = await RestaurantTable.getAvailableTables(restaurantId, date);
-      final currentState = state.value ?? ManagerState();
-      state = AsyncData(currentState.copyWith(restaurantTables: availableTables));
-    } catch (e) {
-      state = AsyncValue.error(e.toString(), StackTrace.current);
-    }
-  }
-
-  Future<void> getReservations(int restaurantId) async {
-    final currentState = state.value ?? ManagerState();
-    state = const AsyncValue.loading();
-
-    try {
-      final reservations = await ReservationDetail.getReservations(restaurantId);
-      state = AsyncData(currentState.copyWith(currentRestaurantId: restaurantId, reservations: reservations));
-    } catch (e) {
-      state = AsyncValue.error(e.toString(), StackTrace.current);
-    }
-  }
-
-  Future<void> deleteService(Service service) async {
-    final currentState = state.value ?? ManagerState();
-    final currentId = state.value?.currentRestaurantId;
-
-    state = const AsyncValue.loading();
-    try {
-      await service.deleteService(service.id);
-      final List<Service> listOfServices = await Service.getServiceForResturant(currentId!);
-      state = AsyncData(currentState.copyWith(services: listOfServices));
-    } catch (e) {
-      state = AsyncValue.error(e.toString(), StackTrace.current);
-    }
-  }
-
-  Future<void> updateService(Service service, int dayOfWeek, TimeOnly newStartTime, TimeOnly newEndTime) async {
-    final currentState = state.value ?? ManagerState();
-    final currentId = state.value?.currentRestaurantId;
-
-    state = const AsyncValue.loading();
-    try {
-      await service.updateService(service.id, dayOfWeek, newStartTime, newEndTime);
-      final List<Service> listOfServices = await Service.getServiceForResturant(currentId!);
-      state = AsyncData(currentState.copyWith(services: listOfServices, impactedReservations: 0));
-    } catch (e) {
-      state = AsyncValue.error(e.toString(), StackTrace.current);
-    }
-  }
-
+  // --- Create ---
   Future<void> createService(int restaurantId, int dayOfWeek, TimeOnly startTime, TimeOnly endTime) async {
     final currentState = state.value ?? ManagerState();
     final currentId = state.value?.currentRestaurantId;
@@ -211,46 +165,117 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
     }
   }
 
+  // --- Read (Single) ---
+  Future<void> getService(int serviceId) async {
+    final currentState = state.value ?? ManagerState();
+    final currentList = state.value?.services ?? [];
+    final currentId = state.value?.currentRestaurantId;
+
+    state = const AsyncValue.loading();
+    try {
+      final updatedService = await Service.getSpecificService(serviceId, currentId!);
+      bool found = false;
+
+      final newList = currentList.map((service) {
+        if (service.id == serviceId) {
+          found = true;
+          return updatedService;
+        }
+        return service;
+      }).toList();
+
+      if (!found) {
+        newList.add(updatedService);
+      }
+      state = AsyncData(currentState.copyWith(services: newList, impactedReservations: 0));
+    } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
+  // --- Read (List) ---
   Future<void> loadServices(int restaurantId) async {
     state = const AsyncValue.loading();
     try {
       final service = await Service.getServiceForResturant(restaurantId);
       final gap = await Restaurant.getRestaurantGap(restaurantId);
       final currentState = state.value ?? ManagerState();
-      state = AsyncData(currentState.copyWith(services: service, currentRestaurantGap : gap, impactedReservations: 0));
+      state = AsyncData(currentState.copyWith(services: service, currentRestaurantGap: gap, impactedReservations: 0));
     } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
   }
 
-  Future<void> countImpactedReservations(int restaurantId, int dayOfWeek, TimeOnly newStartTime, TimeOnly newEndTime, int serviceId) async {
+  // --- Update ---
+  Future<void> updateService(Service service, int dayOfWeek, TimeOnly newStartTime, TimeOnly newEndTime) async {
+    final currentState = state.value ?? ManagerState();
+    final currentId = state.value?.currentRestaurantId;
+
+    state = const AsyncValue.loading();
+    try {
+      await service.updateService(service.id, dayOfWeek, newStartTime, newEndTime);
+      final List<Service> listOfServices = await Service.getServiceForResturant(currentId!);
+      state = AsyncData(currentState.copyWith(services: listOfServices, impactedReservations: 0));
+    } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
+  // --- Delete ---
+  Future<void> deleteService(Service service) async {
+    final currentState = state.value ?? ManagerState();
+    final currentId = state.value?.currentRestaurantId;
+
+    state = const AsyncValue.loading();
+    try {
+      await service.deleteService(service.id);
+      final List<Service> listOfServices = await Service.getServiceForResturant(currentId!);
+      state = AsyncData(currentState.copyWith(services: listOfServices));
+    } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
+  // --- Validation / Helpers (Impacts) ---
+  Future<void> countImpactedReservations(
+    int restaurantId,
+    int dayOfWeek,
+    TimeOnly newStartTime,
+    TimeOnly newEndTime,
+    int serviceId,
+  ) async {
     final currentState = state.value ?? ManagerState();
     try {
       final impactedReservations = await Service.countReservationsOutsideNewSlot(
-          restaurantId, dayOfWeek, newStartTime, newEndTime, serviceId);
+        restaurantId,
+        dayOfWeek,
+        newStartTime,
+        newEndTime,
+        serviceId,
+      );
       state = AsyncData(currentState.copyWith(impactedReservations: impactedReservations));
     } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
   }
 
-  Future<void> countImpactedServices(int restaurantId, int dayOfWeek, TimeOnly newStartTime, TimeOnly newEndTime, int serviceId) async {
+  Future<void> countImpactedServices(
+    int restaurantId,
+    int dayOfWeek,
+    TimeOnly newStartTime,
+    TimeOnly newEndTime,
+    int serviceId,
+  ) async {
     final currentState = state.value ?? ManagerState();
     try {
       final impactedServices = await Service.countImpactedServices(
-          restaurantId, dayOfWeek, newStartTime, newEndTime, serviceId);
+        restaurantId,
+        dayOfWeek,
+        newStartTime,
+        newEndTime,
+        serviceId,
+      );
       state = AsyncData(currentState.copyWith(impactedServices: impactedServices));
-    } catch (e) {
-      state = AsyncValue.error(e.toString(), StackTrace.current);
-    }
-  }
-
-  Future<void> getRestaurantGap(int restaurantId) async {
-    final currentState = state.value ?? ManagerState();
-    state = const AsyncValue.loading();
-    try {
-      final gap = await Restaurant.getRestaurantGap(restaurantId);
-      state = AsyncData(currentState.copyWith(currentRestaurantGap: gap));
     } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
@@ -259,5 +284,112 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
   Future<void> resetImpacts() async {
     final currentState = state.value ?? ManagerState();
     state = AsyncData(currentState.copyWith(impactedReservations: 0, impactedServices: 0));
+  }
+
+  // ==========================================
+  // TABLES (CRUDL)
+  // ==========================================
+
+  // --- Create ---
+  Future<void> createTable(int capacity, int number) async {
+    final currentState = state.value ?? ManagerState();
+    final currentId = state.value?.currentRestaurantId;
+
+    state = const AsyncValue.loading();
+    try {
+      await RestaurantTable.createTable(currentId!, capacity, number);
+      final List<RestaurantTable> listOfTables = await RestaurantTable.getTables(currentId);
+      state = AsyncData(currentState.copyWith(restaurantTables: listOfTables));
+    } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
+  // --- Read (Single) ---
+  Future<void> getTable(int tableId) async {
+    final currentState = state.value ?? ManagerState();
+    final currentList = state.value?.availableTables ?? [];
+
+    state = const AsyncValue.loading();
+    try {
+      final updatedTable = await RestaurantTable.getSpecificTable(tableId);
+      bool found = false;
+
+      final newList = currentList.map((table) {
+        if (table.id == tableId) {
+          found = true;
+          return updatedTable;
+        }
+        return table;
+      }).toList();
+
+      if (!found) {
+        newList.add(updatedTable);
+      }
+
+      state = AsyncData(currentState.copyWith(restaurantTables: newList));
+    } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
+  // --- Read (List) ---
+  Future<void> getTables(int restaurantId) async {
+    state = const AsyncValue.loading();
+    try {
+      final tables = await RestaurantTable.getTables(restaurantId);
+      final currentState = state.value ?? ManagerState();
+      state = AsyncData(currentState.copyWith(restaurantTables: tables));
+    } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
+  Future<void> loadRestaurantTables(int restaurantId) async {
+    state = const AsyncValue.loading();
+    try {
+      final availableTables = await RestaurantTable.getTables(restaurantId);
+      final currentState = state.value ?? ManagerState();
+      state = AsyncData(currentState.copyWith(restaurantTables: availableTables));
+    } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
+  Future<void> loadAvailableTables(int restaurantId, DateTime date) async {
+    state = const AsyncValue.loading();
+    try {
+      final availableTables = await RestaurantTable.getAvailableTables(restaurantId, date);
+      final currentState = state.value ?? ManagerState();
+      state = AsyncData(currentState.copyWith(restaurantTables: availableTables));
+    } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
+  // --- Update ---
+  Future<void> updateTable(RestaurantTable table, int capacity, int number) async {
+    final currentState = state.value ?? ManagerState();
+    final currentId = state.value?.currentRestaurantId;
+
+    state = const AsyncValue.loading();
+    try {
+      await table.updateTable(table.id, capacity, number);
+      final List<RestaurantTable> listOfTables = await RestaurantTable.getTables(currentId!);
+      state = AsyncData(currentState.copyWith(restaurantTables: listOfTables));
+    } catch (e) {
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
+  // --- Validation / Helpers ---
+  Future<bool> validateTableCapacity(int tableId, int newCapacity) async {
+    try {
+      return await RestaurantTable.validateCapacity(tableId, newCapacity);
+    } catch (e) {
+      // En cas d'erreur réseau, on peut choisir de bloquer par sécurité
+      print("Erreur de validation: $e");
+      return false;
+    }
   }
 }

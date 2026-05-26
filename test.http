@@ -93,3 +93,12 @@ Content-Type: application/json
 {
   "restaurant_id" : 1
 }
+
+### récupérer toutes les tables d'un restaurant
+POST http://localhost:3000/rpc/get_tables
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoibWFuYWdlciIsInN1YiI6ImJlcGVuZWxsZUBlcGZjLmV1IiwibmFtZSI6IkJlbm_DrnQiLCJ1c2VyX2lkIjoyLCJleHAiOjE3Nzk4ODExNzZ9.zjlYPYvw6HIdt9sevnLcK-sqMnbcHG81EIlpyEw9yxM
+Content-Type: application/json
+
+{
+  "restaurant_id" : 1
+}

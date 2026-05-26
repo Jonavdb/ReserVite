@@ -41,7 +41,6 @@ class _ListReservationsManagerScreenState extends ConsumerState<ListReservations
 
   @override
   Widget build(BuildContext context) {
-
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
     final reservationsState = ref.watch(managerStateProvider);
@@ -50,7 +49,9 @@ class _ListReservationsManagerScreenState extends ConsumerState<ListReservations
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () { Navigator.pop(context);},
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         title: Text(widget.restaurantName),
         automaticallyImplyLeading: false,
@@ -211,8 +212,18 @@ class _ListReservationsManagerScreenState extends ConsumerState<ListReservations
         type: BottomNavigationBarType.fixed,
         currentIndex: 0,
         onTap: (index) {
-          if (index == 1){
-            Navigator.pushNamed(context, '/restaurant_management_services', arguments: {'restaurantId' : widget.restaurantId, 'restaurantName' : widget.restaurantName});
+          if (index == 1) {
+            Navigator.pushNamed(
+              context,
+              '/restaurant_management_services',
+              arguments: {'restaurantId': widget.restaurantId, 'restaurantName': widget.restaurantName},
+            );
+          } else if (index == 2) {
+            Navigator.pushNamed(
+              context,
+              '/restaurant_management_tables',
+              arguments: {'restaurantId': widget.restaurantId, 'restaurantName': widget.restaurantName},
+            );
           }
         },
         items: const [
