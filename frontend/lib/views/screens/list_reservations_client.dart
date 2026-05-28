@@ -31,7 +31,9 @@ class ListReservationsClient extends ConsumerWidget {
               Navigator.pushReplacementNamed(context, '/search_restaurants');
             },
           ),
-          IconButton(icon: const Icon(Icons.refresh), tooltip: 'Rafraîchir les données', onPressed: () {}),
+          IconButton(icon: const Icon(Icons.refresh), tooltip: 'Rafraîchir les données', onPressed: () {
+            ref.read(clientStateProvider.notifier).changeFilter(clientStateAsync.value!.currentFilter);
+          }),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Déconnexion ($userName)',

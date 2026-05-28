@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_f03/core/tools/date_time_picker.dart';
+import 'package:prbd_2526_f03/providers/reference_time_provider.dart';
+import 'package:prbd_2526_f03/providers/simulated_time_provider.dart';
 import '../../providers/client/client_state_provider.dart';
 
 class ViewReservationClient extends ConsumerWidget {
@@ -14,8 +17,12 @@ class ViewReservationClient extends ConsumerWidget {
     // theme de la page
     final theme = Theme.of(context);
 
-    // TODO : récupérer le temps simulé via provider
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
+    // on observe la date via le referenceTimeProcider
+    final appTimeProvider = ref.watch(referenceTimeProvider);
+
+    // on récupère le notifier du provider du temps simulé
+    // pour pouvoir l'appeler quand on a besoin d'interagir avec le backend
+    var simulatedTimeNotifier = ref.read(simulatedTimeProvider.notifier);
 
     // on récupère l'id de la réservation selectionnée
     final reservationId = ModalRoute.of(context)!.settings.arguments as int;
@@ -51,6 +58,12 @@ class ViewReservationClient extends ConsumerWidget {
       }
     }
 
+    /*final dateTextStyle = TextStyle(
+      fontSize: 10,
+      color: Colors.grey[400],
+      fontWeight: FontWeight.normal,
+    );*/
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -78,19 +91,7 @@ class ViewReservationClient extends ConsumerWidget {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message:
-                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-              ),
+              child: const DateTimePicker(),
             ),
           ),
         ),
