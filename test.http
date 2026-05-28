@@ -93,3 +93,18 @@ Content-Type: application/json
 {
   "restaurant_id" : 1
 }
+
+### Test Manu : récupérer le temps simulé
+POST http://localhost:3000/rpc/get_current_date
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic3ViIjoieGFwaWdlb2xldEBlcGZjLmV1IiwibmFtZSI6IlhhdmllciIsInVzZXJfaWQiOjMsImV4cCI6MTc4MDA1MDIyNH0.doxC2aXxsXL1ABadg4Ln8PErhUrAN0XEvUmOkkz7X9s
+Content-Type: application/json
+
+### Test Manu : modifier le temps simulé
+POST http://localhost:3000/rpc/set_current_date
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic3ViIjoieGFwaWdlb2xldEBlcGZjLmV1IiwibmFtZSI6IlhhdmllciIsInVzZXJfaWQiOjMsImV4cCI6MTc4MDA1MDIyNH0.doxC2aXxsXL1ABadg4Ln8PErhUrAN0XEvUmOkkz7X9s
+Content-Type: application/json
+
+{
+  "new_date": "2026-05-28T10:43:25.000Z"
+}
+

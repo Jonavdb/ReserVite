@@ -6,7 +6,7 @@ import 'package:prbd_2526_f03/views/screens/list_reservations_client.dart';
 import 'package:prbd_2526_f03/views/screens/list_reservations_manager.dart';
 import 'package:prbd_2526_f03/views/screens/list_restaurants_manager.dart';
 import 'package:prbd_2526_f03/views/screens/reservation_details_manager.dart';
-import 'package:prbd_2526_f03/views/screens/view_reservations_details.dart';
+import 'package:prbd_2526_f03/views/screens/view_reservation_details.dart';
 import 'package:prbd_2526_f03/views/screens/restaurant_details.dart';
 import 'package:prbd_2526_f03/views/screens/restaurant_management_services.dart';
 import '../views/screens/login.dart';
