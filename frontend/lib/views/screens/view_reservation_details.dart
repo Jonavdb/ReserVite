@@ -29,7 +29,7 @@ class ViewReservationClient extends ConsumerWidget {
     // on récupère la réservation du client dans la liste de toutes les réservations
     final clientReservation = reservations.where((r) => r.id == reservationId).firstOrNull;
 
-    // état bouton modifier
+    // variable gestion d'état boutons d'action (Modifier et Annuler)
     final reservationDateTime = clientReservation?.datetime;
     final reservationStatus = clientReservation?.status;
     final appTime = referenceTime.value ?? DateTime.now();
@@ -37,6 +37,7 @@ class ViewReservationClient extends ConsumerWidget {
     final isCancelled = reservationStatus == 'cancelled';
     final isDisabled = reservationDateTime != null ? reservationDateTime.compareTo(appTime) <= 0 : false;
 
+    // variables de gestion de l'affichage de la réservation selectionnée
     String statusLabel = '';
     Color statusColor = Colors.grey;
     if(clientReservation != null) {
