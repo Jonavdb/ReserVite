@@ -76,7 +76,7 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
    */
   // Fonction qui permet de récupérer les  réservations du client connecté.. selon un filtre choisis (si aucun filtre, on récupère tout)
   Future<void> changeFilter(String newFilter) async {
-    final currentState = state.value!; // sauvegarde l'état actuel des restaurants affichés
+    final currentState = state.value!; // sauvegarde l'état actuel
     state = const AsyncLoading();
 
     // on lance le processus pour récupérer les réservations du client connecté..
@@ -92,4 +92,29 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
       state = AsyncError(e, stackTrace);
     }
   } // à chaque transition d'état tous les observateurs de l'état du client connecté sont notifiés et agissent en conséquence
+
+
+  Future<void> refreshSingleReservation(int? id) async {
+    final currentState = state.value!; // sauvegarde l'état actuel
+    state = const AsyncLoading();
+
+    // swap : dans la liste originale, on remplace la reservation avec l'id renseigné
+    // par celle récupérée dans le backend
+    // résultat : on conserve la liste originale avec la même réservation sauf que là ses données sont à jour
+    try {
+
+      final fetchedReservation = await ClientState.fetchReservationById(id);
+      final newList = currentState.reservations.map((reservation) {
+        if (reservation.id == fetchedReservation.id) {
+          return fetchedReservation;
+        }
+        return reservation;
+      }).toList();
+      state = AsyncData(currentState.copyWith(reservations: newList));
+      print("succes !");
+    } catch (e, stackTrace) {
+      state = AsyncError(e, stackTrace);
+      print("error ");
+    }
+  }
 }

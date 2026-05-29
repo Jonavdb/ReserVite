@@ -67,4 +67,26 @@ class ClientState {
     }
     return reservations;
   }
+
+  static Future<ReservationClient> fetchReservationById(int? id) async {
+    final Map<String, int> params = {};
+    if (id != null) {
+      params['resid'] = id;
+    }
+
+    final response = await ApiClient.post(
+      'get_client_reservation_by_id',
+      body: params.isNotEmpty ? json.encode(params) : null,
+      anonymous: false,
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Réservation introuvable. ID: $id");
+    }
+
+    final dynamic body = json.decode(response.body);
+
+    return ReservationClient.fromJson(body);
+  }
+
 }

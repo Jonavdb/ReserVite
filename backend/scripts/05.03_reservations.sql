@@ -258,3 +258,30 @@ end;
 $$  language plpgsql security definer;
 
 grant execute on function count_reservations_outside_new_slot(int, int, time, time, int) to authenticated;
+
+
+create or replace function get_client_reservation_by_id(resid int)
+    returns client_reservation_info
+as $$
+declare
+    uid int := auth.id();
+    user_role text := auth.role();
+    res client_reservation_info;
+begin
+    if uid is null then
+        raise exception 'Vous devez être connecté';
+    end if;
+
+    if user_role != 'client' then
+        raise exception 'Vous n''êtes pas autorisé. Rôle détecté: [%], ID détecté: [%]', user_role, uid;
+    end if;
+    select * into res from get_client_reservations(null) where id = resId;
+
+    if res is null then
+        raise exception 'Réservation introuvable. ID :[%]', resId;
+    end if;
+
+    return res;
+end;
+$$ language plpgsql security definer;
+grant execute on function get_client_reservation_by_id(int) to authenticated;
