@@ -117,3 +117,13 @@ Content-Type: application/json
   "new_date": "2026-05-28T10:43:25.000Z"
 }
 
+
+### Test Manu : récupérer les infos d'une réservation avec son id
+POST http://localhost:3000/rpc/get_client_reservation_by_id
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic3ViIjoieGFwaWdlb2xldEBlcGZjLmV1IiwibmFtZSI6IlhhdmllciIsInVzZXJfaWQiOjMsImV4cCI6MTc4MDA1MDIyNH0.doxC2aXxsXL1ABadg4Ln8PErhUrAN0XEvUmOkkz7X9s
+Content-Type: application/json
+
+{
+  "resid": 7
+}
+

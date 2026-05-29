@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:prbd_2526_f03/core/tools/date_time_picker.dart';
+import 'package:prbd_2526_f03/core/widgets/date_time_picker_widget.dart';
 import 'package:prbd_2526_f03/providers/reference_time_provider.dart';
 import 'package:prbd_2526_f03/providers/simulated_time_provider.dart';
 import '../../providers/client/client_state_provider.dart';
@@ -14,15 +14,11 @@ class ViewReservationClient extends ConsumerWidget {
     // on stock l'état courant des données du client connecté
     final clientStateAsync = ref.watch(clientStateProvider);
 
+    // on recupère le temps simulé courant
+    final referenceTime = ref.watch(referenceTimeProvider);
+
     // theme de la page
     final theme = Theme.of(context);
-
-    // on observe la date via le referenceTimeProcider
-    final appTimeProvider = ref.watch(referenceTimeProvider);
-
-    // on récupère le notifier du provider du temps simulé
-    // pour pouvoir l'appeler quand on a besoin d'interagir avec le backend
-    var simulatedTimeNotifier = ref.read(simulatedTimeProvider.notifier);
 
     // on récupère l'id de la réservation selectionnée
     final reservationId = ModalRoute.of(context)!.settings.arguments as int;
@@ -33,7 +29,15 @@ class ViewReservationClient extends ConsumerWidget {
     // on récupère la réservation du client dans la liste de toutes les réservations
     final clientReservation = reservations.where((r) => r.id == reservationId).firstOrNull;
 
-    //
+    // variable gestion d'état boutons d'action (Modifier et Annuler)
+    final reservationDateTime = clientReservation?.datetime;
+    final reservationStatus = clientReservation?.status;
+    final appTime = referenceTime.value ?? DateTime.now();
+    final isCompleted = reservationStatus == 'completed';
+    final isCancelled = reservationStatus == 'cancelled';
+    final isDisabled = reservationDateTime != null ? reservationDateTime.compareTo(appTime) <= 0 : false;
+
+    // variables de gestion de l'affichage de la réservation selectionnée
     String statusLabel = '';
     Color statusColor = Colors.grey;
     if(clientReservation != null) {
@@ -58,12 +62,6 @@ class ViewReservationClient extends ConsumerWidget {
       }
     }
 
-    /*final dateTextStyle = TextStyle(
-      fontSize: 10,
-      color: Colors.grey[400],
-      fontWeight: FontWeight.normal,
-    );*/
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -79,7 +77,9 @@ class ViewReservationClient extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Rafraîchir les données',
-            onPressed: () {},
+            onPressed: () {
+              ref.read(clientStateProvider.notifier).refreshSingleReservation(reservationId);
+            },
           ),
         ],
         elevation: 2,
@@ -226,18 +226,24 @@ class ViewReservationClient extends ConsumerWidget {
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Modifier'),
+                    child: Visibility(
+                      visible: !isCompleted && !isCancelled,
+                      child: ElevatedButton.icon(
+                        onPressed: isDisabled ? null : () {},
+                        icon: const Icon(Icons.edit),
+                        label: const Text('Modifier'),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.cancel),
-                      label: const Text('Annuler'),
+                    child: Visibility(
+                      visible: !isCompleted && !isCancelled,
+                      child: ElevatedButton.icon(
+                        onPressed: () {},
+                        icon: const Icon(Icons.cancel),
+                        label: const Text('Annuler'),
+                      ),
                     ),
                   ),
                 ],
