@@ -14,6 +14,9 @@ class ViewReservationClient extends ConsumerWidget {
     // on stock l'état courant des données du client connecté
     final clientStateAsync = ref.watch(clientStateProvider);
 
+    // on recupère le temps simulé courant
+    final referenceTime = ref.watch(referenceTimeProvider);
+
     // theme de la page
     final theme = Theme.of(context);
 
@@ -25,6 +28,14 @@ class ViewReservationClient extends ConsumerWidget {
 
     // on récupère la réservation du client dans la liste de toutes les réservations
     final clientReservation = reservations.where((r) => r.id == reservationId).firstOrNull;
+
+    // état bouton modifier
+    final reservationDateTime = clientReservation?.datetime;
+    final reservationStatus = clientReservation?.status;
+    final appTime = referenceTime.value ?? DateTime.now();
+    final isCompleted = reservationStatus == 'completed';
+    final isCancelled = reservationStatus == 'cancelled';
+    final isDisabled = reservationDateTime != null ? reservationDateTime.compareTo(appTime) <= 0 : false;
 
     String statusLabel = '';
     Color statusColor = Colors.grey;
@@ -214,18 +225,24 @@ class ViewReservationClient extends ConsumerWidget {
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Modifier'),
+                    child: Visibility(
+                      visible: !isCompleted && !isCancelled,
+                      child: ElevatedButton.icon(
+                        onPressed: isDisabled ? null : () {},
+                        icon: const Icon(Icons.edit),
+                        label: const Text('Modifier'),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.cancel),
-                      label: const Text('Annuler'),
+                    child: Visibility(
+                      visible: !isCompleted && !isCancelled,
+                      child: ElevatedButton.icon(
+                        onPressed: () {},
+                        icon: const Icon(Icons.edit),
+                        label: const Text('Annuler'),
+                      ),
                     ),
                   ),
                 ],
