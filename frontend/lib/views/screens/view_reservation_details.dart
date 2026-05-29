@@ -240,7 +240,7 @@ class ViewReservationClient extends ConsumerWidget {
                       visible: !isCompleted && !isCancelled,
                       child: ElevatedButton.icon(
                         onPressed: () {},
-                        icon: const Icon(Icons.edit),
+                        icon: const Icon(Icons.cancel),
                         label: const Text('Annuler'),
                       ),
                     ),
