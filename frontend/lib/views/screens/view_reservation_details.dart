@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:prbd_2526_f03/core/widgets/date_time_picker_widget.dart';
+import 'package:prbd_2526_f03/core/widgets/simulated_date_time_picker_widget.dart';
 import 'package:prbd_2526_f03/providers/reference_time_provider.dart';
 import 'package:prbd_2526_f03/providers/simulated_time_provider.dart';
 import '../../providers/client/client_state_provider.dart';
@@ -91,7 +91,7 @@ class ViewReservationClient extends ConsumerWidget {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: const DateTimePicker(),
+              child: const SimulatedDateTimePicker(),
             ),
           ),
         ),
