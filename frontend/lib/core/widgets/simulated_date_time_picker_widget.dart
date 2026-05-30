@@ -7,8 +7,8 @@ import 'package:prbd_2526_f03/providers/simulated_time_provider.dart';
 /*
   Widget custom pour modifier la date simulée de l'application
  */
-class DateTimePicker extends ConsumerWidget {
-  const DateTimePicker({super.key});
+class SimulatedDateTimePicker extends ConsumerWidget {
+  const SimulatedDateTimePicker({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

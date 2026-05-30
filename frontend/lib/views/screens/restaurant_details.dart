@@ -132,7 +132,13 @@ class _RestaurantDetailsScreenState extends ConsumerState<RestaurantDetailsScree
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       // TODO : envoyer sur la page de Manu
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/add_reservation',
+                          arguments: {'restaurantId': restaurant.id},
+                        );
+                      },
                       icon: const Icon(Icons.add),
                       label: const Text('Réserver'),
                       style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),

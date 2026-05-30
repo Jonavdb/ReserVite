@@ -309,7 +309,10 @@ class ListReservationsClient extends ConsumerWidget {
 
       // FOOTER (bouton 'nouvelle réservation')
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.pushNamed(
+            context, '/search_restaurants',);
+        },
         icon: const Icon(Icons.add),
         label: const Text('Nouvelle réservation'),
       ),
