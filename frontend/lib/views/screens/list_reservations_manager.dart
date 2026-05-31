@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_f03/providers/manager/manager_state_provider.dart';
+import 'package:prbd_2526_f03/core/widgets/simulated_date_time_picker_widget.dart';
 
 class ListReservationsManager extends ConsumerStatefulWidget {
   final int restaurantId;
@@ -42,7 +43,6 @@ class _ListReservationsManagerScreenState extends ConsumerState<ListReservations
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
     final reservationsState = ref.watch(managerStateProvider);
 
     return Scaffold(
@@ -71,13 +71,7 @@ class _ListReservationsManagerScreenState extends ConsumerState<ListReservations
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message: 'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR').format(simulatedTime),
-                  style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.normal),
-                ),
-              ),
+              child: const SimulatedDateTimePicker(),
             ),
           ),
         ),
@@ -212,7 +206,13 @@ class _ListReservationsManagerScreenState extends ConsumerState<ListReservations
         type: BottomNavigationBarType.fixed,
         currentIndex: 0,
         onTap: (index) {
-          if (index == 1) {
+          if (index == 0) {
+            Navigator.pushNamed(
+              context,
+              '/list_reservations_manager',
+              arguments: {'restaurantId': widget.restaurantId, 'restaurantName': widget.restaurantName},
+            );
+          } else if (index == 1) {
             Navigator.pushNamed(
               context,
               '/restaurant_management_services',
