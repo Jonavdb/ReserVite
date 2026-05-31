@@ -5,6 +5,8 @@ import 'package:prbd_2526_f03/models/manager/service.dart';
 import 'package:prbd_2526_f03/models/manager/time_only.dart';
 import 'package:prbd_2526_f03/providers/manager/manager_state_provider.dart';
 
+import '../../core/widgets/simulated_date_time_picker_widget.dart';
+
 class EditService extends ConsumerStatefulWidget {
   final int restaurantId;
   final int ?serviceId;
@@ -74,20 +76,8 @@ class _EditServiceState extends ConsumerState<EditService> {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message:
-                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-              ),
-            ),
+              child: const SimulatedDateTimePicker(),
+          ),
           ),
         ),
       ),

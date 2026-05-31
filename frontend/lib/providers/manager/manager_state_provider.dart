@@ -2,6 +2,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:prbd_2526_f03/models/manager/manager_state.dart';
 import 'package:prbd_2526_f03/models/manager/time_only.dart';
 import 'package:prbd_2526_f03/models/restaurant/restaurant.dart';
+import 'package:prbd_2526_f03/providers/simulated_time_provider.dart';
 import '../../core/tools/abstract_async_notifier.dart';
 import '../../models/manager/reservation_detail.dart';
 import '../../models/manager/service.dart';
@@ -17,8 +18,29 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
   @override
   Future<ManagerState> build() async {
     // on charge les restaurants au démarrage
+    ref.watch(simulatedTimeProvider);
+    final previous = state.value;
+    final currentId = previous?.currentRestaurantId;
+
     final restaurants = await Restaurant.getManagerRestaurants();
-    return ManagerState(restaurants: restaurants);
+
+    if (currentId == null) {
+      return ManagerState(restaurants: restaurants);
+    }
+
+    final reservations = await ReservationDetail.getReservations(currentId);
+    final services = await Service.getServiceForResturant(currentId);
+    final tables = await RestaurantTable.getTables(currentId);
+    final gap = await Restaurant.getRestaurantGap(currentId);
+
+    return ManagerState(
+      restaurants: restaurants,
+      currentRestaurantId: currentId,
+      reservations: reservations,
+      services: services,
+      restaurantTables: tables,
+      currentRestaurantGap: gap,
+    );
   }
 
   @override
