@@ -118,14 +118,17 @@ $$  language plpgsql security definer;
 grant execute on function count_impacted_services(int, int, time, time, int) to authenticated;
 
 create or replace function create_service(restaurant_id int, new_day_of_week int, new_start_time time, new_end_time time)
-    returns void as
+    returns int as
 $$
+declare
+    new_id int;
 begin
     perform auth.check_logged();
     if (auth.role() != 'manager') then
         raise exception 'Vous n''etes pas autorise à accéder à ces services';
     end if;
-    insert into services (restaurant, day_of_week, start_time, end_time) values (restaurant_id, new_day_of_week, new_start_time, new_end_time);
+    insert into services (restaurant, day_of_week, start_time, end_time) values (restaurant_id, new_day_of_week, new_start_time, new_end_time) returning id into new_id;
+    return new_id;
 end;
 $$ language plpgsql security definer;
 
