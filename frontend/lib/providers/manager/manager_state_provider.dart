@@ -7,6 +7,7 @@ import '../../core/tools/abstract_async_notifier.dart';
 import '../../models/manager/reservation_detail.dart';
 import '../../models/manager/service.dart';
 import '../../models/manager/table.dart';
+import '../security/current_user_provider.dart';
 
 final managerStateProvider = AsyncNotifierProvider<ManagerStateNotifier, ManagerState>(() => ManagerStateNotifier());
 
@@ -19,6 +20,12 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
   Future<ManagerState> build() async {
     // on charge les restaurants au démarrage
     ref.watch(simulatedTimeProvider);
+    ref.watch(currentUserProvider);
+    final userNotifier = ref.watch(currentUserProvider.notifier);
+
+    if (!userNotifier.isManager) {
+      throw Exception("Access Denied: You must be logged in as a manager.");
+    }
     final previous = state.value;
     final currentId = previous?.currentRestaurantId;
 
