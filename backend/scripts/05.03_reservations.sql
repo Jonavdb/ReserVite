@@ -287,7 +287,11 @@ $$ language plpgsql security definer;
 grant execute on function get_client_reservation_by_id(int) to authenticated;
 
 
-CREATE OR REPLACE FUNCTION get_slots_available_for_potential_reservation(p_resdate timestamp, p_restaurant_id int)
+CREATE OR REPLACE FUNCTION get_slots_available_for_potential_reservation(
+    p_resdate timestamp,
+    p_restaurant_id int,
+    p_ignore_res_id int DEFAULT NULL
+)
     RETURNS time[]
 AS $$
 DECLARE
@@ -297,9 +301,9 @@ BEGIN
     -- pour avoir les heures des créneaux disponibles
     SELECT ARRAY(
                    WITH
-                       -- 1. on récupère le nombre total de table du restaurant en paramètre
-                       total_tables as (
-                           SELECT count(id) as max_tables
+                       -- 1. on récupère le nombre total de chaises (la capacité totale) du restaurant en paramètre
+                       restaurant_capacity as (
+                           SELECT COALESCE(SUM(capacity), 0) as max_seats
                            FROM tables t
                            WHERE t.restaurant = p_restaurant_id
                        ),
@@ -318,25 +322,24 @@ BEGIN
                            WHERE resto.id = p_restaurant_id
                              AND s.day_of_week = EXTRACT(isodow from p_resdate)
                        ),
-                       -- 3. on récupère tous les débuts de créneaux horaires du restaurant en paramètre
-                       -- où une reservations a été faite à la date en paramètre
-                       booked_slots as (
-                           SELECT r.datetime::time as slot_time, count(rt."table") as booked_count
+                       -- 3. on récupère le nombre total de convives ayant réservé pour ce jour
+                       -- (en excluant la réservation en cours de modification si p_ignore_res_id est fourni)
+                       booked_today as (
+                           SELECT COALESCE(SUM(number_of_guests), 0) as booked_count
                            FROM reservations r
-                                    JOIN reservation_tables rt ON rt.reservation = r.id
                            WHERE r.restaurant = p_restaurant_id
                              AND r.datetime::date = p_resdate::date
                              AND r.status IN ('pending', 'confirmed')
-                           GROUP BY r.datetime::time
+                             AND (p_ignore_res_id IS NULL OR r.id != p_ignore_res_id)
                        )
-                   -- 4. on filtre : à tous les créneaux ON RETIRE tous les créneaux occupés
+                   -- 4. on filtre : de tous les créneaux ON RETIRE tous les créneaux si le total des convives du jour atteint ou dépasse la capacité maximale de chaises du restaurant
                    -- ce qui nous donne une liste de tous les débuts de créneaux horaires libres du restaurant en paramètre
                    -- à la date en paramètre
                    SELECT a.slot_time
                    FROM all_slots a
-                            CROSS JOIN total_tables tt
-                            LEFT JOIN booked_slots b ON b.slot_time = a.slot_time
-                   WHERE coalesce(b.booked_count, 0) < tt.max_tables
+                            CROSS JOIN restaurant_capacity rc
+                            CROSS JOIN booked_today bt
+                   WHERE bt.booked_count < rc.max_seats
                    ORDER BY a.slot_time
            ) INTO v_available_slots;
 
@@ -344,48 +347,40 @@ BEGIN
 END;
 $$ language plpgsql security definer;
 
-GRANT EXECUTE ON FUNCTION get_slots_available_for_potential_reservation(timestamp, int) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_slots_available_for_potential_reservation(timestamp, int, int) TO authenticated;
 
 
 CREATE OR REPLACE FUNCTION check_capacity_for_potential_reservation(
     p_target_timestamp timestamp,
     p_restaurant_id int,
-    p_requested_guests int
+    p_requested_guests int,
+    p_ignore_res_id int DEFAULT NULL
 )
     RETURNS boolean
 AS $$
 DECLARE
-    v_has_capacity boolean;
+    v_total_capacity int;
+    v_booked_guests int;
 BEGIN
-    WITH
-        -- 1. on récupère toutes les tables reservées à la date en paramètre
-        -- dans le restaurant en paramètre
-        booked_tables AS (
-            SELECT rt."table" AS table_id
-            FROM reservations r
-                     JOIN reservation_tables rt ON rt.reservation = r.id
-            WHERE r.restaurant = p_restaurant_id
-              AND r.datetime = p_target_timestamp
-              AND r.status IN ('pending', 'confirmed')
-        ),
-        -- 2. on récupère la somme de capacité de toutes les disponibles à ce moment là
-        remaining_capacity AS (
-            SELECT COALESCE(SUM(t.capacity), 0) AS total_free_seats
-            FROM tables t
-            WHERE t.restaurant = p_restaurant_id
-              AND t.id NOT IN (SELECT table_id FROM booked_tables)
-        )
-    -- 3. on vérifie que les tables disponibles à ce créneau horaire peuvent accueillir le nombre de convives spécifié
-    -- ie leur capacité totale est assez grande
-    SELECT (rc.total_free_seats >= p_requested_guests)
-    FROM remaining_capacity rc
-    INTO v_has_capacity;
+    -- 1. On récupère la capacité totale du restaurant (somme des places de toutes les tables)
+    SELECT COALESCE(SUM(capacity), 0) INTO v_total_capacity
+    FROM tables
+    WHERE restaurant = p_restaurant_id;
 
-    RETURN v_has_capacity;
+    -- 2. On additionne TOUS les convives qui ont réservé pour CE JOUR (statut pending ou confirmed)
+    SELECT COALESCE(SUM(number_of_guests), 0) INTO v_booked_guests
+    FROM reservations
+    WHERE restaurant = p_restaurant_id
+      AND datetime::date = p_target_timestamp::date
+      AND status IN ('pending', 'confirmed')
+      AND (p_ignore_res_id IS NULL OR id != p_ignore_res_id);
+
+    -- 3. On vérifie s'il reste assez de places globales par rapport à ce qui est demandé
+    RETURN (v_total_capacity - v_booked_guests) >= p_requested_guests;
 END;
 $$ language plpgsql security definer;
 
-GRANT EXECUTE ON FUNCTION check_capacity_for_potential_reservation(timestamp, int, int) TO authenticated;
+GRANT EXECUTE ON FUNCTION check_capacity_for_potential_reservation(timestamp, int, int, int) TO authenticated;
 
 
 create or replace function create_reservation(
@@ -426,3 +421,38 @@ end;
 $$ language plpgsql security definer;
 
 grant execute on function create_reservation(int, timestamp, int, text) to authenticated;
+
+
+create or replace function update_reservation(
+    p_reservation_id int,
+    p_reservation_time timestamp,
+    p_nb_guests int,
+    p_special_requests text
+)
+    returns void
+as $$
+declare
+    uid int := auth.id();
+    user_role text := auth.role();
+begin
+    if uid is null then
+        raise exception 'Vous devez être connecté';
+    end if;
+
+    if user_role != 'client' then
+        raise exception 'Vous n''êtes pas autorisé.';
+    end if;
+
+    if not exists(select 1 from reservations where id = p_reservation_id and client = uid) then
+        raise exception 'Réservation introuvable ou vous n''en êtes pas le propriétaire.';
+    end if;
+
+    update reservations
+    set datetime = p_reservation_time,
+        number_of_guests = p_nb_guests,
+        special_requests = nullif(trim(p_special_requests), '')
+    where id = p_reservation_id and client = uid;
+end;
+$$ language plpgsql security definer;
+
+grant execute on function update_reservation(int, timestamp, int, text) to authenticated;

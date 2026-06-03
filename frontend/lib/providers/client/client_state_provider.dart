@@ -117,12 +117,22 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
     }
   }
 
-  Future<void> getAvailableTimeSlots(int restaurantId, DateTime datePendingReservation) async {
+  Future<void> getAvailableTimeSlots(
+      int restaurantId,
+      DateTime datePendingReservation,
+      {int? ignoreReservationId} // AJOUT : Paramètre optionnel pour l'édition
+      ) async {
     final currentState = state.value!; // sauvegarde l'état actuel
     state = const AsyncLoading();
 
     try {
-      final availableTimeSlots = await ClientState.fetchAvailableTimeSlots(restaurantId, datePendingReservation);
+      // AJOUT : Transmission de l'ID à ignorer lors de l'appel au modèle
+      final availableTimeSlots = await ClientState.fetchAvailableTimeSlots(
+        restaurantId,
+        datePendingReservation,
+        ignoreReservationId: ignoreReservationId,
+      );
+
       state = AsyncData(currentState.copyWith(availableTimeSlots: availableTimeSlots));
       print("succes !");
     } catch (e, stackTrace) {
@@ -131,9 +141,20 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
     }
   }
 
-  Future<bool> checkSlotCapacity(int restaurantId, DateTime fullTimestamp, int requestedGuests) async {
+  Future<bool> checkSlotCapacity(
+      int restaurantId,
+      DateTime fullTimestamp,
+      int requestedGuests,
+      {int? ignoreReservationId} // AJOUT : Paramètre optionnel pour l'édition
+      ) async {
     try {
-      return await ClientState.fetchSlotCapacityCheck(restaurantId, fullTimestamp, requestedGuests);
+      // AJOUT : Transmission de l'ID à ignorer lors de l'appel au modèle
+      return await ClientState.fetchSlotCapacityCheck(
+        restaurantId,
+        fullTimestamp,
+        requestedGuests,
+        ignoreReservationId: ignoreReservationId,
+      );
     } catch (e) {
       print("Capacity check error: $e");
       return false;
@@ -162,6 +183,34 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
     } catch (e, stackTrace) {
       state = AsyncData(currentState);
       print("Erreur lors de la création de la réservation : $e");
+      return false;
+    }
+  }
+
+  Future<bool> editReservation(
+      int reservationId,
+      int restaurantId,
+      DateTime reservationTime,
+      int nbGuests,
+      String specialRequests,
+      ) async {
+    final currentState = state.value!;
+    state = const AsyncLoading();
+
+    try {
+      final success = await ClientState.updateReservation(
+        reservationId,
+        restaurantId,
+        reservationTime,
+        nbGuests,
+        specialRequests,
+      );
+
+      state = AsyncData(currentState);
+      return success;
+    } catch (e, stackTrace) {
+      state = AsyncData(currentState);
+      print("Erreur lors de la modification de la réservation : $e");
       return false;
     }
   }

@@ -28,13 +28,12 @@ class AddReservation extends HookConsumerWidget {
     final formKey = useMemoized(() => GlobalKey<FormState>());
     final isFormValid = useState(false);
 
-
     Map<int, String> formatServicesByDay(List<RestaurantService>? services) {
       final Map<int, List<String>> grouped = {};
 
       if(services == null || services.isEmpty) {
         print("null / aucun service pour aucun jour à ce resto");
-        return grouped.map((day, times) => MapEntry(day, times.join(',\n')));
+        return {};
       }
 
       for (var service in services) {
@@ -46,8 +45,11 @@ class AddReservation extends HookConsumerWidget {
       }
 
       // transforme la liste des horaires d'un jour en une seule string séparée par des virgules
-      return grouped.map((day, times) => MapEntry(day, times.join(',\n')));
+      return grouped.map<int, String>((day, times) {
+        return MapEntry(day, times.join(',\n'));
+      });
     }
+
     List<String> formatTimeSlots(List<DateTime> slots) {
       if(slots.isEmpty) {
         return List.empty();
@@ -157,6 +159,18 @@ class AddReservation extends HookConsumerWidget {
               final restaurant = clientState.selectedRestaurant;
               if (restaurant == null) return const Center(child: Text("Restaurant introuvable"));
 
+              // --- LOGIQUE AJOUTÉE POUR LE COMPTAGE DES QUOTAS DE SERVICES ---
+              final int currentDay = date.value!.weekday;
+              final servicesForDay = restaurant.services?.where((s) => s.dayOfWeek == currentDay).toList() ?? [];
+
+              final reservationsOnDay = clientState.reservations.where((r) =>
+              r.restaurant.id == restaurant.id &&
+                  r.datetime.year == date.value!.year &&
+                  r.datetime.month == date.value!.month &&
+                  r.datetime.day == date.value!.day &&
+                  (r.status == 'pending' || r.status == 'confirmed')
+              ).toList();
+
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -257,9 +271,8 @@ class AddReservation extends HookConsumerWidget {
                   const SizedBox(height: 24),
                   Builder(
                     builder: (context) {
-                      final int currentDay = date.value!.weekday;
-
-                      if (formattedServices[currentDay] == null) {
+                      // CAS 1 : Le restaurant est fermé ce jour-là (Aucun service)
+                      if (servicesForDay.isEmpty) {
                         return Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
@@ -280,7 +293,32 @@ class AddReservation extends HookConsumerWidget {
                             ],
                           ),
                         );
-                      } else {
+                      }
+                      // CAS 2 : Le quota maximal de services a déjà été réservé par le client pour aujourd'hui
+                      else if (reservationsOnDay.length >= servicesForDay.length) {
+                        return Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.orange),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.event_busy, color: Colors.orange),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Vous avez déjà réservé tous les services de ce jour là.',
+                                  style: TextStyle(color: Colors.orange, fontSize: 13, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      // CAS 3 : Affichage standard de la grille des créneaux
+                      else {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -460,10 +498,12 @@ class AddReservation extends HookConsumerWidget {
                   ),
                   const SizedBox(height: 32),
                   ElevatedButton.icon(
+                    // Modification : Le bouton reste cliquable même si isOverloaded est vrai (Avertissement simple)
                     onPressed: (date.value != null &&
                         selectedTimeSlot.value != null &&
                         isFormValid.value &&
-                        formattedServices[date.value!.weekday] != null &&
+                        servicesForDay.isNotEmpty &&
+                        reservationsOnDay.length < servicesForDay.length &&
                         (clientState.availableTimeSlots ?? []).any((slot) => DateFormat('HH:mm').format(slot) == selectedTimeSlot.value))
                         ? () async {
                       final dateStr = DateFormat('yyyy-MM-dd').format(date.value!);

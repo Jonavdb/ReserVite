@@ -229,7 +229,14 @@ class ViewReservationClient extends ConsumerWidget {
                     child: Visibility(
                       visible: !isCompleted && !isCancelled,
                       child: ElevatedButton.icon(
-                        onPressed: isDisabled ? null : () {},
+                        // ACTION DE SÉCURITÉ ET TRANSFERT : pousse l'ID dans la route d'édition
+                        onPressed: isDisabled ? null : () {
+                          Navigator.pushNamed(
+                            context,
+                            '/edit_reservation',
+                            arguments: reservationId,
+                          );
+                        },
                         icon: const Icon(Icons.edit),
                         label: const Text('Modifier'),
                       ),
