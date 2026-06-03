@@ -44,7 +44,6 @@ class EditReservation extends HookConsumerWidget {
     Map<int, String> formatServicesByDay(List<RestaurantService>? services) {
       final Map<int, List<String>> grouped = {};
       if (services == null || services.isEmpty) {
-        print("null / aucun service pour aucun jour à ce resto");
         return {};
       }
 

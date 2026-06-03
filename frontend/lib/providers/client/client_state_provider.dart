@@ -99,10 +99,8 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
         return reservation;
       }).toList();
       state = AsyncData(currentState.copyWith(reservations: newList));
-      print("succes !");
     } catch (e, stackTrace) {
       state = AsyncError(e, stackTrace);
-      print("error ");
     }
   }
 
@@ -123,10 +121,8 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
       );
 
       state = AsyncData(currentState.copyWith(availableTimeSlots: availableTimeSlots));
-      print("succes !");
     } catch (e, stackTrace) {
       state = AsyncError(e, stackTrace);
-      print("error ");
     }
   }
 
@@ -145,7 +141,6 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
         ignoreReservationId: ignoreReservationId,
       );
     } catch (e) {
-      print("Capacity check error: $e");
       return false;
     }
   }
@@ -171,7 +166,6 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
       return success;
     } catch (e, stackTrace) {
       state = AsyncData(currentState);
-      print("Erreur lors de la création de la réservation : $e");
       return false;
     }
   }
@@ -199,7 +193,6 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
       return success;
     } catch (e, stackTrace) {
       state = AsyncData(currentState);
-      print("Erreur lors de la modification de la réservation : $e");
       return false;
     }
   }

@@ -125,7 +125,40 @@ class _ListReservationsManagerScreenState extends ConsumerState<ListReservations
                       ? reservations
                       : reservations.where((r) => r.status == _selectedFilter).toList();
                   if (filteredReservations.isEmpty) {
-                    return const Center(child: Text('Aucune réservation trouvée.'));
+                      // Détermine le texte en fonction du filtre actif pour correspondre parfaitement à l'écran
+                      String emptyMessage = 'Aucune réservation trouvée.';
+                      switch (_selectedFilter) {
+                        case '':
+                          emptyMessage = 'Aucune réservation';
+                          break;
+                        case 'pending':
+                          emptyMessage = 'Aucune réservation en attente';
+                          break;
+                        case 'confirmed':
+                          emptyMessage = 'Aucune réservation confirmée';
+                          break;
+                        case 'completed':
+                          emptyMessage = 'Aucune réservation terminée';
+                          break;
+                        case 'cancelled':
+                          emptyMessage = 'Aucune réservation annulée';
+                          break;
+                      }
+
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.calendar_today_outlined, size: 90, color: Colors.grey[350]),
+                            const SizedBox(height: 24),
+                            Text(
+                              emptyMessage,
+                              style: TextStyle(fontSize: 18, color: Colors.grey[700], fontWeight: FontWeight.w500),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      );
                   }
                   return ListView.builder(
                     padding: const EdgeInsets.all(16.0),

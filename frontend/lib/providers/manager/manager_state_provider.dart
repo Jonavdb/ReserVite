@@ -398,8 +398,6 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
     try {
       return await RestaurantTable.validateCapacity(tableId, newCapacity);
     } catch (e) {
-      // En cas d'erreur réseau, on peut choisir de bloquer par sécurité
-      print("Erreur de validation: $e");
       return false;
     }
   }
