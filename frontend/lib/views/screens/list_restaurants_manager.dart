@@ -5,6 +5,8 @@ import 'package:prbd_2526_f03/providers/manager/manager_state_provider.dart';
 import 'package:prbd_2526_f03/providers/security/current_user_provider.dart';
 
 import '../../core/tools/date_utils.dart';
+import '../../core/widgets/simulated_date_time_picker_widget.dart';
+import '../../providers/reference_time_provider.dart';
 
 class ListRestaurantsManager extends ConsumerWidget {
   const ListRestaurantsManager({super.key});
@@ -16,7 +18,8 @@ class ListRestaurantsManager extends ConsumerWidget {
     final userName = notifier.loggedUserName;
 
     final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
+    final simulatedTime = ref.watch(referenceTimeProvider).value ?? DateTime.now();
+
 
     return Scaffold(
       appBar: AppBar(
@@ -32,7 +35,6 @@ class ListRestaurantsManager extends ConsumerWidget {
             icon: const Icon(Icons.logout),
             tooltip: 'Déconnexion ($userName)',
             onPressed: () {
-              ref.invalidate(managerStateProvider); // détruit le cache du manager courant
               ref.read(currentUserProvider.notifier).logout();
               Navigator.pushReplacementNamed(context, '/login');
             },
@@ -47,13 +49,7 @@ class ListRestaurantsManager extends ConsumerWidget {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message: 'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR').format(simulatedTime),
-                  style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.normal),
-                ),
-              ),
+              child:  const SimulatedDateTimePicker(),
             ),
           ),
         ),

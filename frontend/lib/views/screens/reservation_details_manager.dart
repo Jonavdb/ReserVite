@@ -1,26 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_f03/core/widgets/simulated_date_time_picker_widget.dart';
 import 'package:prbd_2526_f03/models/manager/reservation_detail.dart';
 import 'package:prbd_2526_f03/providers/manager/manager_state_provider.dart';
+import 'package:prbd_2526_f03/providers/reference_time_provider.dart';
 
-class ReservationDetailsManager extends ConsumerStatefulWidget {
+class ReservationDetailsManager extends ConsumerWidget {
   final int reservationId;
 
   const ReservationDetailsManager({super.key, required this.reservationId});
-
-  @override
-  ConsumerState<ReservationDetailsManager> createState() => _ReservationDetailsManagerState();
-}
-
-class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsManager> {
-  @override
-  void initState() {
-    super.initState();
-    // charger les réservations au démarrage
-    // ref n'est pas encore disponible dans InitState donc on utilise Future.microTask
-    Future.microtask(() => ref.read(managerStateProvider.notifier).getReservation(widget.reservationId));
-  }
 
   Color _colorStatus(String status) {
     switch (status) {
@@ -53,9 +42,9 @@ class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsMa
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
+    final simulatedTime = ref.watch(referenceTimeProvider).value ?? DateTime.now();
     final reservationDetailState = ref.watch(managerStateProvider);
 
     return Scaffold(
@@ -67,7 +56,7 @@ class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsMa
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Rafraîchir les données',
-            onPressed: () => ref.read(managerStateProvider.notifier).getReservation(widget.reservationId),
+            onPressed: () => ref.read(managerStateProvider.notifier).getReservation(reservationId),
           ),
         ],
         elevation: 2,
@@ -79,13 +68,7 @@ class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsMa
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message: 'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR').format(simulatedTime),
-                  style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.normal),
-                ),
-              ),
+              child: const SimulatedDateTimePicker(),
             ),
           ),
         ),
@@ -96,7 +79,7 @@ class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsMa
           error: (error, _) => Center(child: Text('Erreur: $error')),
           data: (managerState) {
             final reservations = managerState.reservations;
-            final reservationDetail = reservations.where((res) => res.id == widget.reservationId).firstOrNull;
+            final reservationDetail = reservations.where((res) => res.id == reservationId).firstOrNull;
 
             if (reservationDetail == null) {
               return const Center(child: Text('Aucune informations concernant cette reservation'));
@@ -296,7 +279,7 @@ class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsMa
                                     actions: [
                                       TextButton(onPressed: () => Navigator.pop(context), child: const Text('Non')),
                                       TextButton(
-                                        onPressed: () => _complete(context, reservationDetail, simulatedTime),
+                                        onPressed: () => _complete(context, ref, reservationDetail, simulatedTime),
                                         child: const Text('Oui', style: TextStyle(color: Colors.red)),
                                       ),
                                     ],
@@ -331,7 +314,7 @@ class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsMa
                               actions: [
                                 TextButton(onPressed: () => Navigator.pop(context), child: const Text('Non')),
                                 TextButton(
-                                  onPressed: () => _cancel(context, reservationDetail),
+                                  onPressed: () => _cancel(context, ref, reservationDetail),
                                   child: const Text('Oui', style: TextStyle(color: Colors.red)),
                                 ),
                               ],
@@ -352,20 +335,20 @@ class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsMa
     );
   }
 
-  void _cancel(BuildContext context, ReservationDetail res) async {
+  void _cancel(BuildContext context, WidgetRef ref, ReservationDetail res) async {
     final notifier = ref.read(managerStateProvider.notifier);
     notifier.cancelledReservation(res);
     if (context.mounted) {
-      ref.read(managerStateProvider.notifier).getReservation(widget.reservationId);
+      ref.read(managerStateProvider.notifier).getReservation(reservationId);
       Navigator.of(context).pop(null);
     }
   }
 
-  void _complete(BuildContext context, ReservationDetail res, DateTime simulatedTime) async {
+  void _complete(BuildContext context, WidgetRef ref, ReservationDetail res, DateTime simulatedTime) async {
     final notifier = ref.read(managerStateProvider.notifier);
     notifier.completeReservation(res, simulatedTime);
     if (context.mounted) {
-      ref.read(managerStateProvider.notifier).getReservation(widget.reservationId);
+      ref.read(managerStateProvider.notifier).getReservation(reservationId);
       Navigator.of(context).pop(null);
     }
   }

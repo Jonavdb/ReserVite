@@ -1,9 +1,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:prbd_2526_f03/models/manager/service.dart';
 import 'package:prbd_2526_f03/providers/manager/manager_state_provider.dart';
+
+import '../../core/widgets/simulated_date_time_picker_widget.dart';
 
 class RestaurantManagementServices extends ConsumerStatefulWidget{
   final int restaurantId;
@@ -30,7 +31,6 @@ class _RestaurantManagementServicesState extends ConsumerState<RestaurantManagem
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
     final servicesManagementState = ref.watch(managerStateProvider);
 
     return Scaffold(
@@ -60,19 +60,7 @@ class _RestaurantManagementServicesState extends ConsumerState<RestaurantManagem
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message:
-                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-              ),
+              child:  const SimulatedDateTimePicker(),
             ),
           ),
         ),
@@ -235,20 +223,31 @@ class _RestaurantManagementServicesState extends ConsumerState<RestaurantManagem
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: 1,
-        onTap: (_) {},
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushNamed(
+              context,
+              '/list_reservations_manager',
+              arguments: {'restaurantId': widget.restaurantId, 'restaurantName': widget.restaurantName},
+            );
+          } else if (index == 1) {
+            Navigator.pushNamed(
+              context,
+              '/restaurant_management_services',
+              arguments: {'restaurantId': widget.restaurantId, 'restaurantName': widget.restaurantName},
+            );
+          } else if (index == 2) {
+            Navigator.pushNamed(
+              context,
+              '/restaurant_management_tables',
+              arguments: {'restaurantId': widget.restaurantId, 'restaurantName': widget.restaurantName},
+            );
+          }
+        },
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'Réservations',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.schedule),
-            label: 'Services',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.table_restaurant),
-            label: 'Tables',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Réservations'),
+          BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Services'),
+          BottomNavigationBarItem(icon: Icon(Icons.table_restaurant), label: 'Tables'),
         ],
       ),
     );
@@ -261,7 +260,7 @@ class _RestaurantManagementServicesState extends ConsumerState<RestaurantManagem
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Service supprimé avec succès')),
       );
-      ref.read(managerStateProvider.notifier).loadServices(widget.restaurantId);
+      // ref.read(managerStateProvider.notifier).loadServices(widget.restaurantId);
       Navigator.of(context).pop(null);
     }
   }

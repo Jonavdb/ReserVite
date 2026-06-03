@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../core/widgets/simulated_date_time_picker_widget.dart';
 import '../../providers/manager/manager_state_provider.dart';
 
 class RestaurantManagementTables extends ConsumerStatefulWidget {
@@ -23,7 +24,6 @@ class _RestaurantManagementTablesState extends ConsumerState<RestaurantManagemen
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
     final tablesManagementState = ref.watch(managerStateProvider);
 
     return Scaffold(
@@ -54,13 +54,7 @@ class _RestaurantManagementTablesState extends ConsumerState<RestaurantManagemen
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message: 'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR').format(simulatedTime),
-                  style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.normal),
-                ),
-              ),
+              child: const SimulatedDateTimePicker(),
             ),
           ),
         ),

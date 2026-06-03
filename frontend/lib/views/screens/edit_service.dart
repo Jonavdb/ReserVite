@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:prbd_2526_f03/models/manager/service.dart';
 import 'package:prbd_2526_f03/models/manager/time_only.dart';
 import 'package:prbd_2526_f03/providers/manager/manager_state_provider.dart';
+
+import '../../core/widgets/simulated_date_time_picker_widget.dart';
 
 class EditService extends ConsumerStatefulWidget {
   final int restaurantId;
@@ -38,7 +39,6 @@ class _EditServiceState extends ConsumerState<EditService> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
     final editServiceState = ref.watch(managerStateProvider);
 
     editServiceState.whenData((managerState) {
@@ -74,20 +74,8 @@ class _EditServiceState extends ConsumerState<EditService> {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message:
-                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-              ),
-            ),
+              child: const SimulatedDateTimePicker(),
+          ),
           ),
         ),
       ),
@@ -300,7 +288,7 @@ class _EditServiceState extends ConsumerState<EditService> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Service mis à jour avec succès')),
       );
-      ref.read(managerStateProvider.notifier).loadServices(widget.restaurantId);
+      // ref.read(managerStateProvider.notifier).loadServices(widget.restaurantId);
       Navigator.of(context).pop(null);
     }
   }
@@ -312,7 +300,7 @@ class _EditServiceState extends ConsumerState<EditService> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Service créé avec succès')),
       );
-      ref.read(managerStateProvider.notifier).loadServices(widget.restaurantId);
+      // ref.read(managerStateProvider.notifier).loadServices(widget.restaurantId);
       Navigator.of(context).pop(null);
     }
   }
