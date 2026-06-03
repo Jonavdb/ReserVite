@@ -206,7 +206,7 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
         specialRequests,
       );
 
-      state = AsyncData(currentState);
+      await refreshSingleReservation(reservationId);
       return success;
     } catch (e, stackTrace) {
       state = AsyncData(currentState);

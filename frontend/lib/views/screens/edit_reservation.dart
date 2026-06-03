@@ -389,6 +389,29 @@ class EditReservation extends HookConsumerWidget {
                   final dateStr = DateFormat('yyyy-MM-dd').format(date.value!);
                   final fullReservationTimestamp = DateTime.parse('${dateStr}T${selectedTimeSlot.value!}:00');
 
+                  if (currentReservation.status == 'confirmed') {
+                    final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Modifier une réservation confirmée'),
+                          content : const Text('Cette réservation est confirmée. La modifier la remettra en attente et les tables associées seront libérées. Souhaitez-vous continuer ? '),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child : const Text('Annuler'),
+                            ),
+                            TextButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Text('Confirmer'),
+                            ),
+                          ],
+                        ),
+                      );
+                    if (confirm != true){
+                      return;
+                  }
+                  }
+
                   final success = await ref.read(clientStateProvider.notifier).editReservation(
                     reservationId,
                     restaurant!.id,
@@ -403,7 +426,6 @@ class EditReservation extends HookConsumerWidget {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: const Text('Réservation modifiée avec succès !'),
-                        backgroundColor: Colors.green.shade600,
                         behavior: SnackBarBehavior.fixed,
                       ),
                     );
