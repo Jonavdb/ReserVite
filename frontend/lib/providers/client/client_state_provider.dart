@@ -93,7 +93,6 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
     }
   } // à chaque transition d'état tous les observateurs de l'état du client connecté sont notifiés et agissent en conséquence
 
-
   Future<void> refreshSingleReservation(int? id) async {
     final currentState = state.value!; // sauvegarde l'état actuel
     state = const AsyncLoading();
@@ -117,4 +116,28 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
       print("error ");
     }
   }
+
+  Future<void> getAvailableTimeSlots(int restaurantId, DateTime datePendingReservation) async {
+    final currentState = state.value!; // sauvegarde l'état actuel
+    state = const AsyncLoading();
+
+    try {
+      final availableTimeSlots = await ClientState.fetchAvailableTimeSlots(restaurantId, datePendingReservation);
+      state = AsyncData(currentState.copyWith(availableTimeSlots: availableTimeSlots));
+      print("succes !");
+    } catch (e, stackTrace) {
+      state = AsyncError(e, stackTrace);
+      print("error ");
+    }
+  }
+
+  Future<bool> checkSlotCapacity(int restaurantId, DateTime fullTimestamp, int requestedGuests) async {
+    try {
+      return await ClientState.fetchSlotCapacityCheck(restaurantId, fullTimestamp, requestedGuests);
+    } catch (e) {
+      print("Capacity check error: $e");
+      return false;
+    }
+  }
+
 }

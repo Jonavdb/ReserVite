@@ -285,3 +285,105 @@ begin
 end;
 $$ language plpgsql security definer;
 grant execute on function get_client_reservation_by_id(int) to authenticated;
+
+
+CREATE OR REPLACE FUNCTION get_slots_available_for_potential_reservation(p_resdate timestamp, p_restaurant_id int)
+    RETURNS time[]
+AS $$
+DECLARE
+    v_available_slots time[];
+BEGIN
+    -- on récupère le résultat de la fonction et on met tout dans un array de 'time'
+    -- pour avoir les heures des créneaux disponibles
+    SELECT ARRAY(
+                   WITH
+                       -- 1. on récupère le nombre total de table du restaurant en paramètre
+                       total_tables as (
+                           SELECT count(id) as max_tables
+                           FROM tables t
+                           WHERE t.restaurant = p_restaurant_id
+                       ),
+                       -- 2. on récupère tous les débuts de créneaux horaires du restaurant en paramètre au jour de la date en paramètre
+                       -- exemple : 2/6/2026 => jour : MARDI de 18:00 à 20:00 slot duration 30 (ie 30 minutes)
+                       -- => creneaux le mardi : 18:00 - 18:30 - 19:00 - 19:30
+                       all_slots as (
+                           SELECT generated_time::time as slot_time
+                           FROM restaurants resto
+                                    JOIN services s ON s.restaurant = resto.id
+                                    CROSS JOIN LATERAL generate_series(
+                                   p_resdate::date + s.start_time,
+                                   p_resdate::date + s.end_time - (resto.slot_duration * interval '1 minute'),
+                                   resto.slot_duration * interval '1 minute'
+                                                       ) as generated_time
+                           WHERE resto.id = p_restaurant_id
+                             AND s.day_of_week = EXTRACT(isodow from p_resdate)
+                       ),
+                       -- 3. on récupère tous les débuts de créneaux horaires du restaurant en paramètre
+                       -- où une reservations a été faite à la date en paramètre
+                       booked_slots as (
+                           SELECT r.datetime::time as slot_time, count(rt."table") as booked_count
+                           FROM reservations r
+                                    JOIN reservation_tables rt ON rt.reservation = r.id
+                           WHERE r.restaurant = p_restaurant_id
+                             AND r.datetime::date = p_resdate::date
+                             AND r.status IN ('pending', 'confirmed')
+                           GROUP BY r.datetime::time
+                       )
+                   -- 4. on filtre : à tous les créneaux ON RETIRE tous les créneaux occupés
+                   -- ce qui nous donne une liste de tous les débuts de créneaux horaires libres du restaurant en paramètre
+                   -- à la date en paramètre
+                   SELECT a.slot_time
+                   FROM all_slots a
+                            CROSS JOIN total_tables tt
+                            LEFT JOIN booked_slots b ON b.slot_time = a.slot_time
+                   WHERE coalesce(b.booked_count, 0) < tt.max_tables
+                   ORDER BY a.slot_time
+           ) INTO v_available_slots;
+
+    RETURN v_available_slots;
+END;
+$$ language plpgsql security definer;
+
+GRANT EXECUTE ON FUNCTION get_slots_available_for_potential_reservation(timestamp, int) TO authenticated;
+
+
+CREATE OR REPLACE FUNCTION check_capacity_for_potential_reservation(
+    p_target_timestamp timestamp,
+    p_restaurant_id int,
+    p_requested_guests int
+)
+    RETURNS boolean
+AS $$
+DECLARE
+    v_has_capacity boolean;
+BEGIN
+    WITH
+        -- 1. on récupère toutes les tables reservées à la date en paramètre
+        -- dans le restaurant en paramètre
+        booked_tables AS (
+            SELECT rt."table" AS table_id
+            FROM reservations r
+                     JOIN reservation_tables rt ON rt.reservation = r.id
+            WHERE r.restaurant = p_restaurant_id
+              AND r.datetime = p_target_timestamp
+              AND r.status IN ('pending', 'confirmed')
+        ),
+        -- 2. on récupère la somme de capacité de toutes les disponibles à ce moment là
+        remaining_capacity AS (
+            SELECT COALESCE(SUM(t.capacity), 0) AS total_free_seats
+            FROM tables t
+            WHERE t.restaurant = p_restaurant_id
+              AND t.id NOT IN (SELECT table_id FROM booked_tables)
+        )
+    -- 3. on vérifie que les tables disponibles à ce créneau horaire peuvent accueillir le nombre de convives spécifié
+    -- ie leur capacité totale est assez grande
+    SELECT (rc.total_free_seats >= p_requested_guests)
+    FROM remaining_capacity rc
+    INTO v_has_capacity;
+
+    RETURN v_has_capacity;
+END;
+$$ language plpgsql security definer;
+
+GRANT EXECUTE ON FUNCTION check_capacity_for_potential_reservation(timestamp, int, int) TO authenticated;
+
