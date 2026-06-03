@@ -175,16 +175,11 @@ class AddReservation extends HookConsumerWidget {
                           color: Colors.transparent,
                           child: InkWell(
                             onTap: () async {
-                              // onTap : à l'appui sur la zone
-                              // on déclenche l'édition de la date via showDatePicker
-                              // ça ouvre le calendrier
                               final DateTime? pickedDate = await showDatePicker(
                                 context: context,
-                                initialDate: date.value!, // initial date : la date à l'ouverture
-
+                                initialDate: date.value!,
                                 firstDate: initialTime!,
-                                lastDate: DateTime(date.value!.year + 10), // last date : la dernière date disponible
-
+                                lastDate: DateTime(date.value!.year + 10),
                                 builder: (BuildContext context, Widget? child) {
                                   final Size screenSize = MediaQuery.of(context).size;
                                   return MediaQuery(
@@ -264,9 +259,6 @@ class AddReservation extends HookConsumerWidget {
                     builder: (context) {
                       final int currentDay = date.value!.weekday;
 
-                      // =========================================================================
-                      // SCÉNARIO 1 : LE RESTAURANT EST FERMÉ
-                      // =========================================================================
                       if (formattedServices[currentDay] == null) {
                         return Container(
                           padding: const EdgeInsets.all(12),
@@ -306,9 +298,6 @@ class AddReservation extends HookConsumerWidget {
                               data: (clientState) {
                                 final formattedTimeSlots = formatTimeSlots(clientState.availableTimeSlots ?? []);
 
-                                // =========================================================================
-                                // SCÉNARIO 2 : LE RESTAURANT EST OUVERT, MAIS TOUS LES CRÉNEAUX SONT COMPLETS
-                                // =========================================================================
                                 if (formattedTimeSlots.isEmpty) {
                                   return Container(
                                     width: double.infinity,
@@ -471,16 +460,54 @@ class AddReservation extends HookConsumerWidget {
                   ),
                   const SizedBox(height: 32),
                   ElevatedButton.icon(
-                    // =========================================================================
-                    // SÉCURISATION DES CONDITIONS D'ACTIVATION DU BOUTON
-                    // =========================================================================
                     onPressed: (date.value != null &&
                         selectedTimeSlot.value != null &&
                         isFormValid.value &&
-                        formattedServices[date.value!.weekday] != null && // Vérifie que le resto est ouvert ce jour-là
-                        (clientState.availableTimeSlots ?? []).any((slot) => DateFormat('HH:mm').format(slot) == selectedTimeSlot.value)) // Vérifie que le créneau précédemment sélectionné fait toujours partie des créneaux valides renvoyés
-                        ? () {
-                      print("Envoi de la réservation pour : ${selectedTimeSlot.value}");
+                        formattedServices[date.value!.weekday] != null &&
+                        (clientState.availableTimeSlots ?? []).any((slot) => DateFormat('HH:mm').format(slot) == selectedTimeSlot.value))
+                        ? () async {
+                      final dateStr = DateFormat('yyyy-MM-dd').format(date.value!);
+                      final fullReservationTimestamp = DateTime.parse('${dateStr}T${selectedTimeSlot.value!}:00');
+
+                      final success = await ref.read(clientStateProvider.notifier).createNewReservation(
+                        restaurant.id,
+                        fullReservationTimestamp,
+                        nbGuests.value,
+                        specialRequestsController.text,
+                      );
+
+                      if (!context.mounted) return;
+
+                      if (success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Row(
+                              children: [
+                                Icon(Icons.check_circle, color: Colors.white),
+                                SizedBox(width: 12),
+                                Text('Réservation ajoutée avec succès !', style: TextStyle(fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                            backgroundColor: Colors.green.shade600,
+                            behavior: SnackBarBehavior.fixed,
+                            duration: const Duration(seconds: 3),
+                          ),
+                        );
+
+                        // Re-déclenche le chargement serveur avec le bon filtre actif
+                        final currentFilter = clientStateAsync.value?.currentFilter ?? 'pending';
+                        ref.read(clientStateProvider.notifier).changeFilter(currentFilter);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Erreur lors de la création de la réservation.'),
+                            backgroundColor: theme.colorScheme.error,
+                            behavior: SnackBarBehavior.fixed,
+                          ),
+                        );
+                      }
+
+                      Navigator.pushReplacementNamed(context, '/list_reservation_client');
                     }
                         : null,
                     style: ElevatedButton.styleFrom(

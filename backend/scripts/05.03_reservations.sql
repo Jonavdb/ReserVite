@@ -387,3 +387,42 @@ $$ language plpgsql security definer;
 
 GRANT EXECUTE ON FUNCTION check_capacity_for_potential_reservation(timestamp, int, int) TO authenticated;
 
+
+create or replace function create_reservation(
+    p_restaurant_id int,
+    p_reservation_time timestamp,
+    p_nb_guests int,
+    p_special_requests text
+)
+    returns void
+as $$
+declare
+    uid int := auth.id();
+    user_role text := auth.role();
+begin
+    if uid is null then
+        raise exception 'Vous devez être connecté';
+    end if;
+
+    if user_role != 'client' then
+        raise exception 'Vous n''êtes pas autorisé. Rôle détecté: [%], ID détecté: [%]', user_role, uid;
+    end if;
+
+    insert into reservations (
+        client,
+        restaurant,
+        datetime,
+        number_of_guests,
+        special_requests
+    )
+    values (
+               uid,
+               p_restaurant_id,
+               p_reservation_time,
+               p_nb_guests,
+               nullif(trim(p_special_requests), '')
+           );
+end;
+$$ language plpgsql security definer;
+
+grant execute on function create_reservation(int, timestamp, int, text) to authenticated;

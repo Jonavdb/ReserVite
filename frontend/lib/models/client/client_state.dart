@@ -136,4 +136,32 @@ class ClientState {
 
     return json.decode(response.body) as bool;
   }
+
+  static Future<bool> createReservation(
+      int restaurantId,
+      DateTime reservationTime,
+      int nbGuests,
+      String specialRequests,
+      ) async {
+    final Map<String, dynamic> params = {
+      'p_restaurant_id': restaurantId,
+      'p_reservation_time': reservationTime.toIso8601String(),
+      'p_nb_guests': nbGuests,
+      'p_special_requests': specialRequests.trim(),
+    };
+
+    final response = await ApiClient.post(
+      'create_reservation',
+      body: json.encode(params),
+      anonymous: false,
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception("Échec de la création de la réservation. Statut: ${response.statusCode}");
+    }
+
+    return true;
+  }
 }
+
+

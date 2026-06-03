@@ -140,4 +140,30 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
     }
   }
 
+  Future<bool> createNewReservation(
+      int restaurantId,
+      DateTime reservationTime,
+      int nbGuests,
+      String specialRequests,
+      ) async {
+    final currentState = state.value!;
+    state = const AsyncLoading();
+
+    try {
+      final success = await ClientState.createReservation(
+        restaurantId,
+        reservationTime,
+        nbGuests,
+        specialRequests,
+      );
+
+      state = AsyncData(currentState);
+      return success;
+    } catch (e, stackTrace) {
+      state = AsyncData(currentState);
+      print("Erreur lors de la création de la réservation : $e");
+      return false;
+    }
+  }
 }
+
