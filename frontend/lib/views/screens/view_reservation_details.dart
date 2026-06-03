@@ -138,7 +138,7 @@ class ViewReservationClient extends ConsumerWidget {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              clientReservation.restaurant.address, // adresse du resto
+                              ('${clientReservation.restaurant.address} , ${clientReservation.restaurant.city}'), // adresse du resto
                               style: TextStyle(color: Colors.grey[600]),
                             ),
                           ),
@@ -265,7 +265,9 @@ class ViewReservationClient extends ConsumerWidget {
                               );
                             },
                           );
-                        }, label: const Text('Annuler'),
+                        },
+                        icon: const Icon(Icons.cancel),
+                        label: const Text('Annuler'),
                       ),
                     ),
                   ),
@@ -282,6 +284,9 @@ class ViewReservationClient extends ConsumerWidget {
     final notifier = ref.read(clientStateProvider.notifier);
     await notifier.cancelledReservation(res);
     if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Réservation annulée avec succès')),
+      );
       Navigator.of(context).pop(null);
     }
   }

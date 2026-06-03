@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_f03/models/manager/table.dart';
+import '../../core/widgets/simulated_date_time_picker_widget.dart';
 import '../../models/manager/reservation_detail.dart';
 import '../../providers/manager/manager_state_provider.dart';
 
@@ -35,7 +36,6 @@ class _AssignTablesScreen extends ConsumerState<AssignTables> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final simulatedTime = DateTime(2024, 12, 4, 16, 0);
     final assignTablesState = ref.watch(managerStateProvider);
 
     return Scaffold(
@@ -62,19 +62,7 @@ class _AssignTablesScreen extends ConsumerState<AssignTables> {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message:
-                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-              ),
+              child: const SimulatedDateTimePicker(),
             ),
           ),
         ),
@@ -216,6 +204,7 @@ class _AssignTablesScreen extends ConsumerState<AssignTables> {
                         onPressed: _isenough ? () {
                           ref.read(managerStateProvider.notifier).confirmReservation(reservationDetail,
                             _selectedTableIds.toList(),);
+                          Navigator.pop(context);
                           Navigator.pop(context);
                         } : null,
                         style: ElevatedButton.styleFrom(

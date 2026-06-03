@@ -162,7 +162,7 @@ class ReservationDetailsManager extends ConsumerWidget {
                             children: [
                               const Icon(Icons.calendar_today, size: 20),
                               const SizedBox(width: 8),
-                              Text(DateFormat('EEE dd/MM/yyyy HH:mm', 'fr_FR').format(reservationDetail.datetime)),
+                              Text('Date: ${DateFormat('EEE dd/MM/yyyy', 'fr_FR').format(reservationDetail.datetime)}'),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -170,7 +170,7 @@ class ReservationDetailsManager extends ConsumerWidget {
                             children: [
                               const Icon(Icons.access_time, size: 20),
                               const SizedBox(width: 8),
-                              Text(DateFormat('HH:mm').format(reservationDetail.datetime)),
+                              Text('Heure: ${DateFormat('HH:mm').format(reservationDetail.datetime)}'),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -339,6 +339,9 @@ class ReservationDetailsManager extends ConsumerWidget {
     final notifier = ref.read(managerStateProvider.notifier);
     notifier.cancelledReservation(res);
     if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Réservation annulée avec succès')),
+      );
       ref.read(managerStateProvider.notifier).getReservation(reservationId);
       Navigator.of(context).pop(null);
     }
@@ -348,6 +351,9 @@ class ReservationDetailsManager extends ConsumerWidget {
     final notifier = ref.read(managerStateProvider.notifier);
     notifier.completeReservation(res, simulatedTime);
     if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Réservation marquée comme terminée')),
+      );
       ref.read(managerStateProvider.notifier).getReservation(reservationId);
       Navigator.of(context).pop(null);
     }

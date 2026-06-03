@@ -402,7 +402,7 @@ class EditReservation extends HookConsumerWidget {
                             ),
                             TextButton(
                                 onPressed: () => Navigator.pop(context, true),
-                                child: const Text('Confirmer'),
+                                child: const Text('Confirmer', style: TextStyle(color: Colors.red)),
                             ),
                           ],
                         ),

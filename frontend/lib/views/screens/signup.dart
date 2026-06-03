@@ -230,13 +230,22 @@ class _SignupState extends ConsumerState<Signup> {
 
   Future<void> _submitForm(BuildContext context) async {
     if (!await _validateForm()) return;
+
+    String? rawPhone = _phoneController.text.trim();
+    String? cleanPhone;
+
+    if (rawPhone.isNotEmpty) {
+      // regex qui remplace tout ce qui est espace, point ou tiret par du vide
+      cleanPhone = rawPhone.replaceAll(RegExp(r'[\s\.\-]'), '');
+    }
+
     await ref
         .read(currentUserProvider.notifier)
         .signup(
           fullname: _fullNameController.text.trim(),
           email: _emailController.text.trim(),
           password: _passwordController.text,
-          phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+          phone: cleanPhone,
         );
     if (context.mounted) {
       Navigator.pushNamedAndRemoveUntil(context, '/list_reservation_client', (route) => false);
@@ -248,6 +257,7 @@ class _SignupState extends ConsumerState<Signup> {
     await _emailController.validateAndWait();
     await _passwordController.validateAndWait();
     await _confirmPasswordController.validateAndWait();
+    await _phoneController.validateAndWait();
     return _isFormValid;
   }
 
@@ -255,5 +265,6 @@ class _SignupState extends ConsumerState<Signup> {
       _fullNameController.isValid == true &&
       _emailController.isValid == true &&
       _passwordController.isValid == true &&
-      _confirmPasswordController.isValid == true;
+      _confirmPasswordController.isValid == true &&
+      _phoneController.isValid == true;
 }

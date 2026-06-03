@@ -32,7 +32,9 @@ class _RestaurantDetailsScreenState extends ConsumerState<RestaurantDetailsScree
         title: const Text('Détails du restaurant'),
         automaticallyImplyLeading: false,
         // TODO : btn refreshRestaurantDetails
-        actions: [IconButton(icon: const Icon(Icons.refresh), tooltip: 'Rafraîchir les données', onPressed: () {})],
+        actions: [IconButton(icon: const Icon(Icons.refresh), tooltip: 'Rafraîchir les données', onPressed: () {
+            ref.read(clientStateProvider.notifier).loadRestaurantDetails(widget.restaurantId);
+        })],
         elevation: 2,
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
@@ -74,7 +76,7 @@ class _RestaurantDetailsScreenState extends ConsumerState<RestaurantDetailsScree
                     children: [
                       const Icon(Icons.star, color: Colors.amber),
                       const SizedBox(width: 4),
-                      Text(4.5.toStringAsFixed(1)),
+                      Text(restaurant.rating != null ? restaurant.rating!.toStringAsFixed(1) : 'N/A'),
                       const SizedBox(width: 16),
                       Text('€' * (restaurant.priceRange ?? 1)),
                       const SizedBox(width: 16),
@@ -131,7 +133,6 @@ class _RestaurantDetailsScreenState extends ConsumerState<RestaurantDetailsScree
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      // TODO : envoyer sur la page de Manu
                       onPressed: () {
                         Navigator.pushNamed(
                           context,

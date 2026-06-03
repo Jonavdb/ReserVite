@@ -202,8 +202,7 @@ class ClientState {
     );
 
     if (response.statusCode != 200 && response.statusCode != 204) {
-      throw Exception("Échec de la modification. Statut: ${response.statusCode}");
-    }
+      throw Exception("Échec de la modification. Statut: ${response.statusCode} - ${response.body}");    }
 
     return true;
   }

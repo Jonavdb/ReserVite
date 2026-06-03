@@ -428,16 +428,16 @@ begin
         raise exception 'Réservation introuvable ou vous n''en êtes pas le propriétaire.';
     end if;
 
+    if exists(select 1 from reservations where id = p_reservation_id and status = 'confirmed') then
+        delete from reservation_tables where reservation = p_reservation_id;
+        update reservations set status = 'pending' where id = p_reservation_id;
+    end if;
+
     update reservations
     set datetime = p_reservation_time,
         number_of_guests = p_nb_guests,
         special_requests = nullif(trim(p_special_requests), '')
     where id = p_reservation_id and client = uid;
-
-    if exists(select 1 from reservations where id = p_reservation_id and status = 'confirmed') then
-        delete from reservation_tables where reservation = p_reservation_id;
-        update reservations set status = 'pending' where id = p_reservation_id;
-    end if;
 end;
 $$ language plpgsql security definer;
 

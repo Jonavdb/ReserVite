@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:prbd_2526_f03/providers/client/client_state_provider.dart';
+import '../../core/widgets/simulated_date_time_picker_widget.dart';
 import '../../providers/security/current_user_provider.dart';
 
 class ListReservationsClient extends ConsumerWidget {
@@ -53,13 +55,7 @@ class ListReservationsClient extends ConsumerWidget {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message: 'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  'mercredi 04/12/2024 16:00',
-                  style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.normal),
-                ),
-              ),
+              child: const SimulatedDateTimePicker(),
             ),
           ),
         ),
@@ -224,9 +220,7 @@ class ListReservationsClient extends ConsumerWidget {
                       // récupération et formattage de la date de réservation
                       final DateTime parsedDate = reservation.datetime;
                       final String formattedDate =
-                          "${parsedDate.day.toString().padLeft(2, '0')}/"
-                          "${parsedDate.month.toString().padLeft(2, '0')}/"
-                          "${parsedDate.year} à "
+                          "${DateFormat('EEE dd/MM/yyyy', 'fr_FR').format(parsedDate)} "
                           "${parsedDate.hour.toString().padLeft(2, '0')}:"
                           "${parsedDate.minute.toString().padLeft(2, '0')}";
 
