@@ -285,3 +285,177 @@ begin
 end;
 $$ language plpgsql security definer;
 grant execute on function get_client_reservation_by_id(int) to authenticated;
+
+
+create or replace function get_slots_available_for_potential_reservation(
+    p_resdate timestamp,
+    p_restaurant_id int,
+    p_ignore_res_id int default null
+)
+    returns time[]
+as $$
+declare
+    total_capacity int;
+    slot_interval interval;
+    current_slot time;
+    total_booked int;
+    available_slots time[] := '{}';
+    service_record record;
+begin
+
+    select coalesce(sum(capacity), 0) into total_capacity from tables where restaurant = p_restaurant_id;
+    select (slot_duration || ' minutes')::interval into slot_interval from restaurants where id = p_restaurant_id;
+
+    for service_record in (select start_time, end_time from services where restaurant = p_restaurant_id and day_of_week = EXTRACT(isodow from p_resdate))
+        loop
+            current_slot := service_record.start_time;
+            while current_slot < service_record.end_time loop
+
+                    select coalesce(sum(number_of_guests), 0) into total_booked
+                    from reservations
+                    where restaurant = p_restaurant_id
+                      and datetime::date = p_resdate::date
+                      and datetime::time = current_slot
+                      and status in ('pending', 'confirmed')
+                      and (p_ignore_res_id is null or id != p_ignore_res_id);
+
+                    if total_booked < total_capacity then
+                        available_slots := array_append(available_slots, current_slot);
+                    end if;
+                    current_slot := current_slot + slot_interval;
+                end loop;
+        end loop;
+    return available_slots;
+end;
+$$ language plpgsql security definer;
+
+GRANT EXECUTE ON FUNCTION get_slots_available_for_potential_reservation(timestamp, int, int) TO authenticated;
+
+CREATE OR REPLACE FUNCTION check_capacity_for_potential_reservation(
+    p_target_timestamp timestamp,
+    p_restaurant_id int,
+    p_requested_guests int,
+    p_ignore_res_id int DEFAULT NULL
+)
+    RETURNS boolean
+AS $$
+DECLARE
+    v_total_capacity int;
+    v_booked_guests int;
+BEGIN
+    -- 1. On récupère la capacité totale du restaurant (somme des places de toutes les tables)
+    SELECT COALESCE(SUM(capacity), 0) INTO v_total_capacity
+    FROM tables
+    WHERE restaurant = p_restaurant_id;
+
+    -- 2. On additionne TOUS les convives qui ont réservé pour CE JOUR (statut pending ou confirmed)
+    SELECT COALESCE(SUM(number_of_guests), 0) INTO v_booked_guests
+    FROM reservations
+    WHERE restaurant = p_restaurant_id
+      AND datetime::date = p_target_timestamp::date
+      AND status IN ('pending', 'confirmed')
+      AND (p_ignore_res_id IS NULL OR id != p_ignore_res_id);
+
+    -- 3. On vérifie s'il reste assez de places globales par rapport à ce qui est demandé
+    RETURN (v_total_capacity - v_booked_guests) >= p_requested_guests;
+END;
+$$ language plpgsql security definer;
+
+GRANT EXECUTE ON FUNCTION check_capacity_for_potential_reservation(timestamp, int, int, int) TO authenticated;
+
+
+create or replace function create_reservation(
+    p_restaurant_id int,
+    p_reservation_time timestamp,
+    p_nb_guests int,
+    p_special_requests text
+)
+    returns void
+as $$
+declare
+    uid int := auth.id();
+    user_role text := auth.role();
+begin
+    if uid is null then
+        raise exception 'Vous devez être connecté';
+    end if;
+
+    if user_role != 'client' then
+        raise exception 'Vous n''êtes pas autorisé. Rôle détecté: [%], ID détecté: [%]', user_role, uid;
+    end if;
+
+    insert into reservations (
+        client,
+        restaurant,
+        datetime,
+        number_of_guests,
+        special_requests
+    )
+    values (
+               uid,
+               p_restaurant_id,
+               p_reservation_time,
+               p_nb_guests,
+               nullif(trim(p_special_requests), '')
+           );
+end;
+$$ language plpgsql security definer;
+
+grant execute on function create_reservation(int, timestamp, int, text) to authenticated;
+
+
+create or replace function update_reservation(
+    p_reservation_id int,
+    p_reservation_time timestamp,
+    p_nb_guests int,
+    p_special_requests text
+)
+    returns void
+as $$
+declare
+    uid int := auth.id();
+    user_role text := auth.role();
+begin
+    if uid is null then
+        raise exception 'Vous devez être connecté';
+    end if;
+
+    if user_role != 'client' then
+        raise exception 'Vous n''êtes pas autorisé.';
+    end if;
+
+    if not exists(select 1 from reservations where id = p_reservation_id and client = uid) then
+        raise exception 'Réservation introuvable ou vous n''en êtes pas le propriétaire.';
+    end if;
+
+    update reservations
+    set datetime = p_reservation_time,
+        number_of_guests = p_nb_guests,
+        special_requests = nullif(trim(p_special_requests), '')
+    where id = p_reservation_id and client = uid;
+
+    if exists(select 1 from reservations where id = p_reservation_id and status = 'confirmed') then
+        delete from reservation_tables where reservation = p_reservation_id;
+        update reservations set status = 'pending' where id = p_reservation_id;
+    end if;
+end;
+$$ language plpgsql security definer;
+
+grant execute on function update_reservation(int, timestamp, int, text) to authenticated;
+
+create or replace function cancel_reservation_client(reservation_id int) returns void as
+$$
+begin
+    perform auth.check_logged();
+    if(auth.role() != 'client') then
+        raise exception 'Vous n''êtes pas autorisé à annuler cette réservation';
+    end if;
+    if not exists(select 1 from reservations where reservations.id = reservation_id and reservations.client = auth.id()) then
+        raise exception 'Cette réservation ne vous appartient pas';
+    end if;
+    delete from reservation_tables where reservation = reservation_id;
+    update reservations set status = 'cancelled' where id = reservation_id;
+end;
+$$ language plpgsql security definer;
+
+grant execute on function cancel_reservation_client(int) to authenticated;

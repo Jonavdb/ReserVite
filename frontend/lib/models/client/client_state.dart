@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:intl/intl.dart';
 import 'package:prbd_2526_f03/models/client/reservation_client.dart';
 import 'package:prbd_2526_f03/models/restaurant/restaurant_details.dart';
 import '../../core/services/api_client.dart';
@@ -10,6 +11,7 @@ class ClientState {
   final List<Restaurant> restaurants;
   final String? searchedInput;
   final RestaurantDetails? selectedRestaurant;
+  final List<DateTime>? availableTimeSlots;
 
   ClientState({
     required this.currentFilter, // filtre d'affichage des réservations du client connecté ('pending', 'confirmed' etc)
@@ -17,6 +19,7 @@ class ClientState {
     required this.restaurants,
     this.searchedInput = '',
     this.selectedRestaurant,
+    this.availableTimeSlots,
   });
 
   ClientState copyWith({
@@ -25,6 +28,7 @@ class ClientState {
     List<Restaurant>? restaurants,
     String? searchedInput,
     RestaurantDetails? selectedRestaurant,
+    List<DateTime>? availableTimeSlots
   }) {
     return ClientState(
       currentFilter: currentFilter ?? this.currentFilter,
@@ -32,6 +36,7 @@ class ClientState {
       restaurants: restaurants ?? this.restaurants,
       searchedInput: searchedInput ?? this.searchedInput,
       selectedRestaurant: selectedRestaurant ?? this.selectedRestaurant,
+      availableTimeSlots: availableTimeSlots ?? this.availableTimeSlots
     );
   }
 
@@ -89,4 +94,119 @@ class ClientState {
     return ReservationClient.fromJson(body);
   }
 
+  static Future<List<DateTime>> fetchAvailableTimeSlots(
+      int restaurantId,
+      DateTime datePendingReservation,
+      {int? ignoreReservationId} // AJOUT : Paramètre optionnel pour l'édition
+      ) async {
+    final Map<String, dynamic> params = {};
+    params['p_resdate'] = datePendingReservation.toIso8601String();
+    params['p_restaurant_id'] = restaurantId;
+
+    // AJOUT : Si un ID de réservation est fourni, on l'ajoute aux paramètres pour le SQL
+    if (ignoreReservationId != null) {
+      params['p_ignore_res_id'] = ignoreReservationId;
+    }
+
+    final response = await ApiClient.post(
+      'get_slots_available_for_potential_reservation',
+      body: params.isNotEmpty ? json.encode(params) : null,
+      anonymous: false,
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Erreur récupération créneaux horaires disponibles : ${response.reasonPhrase}");
+    }
+
+    final List<String> decodedList = List<String>.from(json.decode(response.body));
+
+    return decodedList.map((timeString) {
+      final dateStr = DateFormat('yyyy-MM-dd').format(datePendingReservation);
+      return DateTime.parse('${dateStr}T$timeString');
+    }).toList();
+  }
+
+  static Future<bool> fetchSlotCapacityCheck(
+      int restaurantId,
+      DateTime targetTimestamp,
+      int requestedGuests,
+      {int? ignoreReservationId} // AJOUT : Paramètre optionnel pour l'édition
+      ) async {
+    final Map<String, dynamic> params = {
+      'p_target_timestamp': targetTimestamp.toIso8601String(),
+      'p_restaurant_id': restaurantId,
+      'p_requested_guests': requestedGuests,
+    };
+
+    // AJOUT : Si un ID de réservation est fourni, on l'ajoute aux paramètres pour le SQL
+    if (ignoreReservationId != null) {
+      params['p_ignore_res_id'] = ignoreReservationId;
+    }
+
+    final response = await ApiClient.post(
+      'check_capacity_for_potential_reservation',
+      body: json.encode(params),
+      anonymous: false,
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Erreur vérification capacité : ${response.reasonPhrase}");
+    }
+
+    return json.decode(response.body) as bool;
+  }
+
+  static Future<bool> createReservation(
+      int restaurantId,
+      DateTime reservationTime,
+      int nbGuests,
+      String specialRequests,
+      ) async {
+    final Map<String, dynamic> params = {
+      'p_restaurant_id': restaurantId,
+      'p_reservation_time': reservationTime.toIso8601String(),
+      'p_nb_guests': nbGuests,
+      'p_special_requests': specialRequests.trim(),
+    };
+
+    final response = await ApiClient.post(
+      'create_reservation',
+      body: json.encode(params),
+      anonymous: false,
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception("Échec de la création de la réservation. Statut: ${response.statusCode}");
+    }
+
+    return true;
+  }
+  static Future<bool> updateReservation(
+      int reservationId,
+      int restaurantId,
+      DateTime reservationTime,
+      int nbGuests,
+      String specialRequests,
+      ) async {
+    final Map<String, dynamic> params = {
+      'p_reservation_id': reservationId,
+      'p_reservation_time': reservationTime.toIso8601String(),
+      'p_nb_guests': nbGuests,
+      'p_special_requests': specialRequests.trim(),
+    };
+
+    final response = await ApiClient.post(
+      'update_reservation',
+      body: json.encode(params),
+      anonymous: false,
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception("Échec de la modification. Statut: ${response.statusCode}");
+    }
+
+    return true;
+  }
 }
+
+

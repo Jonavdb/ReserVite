@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:prbd_2526_f03/models/restaurant.dart';
+
+import '../../core/services/api_client.dart';
 
 class ReservationClient {
   final int id;
@@ -36,5 +40,15 @@ class ReservationClient {
       specialRequests : json['special_requests'] ?? 'Aucune demande',
       restaurant: Restaurant.fromJson(json['restaurant'] as Map<String, dynamic>),
     );
+  }
+
+  Future<void> cancelReservation(int reservationId) async {
+    final response = await ApiClient.post(
+      'cancel_reservation_client',
+      body: jsonEncode({'reservation_id': reservationId}),
+    );
+    if (response.statusCode != 204) {
+      throw Exception('failed to cancel the reservation');
+    }
   }
 }

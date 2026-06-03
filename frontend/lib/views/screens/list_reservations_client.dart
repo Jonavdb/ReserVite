@@ -32,7 +32,7 @@ class ListReservationsClient extends ConsumerWidget {
             },
           ),
           IconButton(icon: const Icon(Icons.refresh), tooltip: 'Rafraîchir les données', onPressed: () {
-            ref.read(clientStateProvider.notifier).changeFilter(clientStateAsync.value!.currentFilter);
+            ref.read(clientStateProvider.notifier).refreshReservations();
           }),
           IconButton(
             icon: const Icon(Icons.logout),
@@ -137,14 +137,15 @@ class ListReservationsClient extends ConsumerWidget {
                 // récupération effectuée  -> affichage de chaque réservation du client connecté
                 data: (clientState) {
                   // liste de ses réservations récupérées via l'état courant initialisée au debut de la page
-                  final list = clientState.reservations;
+                  final list = clientState.currentFilter.isEmpty || clientState.currentFilter == 'all' ?
+                      clientState.reservations : clientState.reservations.where((reservation) => reservation.status == clientState.currentFilter).toList();
 
                   // Cas : liste vide
                   if (list.isEmpty) {
                     // Détermine le texte en fonction du filtre actif pour correspondre parfaitement à l'écran
                     String emptyMessage = 'Aucune réservation trouvée.';
                     switch (clientState.currentFilter) {
-                      case 'all':
+                      case '':
                         emptyMessage = 'Aucune réservation';
                         break;
                       case 'pending':

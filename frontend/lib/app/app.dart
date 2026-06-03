@@ -9,6 +9,7 @@ import 'package:prbd_2526_f03/views/screens/reservation_details_manager.dart';
 import 'package:prbd_2526_f03/views/screens/restaurant_management_services.dart';
 import 'package:prbd_2526_f03/views/screens/restaurant_management_tables.dart';
 import '../views/screens/add_reservation.dart';
+import '../views/screens/edit_reservation.dart';
 import '../views/screens/edit_table.dart';
 import '../views/screens/login.dart';
 import '../views/screens/restaurant_details.dart';
@@ -33,7 +34,8 @@ class App extends ConsumerWidget {
         '/list_reservation_client': (context) => ListReservationsClient(),
         '/view_reservation_client': (context) => ViewReservationClient(),
         '/search_restaurants': (context) => SearchRestaurants(),
-        '/add_reservation': (context) => AddReservation()
+        '/add_reservation': (context) => AddReservation(),
+        '/edit_reservation': (context) => EditReservation(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/list_reservations_manager') {
