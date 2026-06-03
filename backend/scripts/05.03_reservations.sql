@@ -287,64 +287,46 @@ $$ language plpgsql security definer;
 grant execute on function get_client_reservation_by_id(int) to authenticated;
 
 
-CREATE OR REPLACE FUNCTION get_slots_available_for_potential_reservation(
+create or replace function get_slots_available_for_potential_reservation(
     p_resdate timestamp,
     p_restaurant_id int,
-    p_ignore_res_id int DEFAULT NULL
+    p_ignore_res_id int default null
 )
-    RETURNS time[]
-AS $$
-DECLARE
-    v_available_slots time[];
-BEGIN
-    -- on récupère le résultat de la fonction et on met tout dans un array de 'time'
-    -- pour avoir les heures des créneaux disponibles
-    SELECT ARRAY(
-                   WITH
-                       -- 1. on récupère le nombre total de chaises (la capacité totale) du restaurant en paramètre
-                       restaurant_capacity as (
-                           SELECT COALESCE(SUM(capacity), 0) as max_seats
-                           FROM tables t
-                           WHERE t.restaurant = p_restaurant_id
-                       ),
-                       -- 2. on récupère tous les débuts de créneaux horaires du restaurant en paramètre au jour de la date en paramètre
-                       -- exemple : 2/6/2026 => jour : MARDI de 18:00 à 20:00 slot duration 30 (ie 30 minutes)
-                       -- => creneaux le mardi : 18:00 - 18:30 - 19:00 - 19:30
-                       all_slots as (
-                           SELECT generated_time::time as slot_time
-                           FROM restaurants resto
-                                    JOIN services s ON s.restaurant = resto.id
-                                    CROSS JOIN LATERAL generate_series(
-                                   p_resdate::date + s.start_time,
-                                   p_resdate::date + s.end_time - (resto.slot_duration * interval '1 minute'),
-                                   resto.slot_duration * interval '1 minute'
-                                                       ) as generated_time
-                           WHERE resto.id = p_restaurant_id
-                             AND s.day_of_week = EXTRACT(isodow from p_resdate)
-                       ),
-                       -- 3. on récupère le nombre total de convives ayant réservé pour ce jour
-                       -- (en excluant la réservation en cours de modification si p_ignore_res_id est fourni)
-                       booked_today as (
-                           SELECT COALESCE(SUM(number_of_guests), 0) as booked_count
-                           FROM reservations r
-                           WHERE r.restaurant = p_restaurant_id
-                             AND r.datetime::date = p_resdate::date
-                             AND r.status IN ('pending', 'confirmed')
-                             AND (p_ignore_res_id IS NULL OR r.id != p_ignore_res_id)
-                       )
-                   -- 4. on filtre : de tous les créneaux ON RETIRE tous les créneaux si le total des convives du jour atteint ou dépasse la capacité maximale de chaises du restaurant
-                   -- ce qui nous donne une liste de tous les débuts de créneaux horaires libres du restaurant en paramètre
-                   -- à la date en paramètre
-                   SELECT a.slot_time
-                   FROM all_slots a
-                            CROSS JOIN restaurant_capacity rc
-                            CROSS JOIN booked_today bt
-                   WHERE bt.booked_count < rc.max_seats
-                   ORDER BY a.slot_time
-           ) INTO v_available_slots;
+    returns time[]
+as $$
+declare
+    total_capacity int;
+    slot_interval interval;
+    current_slot time;
+    total_booked int;
+    available_slots time[] := '{}';
+    service_record record;
+begin
 
-    RETURN v_available_slots;
-END;
+    select coalesce(sum(capacity), 0) into total_capacity from tables where restaurant = p_restaurant_id;
+    select (slot_duration || ' minutes')::interval into slot_interval from restaurants where id = p_restaurant_id;
+
+    for service_record in (select start_time, end_time from services where restaurant = p_restaurant_id and day_of_week = EXTRACT(isodow from p_resdate))
+        loop
+            current_slot := service_record.start_time;
+            while current_slot < service_record.end_time loop
+
+                    select coalesce(sum(number_of_guests), 0) into total_booked
+                    from reservations
+                    where restaurant = p_restaurant_id
+                      and datetime::date = p_resdate::date
+                      and datetime::time = current_slot
+                      and status in ('pending', 'confirmed')
+                      and (p_ignore_res_id is null or id != p_ignore_res_id);
+
+                    if total_booked < total_capacity then
+                        available_slots := array_append(available_slots, current_slot);
+                    end if;
+                    current_slot := current_slot + slot_interval;
+                end loop;
+        end loop;
+    return available_slots;
+end;
 $$ language plpgsql security definer;
 
 GRANT EXECUTE ON FUNCTION get_slots_available_for_potential_reservation(timestamp, int, int) TO authenticated;
