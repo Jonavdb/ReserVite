@@ -35,7 +35,6 @@ class ListRestaurantsManager extends ConsumerWidget {
             icon: const Icon(Icons.logout),
             tooltip: 'Déconnexion ($userName)',
             onPressed: () {
-              ref.invalidate(managerStateProvider); // détruit le cache du manager courant
               ref.read(currentUserProvider.notifier).logout();
               Navigator.pushReplacementNamed(context, '/login');
             },

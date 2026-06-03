@@ -98,7 +98,7 @@ class Service {
     }
   }
 
-  static Future<void> createService(int restaurantId, int dayOfWeek, TimeOnly newStartTime, TimeOnly newEndTime) async {
+  static Future<int> createService(int restaurantId, int dayOfWeek, TimeOnly newStartTime, TimeOnly newEndTime) async {
     final response = await ApiClient.post('create_service',
         body : jsonEncode(
                 {'restaurant_id': restaurantId,
@@ -107,8 +107,10 @@ class Service {
                   'new_end_time': newEndTime.toFullString(),
                 })
         );
-    if (response.statusCode != 201) {
+    if (response.statusCode != 204 && response.statusCode != 200) {
       throw Exception('Status: ${response.statusCode} - ${response.body}');
+    } else {
+      return jsonDecode(response.body) as int;
     }
   }
 

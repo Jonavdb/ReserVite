@@ -7,6 +7,7 @@ import '../../core/tools/abstract_async_notifier.dart';
 import '../../models/manager/reservation_detail.dart';
 import '../../models/manager/service.dart';
 import '../../models/manager/table.dart';
+import '../security/current_user_provider.dart';
 
 final managerStateProvider = AsyncNotifierProvider<ManagerStateNotifier, ManagerState>(() => ManagerStateNotifier());
 
@@ -19,6 +20,12 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
   Future<ManagerState> build() async {
     // on charge les restaurants au démarrage
     ref.watch(simulatedTimeProvider);
+    ref.watch(currentUserProvider);
+    final userNotifier = ref.watch(currentUserProvider.notifier);
+
+    if (!userNotifier.isManager) {
+      throw Exception("Access Denied: You must be logged in as a manager.");
+    }
     final previous = state.value;
     final currentId = previous?.currentRestaurantId;
 
@@ -141,28 +148,20 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
   }
 
   Future<void> completeReservation(ReservationDetail res, DateTime simulatedTime) async {
-    final currentState = state.value ?? ManagerState();
     state = const AsyncValue.loading();
-    final currentId = state.value?.currentRestaurantId;
     try {
       await res.completeReservation(res.id, simulatedTime);
-      final List<ReservationDetail> reservationList = await ReservationDetail.getReservations(currentId!);
-      state = AsyncData(currentState.copyWith(reservations: reservationList));
+      await getReservation(res.id);
     } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
   }
 
   Future<void> cancelledReservation(ReservationDetail res) async {
-    final currentState = state.value ?? ManagerState();
-    final currentId = state.value?.currentRestaurantId;
-    if (currentId == null) return;
-
     state = const AsyncValue.loading();
     try {
       await res.cancelReservation(res.id);
-      final List<ReservationDetail> reservationDetails = await ReservationDetail.getReservations(currentId);
-      state = AsyncData(currentState.copyWith(reservations: reservationDetails));
+      await getReservation(res.id);
     } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
@@ -174,14 +173,10 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
 
   // --- Create ---
   Future<void> createService(int restaurantId, int dayOfWeek, TimeOnly startTime, TimeOnly endTime) async {
-    final currentState = state.value ?? ManagerState();
-    final currentId = state.value?.currentRestaurantId;
-
     state = const AsyncValue.loading();
     try {
-      await Service.createService(restaurantId, dayOfWeek, startTime, endTime);
-      final List<Service> listOfServices = await Service.getServiceForResturant(currentId!);
-      state = AsyncData(currentState.copyWith(services: listOfServices, impactedReservations: 0));
+      final newId = await Service.createService(restaurantId, dayOfWeek, startTime, endTime);
+      await getService(newId);
     } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
@@ -230,14 +225,10 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
 
   // --- Update ---
   Future<void> updateService(Service service, int dayOfWeek, TimeOnly newStartTime, TimeOnly newEndTime) async {
-    final currentState = state.value ?? ManagerState();
-    final currentId = state.value?.currentRestaurantId;
-
     state = const AsyncValue.loading();
     try {
       await service.updateService(service.id, dayOfWeek, newStartTime, newEndTime);
-      final List<Service> listOfServices = await Service.getServiceForResturant(currentId!);
-      state = AsyncData(currentState.copyWith(services: listOfServices, impactedReservations: 0));
+      await getService(service.id);
     } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
@@ -246,13 +237,11 @@ class ManagerStateNotifier extends AbstractAsyncNotifier<ManagerState> {
   // --- Delete ---
   Future<void> deleteService(Service service) async {
     final currentState = state.value ?? ManagerState();
-    final currentId = state.value?.currentRestaurantId;
-
     state = const AsyncValue.loading();
     try {
       await service.deleteService(service.id);
-      final List<Service> listOfServices = await Service.getServiceForResturant(currentId!);
-      state = AsyncData(currentState.copyWith(services: listOfServices));
+      final updatedList = currentState.services.where((s) => s.id != service.id).toList();
+      state = AsyncData(currentState.copyWith(services: updatedList));
     } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);
     }
