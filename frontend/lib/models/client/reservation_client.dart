@@ -1,0 +1,54 @@
+import 'dart:convert';
+
+import 'package:prbd_2526_f03/models/restaurant.dart';
+
+import '../../core/services/api_client.dart';
+
+class ReservationClient {
+  final int id;
+  final String status;
+  final DateTime datetime;
+  final int numberOfGuests;
+  final String specialRequests;
+  final Restaurant restaurant;
+
+  /*
+      Cette classe contient les données d'une réservation client
+      ex : list_reservations_client.dart affiche pour chaque réservation :
+      - son status sous forme d'icone
+      - le nom du restaurant
+      - la ville
+      - etc
+   */
+  ReservationClient({
+    required this.id,
+    required this.status,
+    required this.datetime,
+    required this.numberOfGuests,
+    required this.specialRequests,
+    required this.restaurant
+  });
+
+
+  // Constructeur permettant de convertir des données json (récupérées via appel au backend) en instance de la classe
+  factory ReservationClient.fromJson(Map<String, dynamic> json) {
+    return ReservationClient(
+      id: json['id'],
+      status: json['status'],
+      datetime: DateTime.parse(json['datetime']),
+      numberOfGuests: json['number_of_guests'],
+      specialRequests : json['special_requests'] ?? 'Aucune demande',
+      restaurant: Restaurant.fromJson(json['restaurant'] as Map<String, dynamic>),
+    );
+  }
+
+  Future<void> cancelReservation(int reservationId) async {
+    final response = await ApiClient.post(
+      'cancel_reservation_client',
+      body: jsonEncode({'reservation_id': reservationId}),
+    );
+    if (response.statusCode != 204) {
+      throw Exception('failed to cancel the reservation');
+    }
+  }
+}

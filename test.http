@@ -1,0 +1,129 @@
+### GET request to example server
+GET https://examples.http-client.intellij.net/get
+    ?generated-in=IntelliJ IDEA
+
+### CONNEXION D'UN CLIENT
+POST http://localhost:3000/rpc/login
+Content-Type: application/json
+
+{
+  "email": "xapigeolet@epfc.eu",
+  "password": "Password1,"
+}
+
+### CONNEXION D'UN MANAGER
+POST http://localhost:3000/rpc/login
+Content-Type: application/json
+
+{
+  "email": "bepenelle@epfc.eu",
+  "password": "Password1,"
+}
+
+### Test récupération des réservations 'pending' du client connecté
+POST http://localhost:3000/rpc/get_user_reservations
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic3ViIjoieGFwaWdlb2xldEBlcGZjLmV1IiwibmFtZSI6IlhhdmllciIsInVzZXJfaWQiOjMsImV4cCI6MTc3OTA5NTIzOH0.fC_jcug69XL5tbEy7OhEhJDwD4JvxMGc6-YQxTMb7wo
+Content-Type: application/json
+
+{
+  "status_filter": "pending"
+}
+
+### Test récupération de toutes les informations liées à une reservation
+POST http://localhost:3000/rpc/get_reservation_manager
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoibWFuYWdlciIsInN1YiI6ImJlcGVuZWxsZUBlcGZjLmV1IiwibmFtZSI6IkJlbm_DrnQiLCJ1c2VyX2lkIjoyLCJleHAiOjE3NzkxMjA1NDd9.svVzgch3J0KXlwLEBIMbdi9f1X1L2nmP9cTo3rguY0I
+Context-Type: application/json
+
+{
+  "reservation_id": 7
+}
+
+### Test récupération des réservations 'pending' du client connecté
+POST http://localhost:3000/rpc/get_client_reservations
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic3ViIjoieGFwaWdlb2xldEBlcGZjLmV1IiwibmFtZSI6IlhhdmllciIsInVzZXJfaWQiOjMsImV4cCI6MTc3OTg3Nzg4NX0.gR9PljwPdzrhGQiv7AyAWfTtDbTf_4nzT4ciSSYXqbM
+Content-Type: application/json
+
+{
+  "status_filter": "pending"
+}
+
+### Test récupération de tous les restaurants
+POST http://localhost:3000/rpc/get_restaurants
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic3ViIjoieGFwaWdlb2xldEBlcGZjLmV1IiwibmFtZSI6IlhhdmllciIsInVzZXJfaWQiOjMsImV4cCI6MTc3OTcxNjE4MX0.9X5q9ORBQJbNAzDuB6rvPh1ndGMIC7b8yMmydSxICdM
+Content-Type: application/json
+
+### Test récupération des restaurants pour le manager
+POST http://localhost:3000/rpc/get_restaurants_manager
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoibWFuYWdlciIsInN1YiI6ImJlcGVuZWxsZUBlcGZjLmV1IiwibmFtZSI6IkJlbm_DrnQiLCJ1c2VyX2lkIjoyLCJleHAiOjE3NzkzODY4OTN9.dAebgk_UxUlCw1Qa7Xe3Lbz2Ylu_F917f7wMIz_nXoI
+Content-Type: application/json
+
+### Test confirmer une reservation
+POST http://localhost:3000/rpc/confirm_reservation_manager
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoibWFuYWdlciIsInN1YiI6ImJlcGVuZWxsZUBlcGZjLmV1IiwibmFtZSI6IkJlbm_DrnQiLCJ1c2VyX2lkIjoyLCJleHAiOjE3NzkzNzg3MjJ9.Kvrbv2sAYaxag2hoq_FKuxxLfxrDJJNIFfJpnY-tKdg
+Content-Type: application/json
+
+{
+  "reservation_id": 10,
+  "table_ids": [1, 2]
+}
+
+### Test du search filter
+POST http://localhost:3000/rpc/find_restaurants_client
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic3ViIjoieGFwaWdlb2xldEBlcGZjLmV1IiwibmFtZSI6IlhhdmllciIsInVzZXJfaWQiOjMsImV4cCI6MTc3OTcxNjE4MX0.9X5q9ORBQJbNAzDuB6rvPh1ndGMIC7b8yMmydSxICdM
+Content-Type: application/json
+
+{
+  "search_term": "   ga"
+}
+
+### Test restaurant details
+POST http://localhost:3000/rpc/get_restaurant_details
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic3ViIjoieGFwaWdlb2xldEBlcGZjLmV1IiwibmFtZSI6IlhhdmllciIsInVzZXJfaWQiOjMsImV4cCI6MTc3OTc5NTU4Nn0.QpIrfqcKRoxP31DUigFZwVauSFAGOkjzZf6NJB-hcoU
+Content-Type: application/json
+
+{
+  "restaurant_id": 3
+}
+
+### Test JO : récupérer les services d'un restaurant
+POST http://localhost:3000/rpc/get_services_for_restaurant
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoibWFuYWdlciIsInN1YiI6ImJlcGVuZWxsZUBlcGZjLmV1IiwibmFtZSI6IkJlbm_DrnQiLCJ1c2VyX2lkIjoyLCJleHAiOjE3Nzk1NDIzNjF9.zAcc8dbTtP3DVQXGjNqW8qTaNnZcIGeYZn62BJu-a1Q
+Content-Type: application/json
+
+{
+  "restaurant_id" : 1
+}
+
+### récupérer toutes les tables d'un restaurant
+POST http://localhost:3000/rpc/get_tables
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoibWFuYWdlciIsInN1YiI6ImJlcGVuZWxsZUBlcGZjLmV1IiwibmFtZSI6IkJlbm_DrnQiLCJ1c2VyX2lkIjoyLCJleHAiOjE3Nzk4ODExNzZ9.zjlYPYvw6HIdt9sevnLcK-sqMnbcHG81EIlpyEw9yxM
+Content-Type: application/json
+
+{
+  "restaurant_id" : 1
+}
+
+### Test Manu : récupérer le temps simulé
+POST http://localhost:3000/rpc/get_current_date
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic3ViIjoieGFwaWdlb2xldEBlcGZjLmV1IiwibmFtZSI6IlhhdmllciIsInVzZXJfaWQiOjMsImV4cCI6MTc4MDA1MDIyNH0.doxC2aXxsXL1ABadg4Ln8PErhUrAN0XEvUmOkkz7X9s
+Content-Type: application/json
+
+### Test Manu : modifier le temps simulé
+POST http://localhost:3000/rpc/set_current_date
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic3ViIjoieGFwaWdlb2xldEBlcGZjLmV1IiwibmFtZSI6IlhhdmllciIsInVzZXJfaWQiOjMsImV4cCI6MTc4MDA1MDIyNH0.doxC2aXxsXL1ABadg4Ln8PErhUrAN0XEvUmOkkz7X9s
+Content-Type: application/json
+
+{
+  "new_date": "2026-05-28T10:43:25.000Z"
+}
+
+
+### Test Manu : récupérer les infos d'une réservation avec son id
+POST http://localhost:3000/rpc/get_client_reservation_by_id
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2xpZW50Iiwic3ViIjoieGFwaWdlb2xldEBlcGZjLmV1IiwibmFtZSI6IlhhdmllciIsInVzZXJfaWQiOjMsImV4cCI6MTc4MDA1MDIyNH0.doxC2aXxsXL1ABadg4Ln8PErhUrAN0XEvUmOkkz7X9s
+Content-Type: application/json
+
+{
+  "resid": 7
+}
+

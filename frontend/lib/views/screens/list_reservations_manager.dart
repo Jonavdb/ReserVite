@@ -1,0 +1,270 @@
+import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:prbd_2526_f03/providers/manager/manager_state_provider.dart';
+import 'package:prbd_2526_f03/core/widgets/simulated_date_time_picker_widget.dart';
+
+class ListReservationsManager extends ConsumerStatefulWidget {
+  final int restaurantId;
+  final String restaurantName;
+
+  const ListReservationsManager({super.key, required this.restaurantId, required this.restaurantName});
+
+  @override
+  ConsumerState<ListReservationsManager> createState() => _ListReservationsManagerScreenState();
+}
+
+class _ListReservationsManagerScreenState extends ConsumerState<ListReservationsManager> {
+  String _selectedFilter = 'all';
+
+  @override
+  void initState() {
+    super.initState();
+    // charger les réservations au démarrage
+    // ref n'est pas encore disponible dans InitState donc on utilise Future.microTask
+    Future.microtask(() => ref.read(managerStateProvider.notifier).getReservations(widget.restaurantId));
+  }
+
+  Icon _statusIcon(String status) {
+    switch (status) {
+      case 'pending':
+        return const Icon(Icons.pending, size: 32, color: Colors.orange);
+      case 'confirmed':
+        return const Icon(Icons.check_circle, size: 32, color: Colors.green);
+      case 'completed':
+        return const Icon(Icons.event_available, size: 32, color: Colors.blue);
+      case 'cancelled':
+        return const Icon(Icons.cancel, size: 32, color: Colors.red);
+      default:
+        return const Icon(Icons.help, size: 32);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final reservationsState = ref.watch(managerStateProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Text(widget.restaurantName),
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Rafraîchir les données',
+            onPressed: () => ref.read(managerStateProvider.notifier).getReservations(widget.restaurantId),
+          ),
+        ],
+        elevation: 2,
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
+        surfaceTintColor: Colors.transparent,
+        flexibleSpace: Align(
+          alignment: Alignment.topCenter,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 2.0),
+              child: const SimulatedDateTimePicker(),
+            ),
+          ),
+        ),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
+              child: SegmentedButton<String>(
+                showSelectedIcon: false,
+                segments: const [
+                  ButtonSegment(value: 'all', icon: Icon(Icons.list, size: 24), tooltip: 'Toutes'),
+                  ButtonSegment(
+                    value: 'pending',
+                    icon: Icon(Icons.pending, size: 24, color: Colors.orange),
+                    tooltip: 'En attente',
+                  ),
+                  ButtonSegment(
+                    value: 'confirmed',
+                    icon: Icon(Icons.check_circle, size: 24, color: Colors.green),
+                    tooltip: 'Confirmées',
+                  ),
+                  ButtonSegment(
+                    value: 'completed',
+                    icon: Icon(Icons.event_available, size: 24, color: Colors.blue),
+                    tooltip: 'Terminées',
+                  ),
+                  ButtonSegment(
+                    value: 'cancelled',
+                    icon: Icon(Icons.cancel, size: 24, color: Colors.red),
+                    tooltip: 'Annulées',
+                  ),
+                ],
+                selected: {_selectedFilter},
+                onSelectionChanged: (value) {
+                  setState(() {
+                    _selectedFilter = value.first;
+                  });
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: reservationsState.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, _) => Center(child: Text('Erreur: $error')),
+                data: (managerState) {
+                  final reservations = managerState.reservations;
+                  final filteredReservations = _selectedFilter == 'all'
+                      ? reservations
+                      : reservations.where((r) => r.status == _selectedFilter).toList();
+                  if (filteredReservations.isEmpty) {
+                      // Détermine le texte en fonction du filtre actif pour correspondre parfaitement à l'écran
+                      String emptyMessage = 'Aucune réservation trouvée.';
+                      switch (_selectedFilter) {
+                        case '':
+                          emptyMessage = 'Aucune réservation';
+                          break;
+                        case 'pending':
+                          emptyMessage = 'Aucune réservation en attente';
+                          break;
+                        case 'confirmed':
+                          emptyMessage = 'Aucune réservation confirmée';
+                          break;
+                        case 'completed':
+                          emptyMessage = 'Aucune réservation terminée';
+                          break;
+                        case 'cancelled':
+                          emptyMessage = 'Aucune réservation annulée';
+                          break;
+                      }
+
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.calendar_today_outlined, size: 90, color: Colors.grey[350]),
+                            const SizedBox(height: 24),
+                            Text(
+                              emptyMessage,
+                              style: TextStyle(fontSize: 18, color: Colors.grey[700], fontWeight: FontWeight.w500),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      );
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16.0),
+                    itemCount: filteredReservations.length,
+                    itemBuilder: (context, index) {
+                      final reservation = filteredReservations[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/reservation_details_manager',
+                              arguments: {'reservationId': reservation.id},
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              children: [
+                                _statusIcon(reservation.status),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        reservation.clientName,
+                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.restaurant, size: 16),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            widget.restaurantName,
+                                            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.access_time, size: 16),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            DateFormat('EEE dd/MM/yyyy HH:mm', 'fr_FR').format(reservation.datetime),
+                                            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          const Icon(Icons.people, size: 16),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '${reservation.numberOfGuests} convive${reservation.numberOfGuests > 1 ? 's' : ''}',
+                                            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(Icons.chevron_right),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: 0,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushNamed(
+              context,
+              '/list_reservations_manager',
+              arguments: {'restaurantId': widget.restaurantId, 'restaurantName': widget.restaurantName},
+            );
+          } else if (index == 1) {
+            Navigator.pushNamed(
+              context,
+              '/restaurant_management_services',
+              arguments: {'restaurantId': widget.restaurantId, 'restaurantName': widget.restaurantName},
+            );
+          } else if (index == 2) {
+            Navigator.pushNamed(
+              context,
+              '/restaurant_management_tables',
+              arguments: {'restaurantId': widget.restaurantId, 'restaurantName': widget.restaurantName},
+            );
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Réservations'),
+          BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Services'),
+          BottomNavigationBarItem(icon: Icon(Icons.table_restaurant), label: 'Tables'),
+        ],
+      ),
+    );
+  }
+}
