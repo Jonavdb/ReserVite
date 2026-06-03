@@ -17,16 +17,14 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
       throw Exception("Access Denied: You must be logged in as a client.");
     }
 
-    const defaultFilter = 'pending';
-
     // Future.wait pour tout charger en parallèle
     final results = await Future.wait([
-      ClientState.fetchReservations(defaultFilter),
+      ClientState.fetchReservations(null),
       Restaurant.getFilteredRestaurants(''), // une recherche vide ramène tous les restos
     ]);
 
     return ClientState(
-      currentFilter: defaultFilter,
+      currentFilter: 'pending',
       reservations: results[0] as List<ReservationClient>,
       restaurants: results[1] as List<Restaurant>,
       searchedInput: '',
@@ -77,17 +75,8 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
   // Fonction qui permet de récupérer les  réservations du client connecté.. selon un filtre choisis (si aucun filtre, on récupère tout)
   Future<void> changeFilter(String newFilter) async {
     final currentState = state.value!; // sauvegarde l'état actuel
-    state = const AsyncLoading();
-
-    // on lance le processus pour récupérer les réservations du client connecté..
-    // qui ont le status du filtre renseigné
     try {
-      final String? filterSanitized = (newFilter == 'all' || newFilter.isEmpty)
-          ? null
-          : newFilter; // on nettoie l'input avant de le passer à la fonction
-      final fetchedReservations = await ClientState.fetchReservations(filterSanitized);
-
-      state = AsyncData(currentState.copyWith(currentFilter: newFilter, reservations: fetchedReservations));
+      state = AsyncData(currentState.copyWith(currentFilter: newFilter));
     } catch (e, stackTrace) {
       state = AsyncError(e, stackTrace);
     }
@@ -212,6 +201,35 @@ class ClientStateNotifier extends AsyncNotifier<ClientState> {
       state = AsyncData(currentState);
       print("Erreur lors de la modification de la réservation : $e");
       return false;
+    }
+  }
+
+  Future<void> cancelledReservation(ReservationClient res) async {
+    final currentState = state.value!;
+    state = const AsyncValue.loading();
+    try {
+     await res.cancelReservation(res.id);
+     final fetchedReservation = await ClientState.fetchReservationById(res.id);
+      final newList = currentState.reservations.map((reservation) {
+        if (reservation.id == fetchedReservation.id) {
+          return fetchedReservation;
+        }
+        return reservation;
+      }).toList();
+      state = AsyncData(currentState.copyWith(reservations: newList));
+    } catch(e){
+      state = AsyncValue.error(e.toString(), StackTrace.current);
+    }
+  }
+
+  Future<void> refreshReservations() async {
+    final currentState = state.value!;
+    state = const AsyncLoading();
+    try {
+      final reservations = await ClientState.fetchReservations(null);
+      state = AsyncData(currentState.copyWith(reservations: reservations));
+    } catch (e, stackTrace) {
+      state = AsyncError(e, stackTrace);
     }
   }
 }

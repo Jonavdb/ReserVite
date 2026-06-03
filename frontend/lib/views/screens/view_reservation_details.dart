@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:prbd_2526_f03/core/widgets/simulated_date_time_picker_widget.dart';
 import 'package:prbd_2526_f03/providers/reference_time_provider.dart';
 import 'package:prbd_2526_f03/providers/simulated_time_provider.dart';
+import '../../models/client/reservation_client.dart';
 import '../../providers/client/client_state_provider.dart';
 
 class ViewReservationClient extends ConsumerWidget {
@@ -247,9 +248,24 @@ class ViewReservationClient extends ConsumerWidget {
                     child: Visibility(
                       visible: !isCompleted && !isCancelled,
                       child: ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.cancel),
-                        label: const Text('Annuler'),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Annuler la réservation'),
+                                content: const Text('Êtes-vous sûr de vouloir annuler cette réservation ?'),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.pop(context), child: const Text('Non')),
+                                  TextButton(
+                                    onPressed: () => _cancel(context, ref, clientReservation),
+                                    child: const Text('Oui', style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }, label: const Text('Annuler'),
                       ),
                     ),
                   ),
@@ -261,4 +277,13 @@ class ViewReservationClient extends ConsumerWidget {
       ),
     );
   }
+
+  void _cancel(BuildContext context, WidgetRef ref, ReservationClient res) async {
+    final notifier = ref.read(clientStateProvider.notifier);
+    await notifier.cancelledReservation(res);
+    if (context.mounted) {
+      Navigator.of(context).pop(null);
+    }
+  }
+
 }

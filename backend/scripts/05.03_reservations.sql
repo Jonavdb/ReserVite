@@ -349,7 +349,6 @@ $$ language plpgsql security definer;
 
 GRANT EXECUTE ON FUNCTION get_slots_available_for_potential_reservation(timestamp, int, int) TO authenticated;
 
-
 CREATE OR REPLACE FUNCTION check_capacity_for_potential_reservation(
     p_target_timestamp timestamp,
     p_restaurant_id int,
@@ -461,3 +460,20 @@ end;
 $$ language plpgsql security definer;
 
 grant execute on function update_reservation(int, timestamp, int, text) to authenticated;
+
+create or replace function cancel_reservation_client(reservation_id int) returns void as
+$$
+begin
+    perform auth.check_logged();
+    if(auth.role() != 'client') then
+        raise exception 'Vous n''êtes pas autorisé à annuler cette réservation';
+    end if;
+    if not exists(select 1 from reservations where reservations.id = reservation_id and reservations.client = auth.id()) then
+        raise exception 'Cette réservation ne vous appartient pas';
+    end if;
+    delete from reservation_tables where reservation = reservation_id;
+    update reservations set status = 'cancelled' where id = reservation_id;
+end;
+$$ language plpgsql security definer;
+
+grant execute on function cancel_reservation_client(int) to authenticated;

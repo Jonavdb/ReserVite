@@ -535,8 +535,7 @@ class AddReservation extends HookConsumerWidget {
                         );
 
                         // Re-déclenche le chargement serveur avec le bon filtre actif
-                        final currentFilter = clientStateAsync.value?.currentFilter ?? 'pending';
-                        ref.read(clientStateProvider.notifier).changeFilter(currentFilter);
+                        await ref.read(clientStateProvider.notifier).refreshReservations();
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
