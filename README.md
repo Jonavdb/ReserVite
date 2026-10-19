@@ -23,6 +23,21 @@ The application allows customers to search for restaurants and make reservations
 - Table assignment and management
 - Restaurant services management
 
+## Screenshots
+
+### Login Screen
+![Login Screen](Screenshots/login-screen.png)
+
+### Reservation list
+![Reservation list](Screenshots/reservation-list.png)
+
+### Reservation details
+![Reservation details](Screenshots/reservation-details.png)
+
+### Services list
+![Services list](Screenshots/services-list.png)
+
+
 ## Project Team
 
 This project was developed by three EPFC students:
